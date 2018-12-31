@@ -1,55 +1,8 @@
 #!/bin/bash
-exec 1> >(tee -a /var/log/openflixrsetup.log) 2>&1
-TODAY=$(date)
-echo "-----------------------------------------------------"
-echo "Date:          $TODAY"
-echo "-----------------------------------------------------"
 
-THISUSER=$(whoami)
-    if [ $THISUSER != 'root' ]
-        then
-            echo 'You must use sudo to run this script, sorry!'
-           exit 1
-    fi
-
-## variables
-networkconfig=
-ip=''
-subnet=''
-gateway=''
-dns=''
-password=''
-letsencrypt=
-domainname=
-email=
-usenetdescription=''
-usenetservername=
-usenetusername=''
-usenetpassword=''
-usenetport=
-usenetthreads=
-usenetssl=
-newznabprovider=''
-newznaburl=
-newznabapi=''
-tvshowdl=
-nzbdl=
-mopidy=
-hass=
-ntopng=
-headphonesuser=''
-headphonespass=''
-anidbuser=''
-anidbpass=''
-spotuser=''
-spotpass=''
-imdb=
-comicvine=''
-
-oldpassword=$(crudini --get /usr/share/nginx/html/setup/config.ini password oldpassword)
-if [ "$oldpassword" == '' ]
-  then
-    oldpassword='openflixr'
+if [[ ! $preinitialized = "yes" ]]; then
+    echo "setup.sh has not been preinitialized. Exiting"
+    exit;
 fi
 
 echo ""

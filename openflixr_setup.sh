@@ -414,6 +414,8 @@ sed -i "s/STEPS_CURRENT=.*/STEPS_CURRENT=${STEPS_CURRENT} /g" $OPENFLIXR_SETUP_C
 
 done
 
+preinitialized="yes"
+
 #Find setup.sh and run it. 
 if [ -f "/usr/share/nginx/html/setup/scripts/setup.sh" ]; then
     echo "Found setup.sh in /usr/share/nginx/html/setup/scripts/"
@@ -425,11 +427,13 @@ elif [ -f "/usr/share/nginx/html/setup/setup.sh" ]; then
     source /usr/share/nginx/html/setup/setup.sh
 elif [ -f "/home/openflixr/setup.sh" ]; then
     echo "Found setup.sh in /home/openflixr/"
+    chown openflixr:openflixr /home/openflixr/setup.sh
     chmod +x /home/openflixr/setup.sh
     source /home/openflixr/setup.sh
 elif [ ! -f "/home/openflixr/setup.sh" ]; then
     echo "Couldn't find setup.sh. Downloading from repo"
     wget -o /home/openflixr/setup.sh https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh
+    chown openflixr:openflixr /home/openflixr/setup.sh
     chmod +x /home/openflixr/setup.sh
     source /home/openflixr/setup.sh
 else
