@@ -1,5 +1,5 @@
 #!/bin/bash
-#exec 1> >(tee -a /var/log/openflixrsetup.log) 2>&1
+
 TODAY=$(date)
 echo "-----------------------------------------------------"
 echo "Date:          ${TODAY}"
@@ -18,7 +18,7 @@ OPENFLIXIR_UID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXIR_GID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXR_LOGFILE="/var/log/updateof.log"
 OPENFLIXR_SETUP_LOGFILE="/var/log/openflixr_setup.log"
-OPENFLIXR_SETUP_CONFIG="/var/log/openflixr_setup.config"
+OPENFLIXR_SETUP_CONFIG="/home/openflixr/openflixr_setup/openflixr_setup.config"
 OPENFLIXR_FOLDERS=(downloads movies series music comics books)
 PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 LOCAL_IP=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
@@ -53,6 +53,11 @@ function valid_ip()
         stat=$?
     fi
     return $stat
+}
+
+function validate_url()
+{
+  if [[ `wget -S --spider $1  2>&1 | grep 'HTTP/1.1 200 OK'` ]]; then echo "true"; fi
 }
 
 echo "Initializing: Checking to see if this has been run before."
@@ -194,7 +199,6 @@ case $STEPS_CURRENT in
             
             if [[ $CHANGE_PASS -eq 0 ]]; then
                 CHANGE_PASS="Y"
-                sed -i "s/CHANGE_PASS=.*/CHANGE_PASS=${CHANGE_PASS} /g" $OPENFLIXR_SETUP_CONFIG
                 valid=0
                 while [[ ! $valid = 1 ]]; do
                     pass=$(whiptail --passwordbox --title "Set new password" "Enter password" 10 30 3>&1 1>&2 2>&3)
@@ -214,6 +218,7 @@ case $STEPS_CURRENT in
                 CHANGE_PASS="N"
                 done=1
             fi
+            sed -i "s/CHANGE_PASS=.*/CHANGE_PASS=${CHANGE_PASS} /g" $OPENFLIXR_SETUP_CONFIG
         done
         
         if [[ $STEPS_CONTINUE -gt 0 ]]; then
@@ -313,7 +318,7 @@ case $STEPS_CURRENT in
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    domain=$(whiptail --inputbox --ok-button "Next" --title "STEP 1/ : Domain" "Enter your domain (required to obtain certificate). If you don't have one, register one and then enter it here." 10 50 3>&1 1>&2 2>&3)
+                    domain=$(whiptail --inputbox --ok-button "Next" --title "STEP 1/ : Domain" "Enter your domain (required to obtain certificate). If you don't have one, register one and then enter it here." 10 50 $LETSENCRYPT_DOMAIN 3>&1 1>&2 2>&3)
                     check_cancel $?;
                     sed -i "s/LETSENCRYPT_DOMAIN=.*/LETSENCRYPT_DOMAIN=${domain} /g" $OPENFLIXR_SETUP_CONFIG
                     
@@ -326,8 +331,9 @@ case $STEPS_CURRENT in
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    email=$(whiptail --inputbox --title "STEP 1/ : Domain" "Enter your e-mail address (required for lost key recovery)." 10 50 3>&1 1>&2 2>&3)
+                    email=$(whiptail --inputbox --title "STEP 1/ : Domain" "Enter your e-mail address (required for lost key recovery)." 10 50 $LETSENCRYPT_EMAIL 3>&1 1>&2 2>&3)
                     check_cancel $?;
+                    sed -i "s/LETSENCRYPT_EMAIL=.*/LETSENCRYPT_EMAIL=${email} /g" $OPENFLIXR_SETUP_CONFIG
                     
                     #TODO: Validate email
                     valid=1
@@ -416,26 +422,26 @@ done
 
 preinitialized="yes"
 
+setup_paths=(
+    "/usr/share/nginx/html/setup/setup.sh"
+    "/home/openflixr/openflixr_setup/setup.sh"
+)
+setup_repo_path="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh"
+
 #Find setup.sh and run it. 
-if [ -f "/usr/share/nginx/html/setup/scripts/setup.sh" ]; then
-    echo "Found setup.sh in /usr/share/nginx/html/setup/scripts/"
-    chmod +x /usr/share/nginx/html/setup/scripts/setup.sh
-    source /usr/share/nginx/html/setup/scripts/setup.sh
-elif [ -f "/usr/share/nginx/html/setup/setup.sh" ]; then
-    echo "Found setup.sh in /usr/share/nginx/html/setup/"
-    chmod +x /usr/share/nginx/html/setup/setup.sh
-    source /usr/share/nginx/html/setup/setup.sh
-elif [ -f "/home/openflixr/setup.sh" ]; then
-    echo "Found setup.sh in /home/openflixr/"
-    chown openflixr:openflixr /home/openflixr/setup.sh
-    chmod +x /home/openflixr/setup.sh
-    source /home/openflixr/setup.sh
-elif [ ! -f "/home/openflixr/setup.sh" ]; then
-    echo "Couldn't find setup.sh. Downloading from repo"
-    wget -o /home/openflixr/setup.sh https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh
-    chown openflixr:openflixr /home/openflixr/setup.sh
-    chmod +x /home/openflixr/setup.sh
-    source /home/openflixr/setup.sh
-else
-    echo "Couldn't find setup.sh to complete the setup."
-fi
+for i in ${!setup_paths[@]}; do
+    path=${setup_paths[$i]}
+    if [ -f "$path" ]; then
+        echo "Found script in $path"
+        chmod +x $path
+        source $path
+        break
+    elif [[ $path = ${setup_paths[-1]} ]]; then
+        echo "Couldn't find setup.sh. Downloading from repo"
+        wget -O $path $setup_repo_path
+        chown openflixr:openflixr $path
+        chmod +x $path
+        source $path
+        break
+    fi    
+done
