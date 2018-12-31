@@ -1,9 +1,19 @@
 #!/bin/bash
-DEBUG=0 #Change this to a 1 if you want to run in debug mode. Debug mode disables the script from actually doing anything in most cases.
-OPENFLIXIR_USERNAME="openflixr" #Change this if you aren't using the default username
+#exec 1> >(tee -a /var/log/openflixrsetup.log) 2>&1
+TODAY=$(date)
+echo "-----------------------------------------------------"
+echo "Date:          ${TODAY}"
+echo "-----------------------------------------------------"
+THISUSER=$(whoami)
+    if [ $THISUSER != 'root' ]
+        then
+            echo 'You must use sudo to run this script, sorry!'
+           exit 1
+    fi
 
-#DO NOT CHANGE ANY OF THESE
+#Variables
 STEPS_CURRENT=0
+STEPS_CONTINUE=0
 OPENFLIXIR_UID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXIR_GID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXR_LOGFILE="/var/log/updateof.log"
@@ -17,30 +27,33 @@ FSTAB_ORIGINAL="/etc/fstab.openflixrsetup.original"
 FSTAB_BACKUP="/etc/fstab.openflixrsetup.bak"
 OPENFLIXIR_CIFS_CREDENTIALS_FILE="/home/${OPENFLIXIR_USERNAME}/.credentials-openflixr"
 
-if [[ "$EUID" -ne 0 ]]; then
-      echo "Please run as root..."
-      echo "You can do this by either putting 'sudo' before the script or typing 'sudo su -' into your prompt before running"
-      exit
-  else 
-    echo "Running as root! Great you can follow directions and we may continue!"
-fi
+#Helper methods
+function check_cancel()
+{
+    local input=$1
+    
+    if [[ $input -eq 1 ]]; then
+        echo "'Cancel' selected. Exiting script."
+        exit
+    fi
+}
 
-echo ""
-echo ""
-echo ""
-echo "----------------------------------"
-echo "First, some acknowledgments!"
-echo "Thanks to those that have built and help build OpenFLIXR! It is awesome!"
-echo "This script is largely based on the guide by jeremywho found here: http://www.openflixr.com/forum/discussion/559/setup-instructions-without-web-wizard"
-echo "Thanks to jeremywho for putting that together! Any steps that I may have missed or additional information can be found by visiting that link"
-echo "Thanks to those people, past, present, and future that have helped make, test, or improve this script!"
-echo ""
-read -p "Press enter to continue" TEMP
-echo "----------------------------------"
-echo ""
-echo "Now we may begin!"
-echo ""
-echo ""
+function valid_ip()
+{
+    local  ip=$1
+    local  stat=1
+
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OIFS=$IFS
+        IFS='.'
+        ip=($ip)
+        IFS=$OIFS
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+            && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
 
 echo "Initializing: Checking to see if this has been run before."
 if [ ! -f $OPENFLIXR_SETUP_CONFIG ]; then
@@ -52,6 +65,7 @@ if [ ! -f $OPENFLIXR_SETUP_CONFIG ]; then
     echo "OPENFLIXR_IP=" >> $OPENFLIXR_SETUP_CONFIG
     echo "OPENFLIXR_SUBNET=" >> $OPENFLIXR_SETUP_CONFIG
     echo "OPENFLIXR_GATEWAY=" >> $OPENFLIXR_SETUP_CONFIG
+    echo "OPENFLIXR_DNS=" >> $OPENFLIXR_SETUP_CONFIG
     echo "ACCESS=" >> $OPENFLIXR_SETUP_CONFIG
     echo "LETSENCRYPT_DOMAIN=" >> $OPENFLIXR_SETUP_CONFIG
     echo "LETSENCRYPT_EMAIL=" >> $OPENFLIXR_SETUP_CONFIG
@@ -66,6 +80,7 @@ else
     echo ""
 fi
 
+#Get variables from config file
 shopt -s extglob
 tr -d '\r' < $OPENFLIXR_SETUP_CONFIG > $OPENFLIXR_SETUP_CONFIG.unix
 while IFS='= ' read -r lhs rhs
@@ -78,6 +93,57 @@ do
         declare $lhs="$rhs"
     fi
 done < $OPENFLIXR_SETUP_CONFIG.unix
+
+
+#From wizard
+networkconfig=$NETWORK
+ip=$OPENFLIXR_IP
+subnet=$OPENFLIXR_SUBNET
+gateway=$OPENFLIXR_GATEWAY
+dns='127.0.0.1'
+password=''
+if [[ $ACCESS = 'remote' ]]; then
+    letsencrypt='on'
+    domainname=$LETSENCRYPT_DOMAIN
+    email=$LETSENCRYPT_EMAIL
+else
+    letsencrypt='off'
+    domainname=''
+    email=''
+fi
+
+oldpassword=$(crudini --get /usr/share/nginx/html/setup/config.ini password oldpassword)
+if [ "$oldpassword" == '' ]
+  then
+    oldpassword='openflixr'
+fi
+
+#TODO Add these later
+usenetdescription=''
+usenetservername=''
+usenetusername=''
+usenetpassword=''
+usenetport=''
+usenetthreads=''
+usenetssl=''
+newznabprovider=''
+newznaburl=''
+newznabapi=''
+tvshowdl='sickrage' #sickrage or sonarr
+nzbdl='sabnzbd' #sabnzbd or nzbget
+mopidy='enabled'
+hass='enabled'
+ntopng='enabled'
+headphonesuser=''
+headphonespass=''
+anidbuser=''
+anidbpass=''
+spotuser=''
+spotpass=''
+imdb=''
+comicvine=''
+
+
 
 while [[ true ]]; do
 
@@ -119,124 +185,163 @@ case $STEPS_CURRENT in
     ;;
     3)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Change passwords"
-        read -p "Do you want to change ${OPENFLIXIR_USERNAME}'s password? (y/n): " CHANGE_PASS
-        sed -i "s/CHANGE_PASS=.*/CHANGE_PASS=${CHANGE_PASS} /g" $OPENFLIXR_SETUP_CONFIG
-        if [[ $DEBUG -ne 1 ]]; then
-            if [[ $CHANGE_PASS = "y" ]]; then
-                echo "Updating linux password"
-                echo "Fixing expiry settings"
-                passwd -d $OPENFLIXIR_USERNAME
-                passwd $OPENFLIXIR_USERNAME
-
-                echo "Updating HTPC password"
-                cp /etc/nginx/.htpasswd /etc/nginx/.htpasswd.bak
-                htpasswd -c /etc/nginx/.htpasswd openflixr
+        echo "Step ${STEPS_CURRENT}: Set new password"
+        
+        done=0
+        while [[ ! $done = 1 ]]; do
+            CHANGE_PASS=$(whiptail --yesno --title "Change Password" "Do you want to change the default password for OpenFLIXR?" 10 40 3>&1 1>&2 2>&3)
+            CHANGE_PASS=$?
+            
+            if [[ $CHANGE_PASS -eq 0 ]]; then
+                CHANGE_PASS="Y"
+                sed -i "s/CHANGE_PASS=.*/CHANGE_PASS=${CHANGE_PASS} /g" $OPENFLIXR_SETUP_CONFIG
+                valid=0
+                while [[ ! $valid = 1 ]]; do
+                    pass=$(whiptail --passwordbox --title "Set new password" "Enter password" 10 30 3>&1 1>&2 2>&3)
+                    check_cancel $?;
+                    cpass=$(whiptail --passwordbox --title "Set new password" "Confirm password" 10 30 3>&1 1>&2 2>&3)
+                    check_cancel $?;
+                    
+                    if [[ $pass == $cpass ]]; then
+                        password=$pass
+                        valid=1
+                        done=1
+                    else
+                        whiptail --ok-button "Try Again" --msgbox "Passwords do not match =( Try again." 10 30
+                    fi
+                done
             else
-                echo "Keeping ${OPENFLIXIR_USERNAME}'s default password"
+                CHANGE_PASS="N"
+                done=1
             fi
-            else
-                echo "DEBUG RUN: Change pass? $CHANGE_PASS"
+        done
+        
+        if [[ $STEPS_CONTINUE -gt 0 ]]; then
+            STEPS_CURRENT=$STEPS_CONTINUE
+        else
+            STEPS_CURRENT=$((STEPS_CURRENT+1))
         fi
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
     ;;
     4)
         echo ""
         echo "Step ${STEPS_CURRENT}: Network Settings."
-        PS3='Please choose your network type: '
-        options=("DHCP" "Static")
-        select opt in "${options[@]}"
-        do
-            case $opt in
-                "DHCP")
-                    echo "Configuring for DHCP"
-                    sed -i "s/NETWORK=.*/NETWORK=${opt} /g" $OPENFLIXR_SETUP_CONFIG
+        
+        done=0
+        while [[ ! $done = 1 ]]; do
+            networkconfig=$(whiptail --radiolist "Choose network configuration" 10 30 2\
+                           dhcp "DHCP" on \
+                           static "Static IP" off 3>&1 1>&2 2>&3)
+            check_cancel $?;              
+            sed -i "s/NETWORK=.*/NETWORK=${networkconfig} /g" $OPENFLIXR_SETUP_CONFIG
+            
+            if [[ $networkconfig = 'static' ]]; then
+                echo "Configuring for Static IP"
+                
+                valid=0
+                while [[ ! $valid = 1 ]]; do
+                    ip=$(whiptail --inputbox --title "Network configuration" "IP Address" 10 30 3>&1 1>&2 2>&3)
+                    check_cancel $?;
                     
-                    break
-                    ;;
-                "Static")
-                    echo "Configuring for Static"
-                    sed -i "s/NETWORK=.*/NETWORK=${opt} /g" $OPENFLIXR_SETUP_CONFIG
-                    read -p "IP Address: " OPENFLIXR_IP
-                    sed -i "s/OPENFLIXR_IP=.*/OPENFLIXR_IP=${OPENFLIXR_IP} /g" $OPENFLIXR_SETUP_CONFIG
-                    read -p "Subnet Mask: " OPENFLIXR_SUBNET
-                    sed -i "s/OPENFLIXR_IP=.*/OPENFLIXR_IP=${OPENFLIXR_IP} /g" $OPENFLIXR_SETUP_CONFIG
-                    read -p "GATEWAY: " OPENFLIXR_GATEWAY
-                    sed -i "s/OPENFLIXR_IP=.*/OPENFLIXR_IP=${OPENFLIXR_IP} /g" $OPENFLIXR_SETUP_CONFIG
-                    break
-                    ;;
-                *) echo "Invalid option";;
-            esac
+                    if valid_ip $ip; then
+                        sed -i "s/OPENFLIXR_IP=.*/OPENFLIXR_IP=${ip} /g" $OPENFLIXR_SETUP_CONFIG
+                        valid=1
+                    else
+                        whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
+                    fi
+                done
+                
+                valid=0
+                while [[ ! $valid = 1 ]]; do
+                    subnet=$(whiptail --inputbox --title "Network configuration" "Subnet Mask" 10 30 3>&1 1>&2 2>&3)
+                    check_cancel $?;
+                    
+                    if valid_ip $ip; then
+                        sed -i "s/OPENFLIXR_SUBNET=.*/OPENFLIXR_SUBNET=${subnet} /g" $OPENFLIXR_SETUP_CONFIG
+                        valid=1
+                    else
+                        whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
+                    fi
+                done
+                
+                valid=0
+                while [[ ! $valid = 1 ]]; do
+                    gateway=$(whiptail --inputbox --title "Network configuration" "Gateway" 10 30 3>&1 1>&2 2>&3)
+                    check_cancel $?;
+                    
+                    if valid_ip $ip; then
+                        sed -i "s/OPENFLIXR_GATEWAY=.*/OPENFLIXR_GATEWAY=${gateway} /g" $OPENFLIXR_SETUP_CONFIG
+                        valid=1
+                    else
+                        whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
+                    fi
+                done
+                
+                done=1
+            fi
+            
+            if [[ $networkconfig = 'dhcp' ]]; then
+                echo "Configuring for DHCP"
+                done=1
+            fi
+            
+            if [[ $networkconfig = '' ]]; then
+                read -p "Something went wrong... Press enter to repeat this step or press ctrl+c to exit: " TEMP
+            fi
         done
+        
         STEPS_CURRENT=$((STEPS_CURRENT+1))
     ;;
     5)
         echo ""
         echo "Step ${STEPS_CURRENT}: Access settings"
-        PS3='Please choose your access type: '
-        options=("Local" "Remote")
-        select opt in "${options[@]}"
-        do
-            case $opt in
-                "Local")
-                    echo "Local access selected."
-                    sed -i "s/ACCESS=.*/ACCESS=${opt} /g" $OPENFLIXR_SETUP_CONFIG
-                    break
-                    ;;
-                "Remote")
-                    echo "Configuring for Remote access."
-                    sed -i "s/ACCESS=.*/ACCESS=${opt} /g" $OPENFLIXR_SETUP_CONFIG
+        
+        done=0
+        while [[ ! $done = 1 ]]; do
+            access=$(whiptail --radiolist "How do you want to access OpenFLIXR?" 10 30 2\
+                           local "Local" on \
+                           remote "Remote" off 3>&1 1>&2 2>&3)
+            check_cancel $?;
+            sed -i "s/ACCESS=.*/ACCESS=${access} /g" $OPENFLIXR_SETUP_CONFIG
+            
+            if [[ $access = 'local' ]]; then
+                echo "Local access selected. Nothing else to do."
+                done=1
+            fi
+            
+            if [[ $access = 'remote' ]]; then
+                echo "Configuring for Remote access."
+                
+                valid=0
+                while [[ ! $valid = 1 ]]; do
+                    domain=$(whiptail --inputbox --ok-button "Next" --title "STEP 1/ : Domain" "Enter your domain (required to obtain certificate). If you don't have one, register one and then enter it here." 10 50 3>&1 1>&2 2>&3)
+                    check_cancel $?;
+                    sed -i "s/LETSENCRYPT_DOMAIN=.*/LETSENCRYPT_DOMAIN=${domain} /g" $OPENFLIXR_SETUP_CONFIG
                     
-                    echo "To complete this, you must first do the following:"
-                    echo "Register a domain name for your server."
+                    #TODO: Validate domain
+                    valid=1
+                done
+                
+                whiptail --ok-button "Next" --msgbox "Add/Edit the A records for ${domain} and www.${domain} to point to ${PUBLIC_IP}" 10 50
+                whiptail --ok-button "Next" --msgbox "Forward port 443 (only!) on your router to your local IP (${LOCAL_IP})" 10 50
+                
+                valid=0
+                while [[ ! $valid = 1 ]]; do
+                    email=$(whiptail --inputbox --title "STEP 1/ : Domain" "Enter your e-mail address (required for lost key recovery)." 10 50 3>&1 1>&2 2>&3)
+                    check_cancel $?;
                     
-                    if [[ $DEBUG -eq 1 ]]; then
-                        echo "LETSENCRYPT_DOMAIN from config: '$LETSENCRYPT_DOMAIN'"
-                        echo "LETSENCRYPT_EMAIL from config: '$LETSENCRYPT_EMAIL'"
-                    fi
-                    
-                    if [[ $LETSENCRYPT_DOMAIN = "" ]]; then
-                        read -p "Once registered, provide your domain name (without www): " DOMAIN
-                    else
-                        read -p "Once registered, provide your domain name (without www) [${LETSENCRYPT_DOMAIN}]: " DOMAIN
-                    fi                    
-                    LETSENCRYPT_DOMAIN=${DOMAIN:-$LETSENCRYPT_DOMAIN}
-                    sed -i "s/LETSENCRYPT_DOMAIN=.*/LETSENCRYPT_DOMAIN=${LETSENCRYPT_DOMAIN} /g" $OPENFLIXR_SETUP_CONFIG
-                    
-                    echo "Add/Edit the A records for ${LETSENCRYPT_DOMAIN} and www.${LETSENCRYPT_DOMAIN} to point to ${PUBLIC_IP}"
-                    read -p "Press enter to continue" TEMP
-                    
-                    echo "Forward ONLY port 443 to OpenFLIXR's Local IP"
-                    read -p "Press enter to continue" TEMP
-                    
-                    echo "Provide and e-mail address for lost key recovery"
-                    if [[ $LETSENCRYPT_EMAIL = "" ]]; then
-                        read -p "E-mail address: " EMAIL
-                    else
-                        read -p "E-mail address [${LETSENCRYPT_EMAIL}]: " EMAIL
-                    fi                    
-                    LETSENCRYPT_EMAIL=${EMAIL:-$LETSENCRYPT_EMAIL}
-                    sed -i "s/LETSENCRYPT_EMAIL=.*/LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL} /g" $OPENFLIXR_SETUP_CONFIG
-                    
-                    echo "Time to configure Let's Encrypt! User input may be required."
-                    if [[ $DEBUG -ne 1 ]]; then
-                        read -p "Press enter to continue" TEMP
-                        apt-get update
-                        apt-get install software-properties-common
-                        add-apt-repository universe
-                        add-apt-repository ppa:certbot/certbot
-                        apt-get update
-                        apt-get install python-certbot-nginx
-                    
-                        certbot --nginx -d "${LETSENCRYPT_DOMAIN},www.${LETSENCRYPT_DOMAIN}" -m "${LETSENCRYPT_EMAIL}"
-                    else
-                        echo "DEBUG RUN: Would have installed certbot and ran it"
-                    fi
-                    break
-                    ;;
-                *) echo "Invalid option";;
-            esac
+                    #TODO: Validate email
+                    valid=1
+                done
+                
+                
+                done=1
+            fi
+            
+            if [[ $access = '' ]]; then
+                read -p "Something went wrong... Press enter to repeat this step or press ctrl+c to exit: " TEMP
+            fi
         done
+        
         STEPS_CURRENT=$((STEPS_CURRENT+1))
     ;;
     6)
@@ -256,171 +361,18 @@ case $STEPS_CURRENT in
     ;;
     7)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Mount folders"
-        
-        echo "How do you want to manage the folder mounting?"
-        echo "Currently only NFS and CIFS are supported in this script. You may also use Webmin to mange this step instead."
-        PS3='Choose your quest:'
-        options=("Mount a Network Share via this script" "Mount a Network Share via Webmin" "Quit")
-        select opt in "${options[@]}"
-        do
-            case $opt in
-                "Mount a Network Share via this script")
-                    MOUNT_MANAGE="script"
-                    sed -i "s/MOUNT_MANAGE=.*/MOUNT_MANAGE=script /g" $OPENFLIXR_SETUP_CONFIG
-                    
-                    break
-                ;;
-                "Mount a Network Share via Webmin")
-                    MOUNT_MANAGE="webmin"
-                    echo "Visit webmin to complete the setup of your folders. http://${LOCAL_IP}/webmin/"
-                    sed -i "s/MOUNT_MANAGE=.*/MOUNT_MANAGE=webmin /g" $OPENFLIXR_SETUP_CONFIG
-                    break
-                ;;
-                "Quit")
-                    exit
-                ;;
-                *) echo "Invalid option";;
-            esac
-        done
-        
-        if [[ $MOUNT_MANAGE = "script" ]]; then
-            if [[ $FSTAB_BACKUP -eq 0 ]]; then
-                echo "Backing up $FSTAB"
-                cp $FSTAB $FSTAB_ORIGINAL
-                sed -i "s/FSTAB_BACKUP=.*/FSTAB_BACKUP=1 /g" $OPENFLIXR_SETUP_CONFIG
-            fi
-            
-            if [[ $FSTAB_MODIFIED -eq 1 ]]; then
-                PS3='Restore $FSTAB from $FSTAB_ORIGINAL?:'
-                options=("Yes" "No" "See $FSTAB" "See $FSTAB_ORIGINAL" "Quit")
-                select opt in "${options[@]}"
-                do
-                    case $opt in
-                        "Yes")
-                            echo "Restoring $FSTAB from $FSTAB_ORIGINAL"
-                            break
-                        ;;
-                        "No")
-                            break
-                        ;;
-                        "See $FSTAB")
-                            echo ""
-                            echo "------------------------"
-                            cat $FSTAB
-                            echo "------------------------"
-                            echo ""
-                        ;;
-                        "See $FSTAB_ORIGINAL")
-                            echo ""
-                            echo "------------------------"
-                            cat $FSTAB_ORIGINAL
-                            echo "------------------------"
-                            echo ""
-                        ;;
-                        "Quit")
-                            exit
-                        ;;
-                        *) echo "Invalid option";;
-                    esac
-                done
-                
-                if [[ $RESTORE -eq y ]]; then
-                    cp $FSTAB_ORIGINAL $FSTAB
-                else
-                    echo "Making backups, just in case."
-                    cp $FSTAB $FSTAB_BACKUP
-                fi
-            else            
-                echo "" >> $FSTAB
-                echo "#OPENFLIXR SETUP" >> $FSTAB
-                sed -i "s/FSTAB_MODIFIED=.*/FSTAB_MODIFIED=1 /g" $OPENFLIXR_SETUP_CONFIG
-            fi
-            
-            # Ask NFS or CIFS?
-            MOUNT_TYPE=""
-            while [[ $MOUNT_TYPE = "" && (! $MOUNT_TYPE = "nfs" || ! $MOUNT_TYPE = "cifs") ]]; do
-                read -p "Please enter you filestorage mount type. (nfs|cifs|webmin): " MOUNT_TYPE
-                MOUNT_TYPE=$(echo "$MOUNT_TYPE" | tr '[:upper:]' '[:lower:]')
-                sed -i "s/MOUNT_TYPE=.*/MOUNT_TYPE=${MOUNT_TYPE} /g" $OPENFLIXR_SETUP_CONFIG
-            done
+        echo "Step ${STEPS_CURRENT}: Mount network shares"
+        MOUNT_MANAGE="webmin"
+        echo "Visit webmin to complete the setup of your folders. http://${LOCAL_IP}/webmin/"
+        sed -i "s/MOUNT_MANAGE=.*/MOUNT_MANAGE=webmin /g" $OPENFLIXR_SETUP_CONFIG
+        #done=0
+        #while [[ ! $done = 1 ]]; do
+        #    sharetype=$(whiptail --radiolist "Choose network share type" 10 30 2\
+        #                   nfs "NFS" on \
+        #                   cifs "CIFS/SMB" off 3>&1 1>&2 2>&3)
+        #    check_cancel $?;
+        #done
 
-            #If CIFS, get credentials and create credentials file
-            if [[ $MOUNT_TYPE = "cifs" ]]; then
-                echo "CIFS network shares requires credentials to access them. 
-                It is more secure to save these to a file so we will save them to '/home/$OPENFLIXIR_USERNAME/.credentials-openflixr'"
-                echo "You can change these at any time by editing that file or re-running this step."
-                
-                read -p "Please enter you network share username: " CIFS_USERNAME
-                
-                while [[ ! $CIFS_PASS = $CIFS_PASS_CONFIRM ]]; do
-                    read -sp "Please enter you network share password: " CIFS_PASS
-                    read -sp "Please enter you network share password again: " CIFS_PASS_CONFIRM
-                    
-                    if [[ ! $CIFS_PASS = $CIFS_PASS_CONFIRM ]]; then
-                        echo "Passwords entered do not match :( Try again!"
-                    fi
-                done
-                
-                if [ ! -f "/home/$OPENFLIXIR_USERNAME/.credentials-openflixr" ]; then
-                    touch "/home/$OPENFLIXIR_USERNAME/.credentials-openflixr"
-                    echo "USERNAME=${CIFS_USERNAME}" >> $OPENFLIXIR_CIFS_CREDENTIALS_FILE
-                    echo "PASSWORD=${CIFS_PASS}" >> $OPENFLIXIR_CIFS_CREDENTIALS_FILE
-                else
-                    sed -i "s/USERNAME=.*/USERNAME=${CIFS_USERNAME} /g" $OPENFLIXIR_CIFS_CREDENTIALS_FILE
-                    sed -i "s/PASSWORD=.*/PASSWORD=${CIFS_PASS} /g" $OPENFLIXIR_CIFS_CREDENTIALS_FILE
-                fi
-                
-                echo "Clearing temporaty credential variables, for security reasons"
-                CIFS_USERNAME=""
-                CIFS_PASS=""
-                CIFS_PASS_CONFIRM=""
-            fi
-            
-            # Ask for server name or IP
-            HOST_NAME=""
-            while [[ $HOST_NAME = "" ]]; do
-                echo ""
-                read -p "Please enter you server name or IP address: " HOST_NAME
-                sed -i "s/HOST_NAME=.*/HOST_NAME=${HOST_NAME} /g" $OPENFLIXR_SETUP_CONFIG
-            done
-            
-            for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
-                echo ""
-                echo "Setting up for '${FOLDER}'"
-              
-                # Ask for server folder
-                HOST_FOLDER=""
-                while [[ $HOST_FOLDER = "" ]]; do
-                    echo ""
-                    read -p "Please enter the folder name on your network share for ${FOLDER} (press 'Enter' to leave blank and mount directly): " HOST_FOLDER
-                done
-                
-                if [[ $DEBUG -ne 1 ]]; then                    
-                    if [[ $MOUNT_TYPE = "nfs" ]]; then
-                        #TODO: Check if this mount already exists in FSTAB
-                        #TODO: Check that the mount works before adding to FSTAB
-                        echo "Adding '$HOST_NAME:/$HOST_FOLDER  /mnt/${FOLDER}/  $MOUNT_TYPE defaults    0 0' to $FSTAB"
-                        echo "$HOST_NAME:/$HOST_FOLDER  /mnt/${FOLDER}/  $MOUNT_TYPE defaults    0 0" >> $FSTAB
-                    fi
-                    
-                    if [[ $MOUNT_TYPE = "cifs" ]]; then
-                        #TODO: Check if this mount already exists in FSTAB
-                        #TODO: Check that the mount works before adding to FSTAB
-                        echo "Adding '//$HOST_NAME/$HOST_FOLDER /mnt/${FOLDER}/ $MOUNT_TYPE credentials=${OPENFLIXR_SETUP_CONFIG},iocharset=utf8,gid=$OPENFLIXIR_GID,uid=$OPENFLIXIR_UID,file_mode=0777,dir_mode=0777 0 0' to $FSTAB"
-                        echo "//$HOST_NAME/$HOST_FOLDER /mnt/${FOLDER}/ $MOUNT_TYPE credentials=${OPENFLIXR_SETUP_CONFIG},iocharset=utf8,gid=$OPENFLIXIR_GID,uid=$OPENFLIXIR_UID,file_mode=0777,dir_mode=0777 0 0" >> $FSTAB
-                    fi
-                else
-                    echo "Would have added //$HOST_NAME/$HOST_FOLDER to $FSTAB using $MOUNT_TYPE"
-                fi
-            done
-            
-            if [[ $DEBUG -ne 1 ]]; then
-                echo "Everything added to $FSTAB. Let's mount them!"
-                mount -a
-            fi
-        fi
-        
         STEPS_CURRENT=$((STEPS_CURRENT+1))
     ;;
     8)
@@ -437,82 +389,23 @@ case $STEPS_CURRENT in
         
         STEPS_CURRENT=$((STEPS_CURRENT+1))
     ;;
-    9)
-        echo ""
-        echo "Step ${STEPS_CURRENT}: Update openflixr"
-        echo "This may take a LONG time and requires some user input."
-        PS3='Do you want to have the script start this or do in manually?:'
-        options=("Script!" "Manually" "Quit")
-        select opt in "${options[@]}"
-        do
-            case $opt in
-                "Script!")
-                    sed -i "s/STEPS_CURRENT=.*/STEPS_CURRENT=${STEPS_CURRENT} /g" $OPENFLIXR_SETUP_CONFIG
-                    echo ""
-                    echo "The system will reboot after the update script completes. No need to worry, just run this after reboot and we will pick up where we left off."
-                    echo "Now, pay attention for prompts!"
-                    read -p "Press enter to continue" TEMP
-                    if [[ $DEBUG -ne 1 ]]; then
-                        updateopenflixr
-                    else
-                        echo "This would have run updateopenflixr"
-                    fi
-                    break
-                ;;
-                "Manually")
-                    echo "Update openflixr by typing 'sudo updateopenflixr' in your prompt."
-                    break
-                ;;
-                "Quit")
-                    exit
-                ;;
-                *) echo "Invalid option";;
-            esac
-        done
-        
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
-    ;;
-    10)
-        echo ""
-        echo "Step ${STEPS_CURRENT}: Update openflixr again, but differently"
-        PS3='Do you want to have the script start this or do in manually?:'
-        options=("Script!" "Manually" "Quit")
-        select opt in "${options[@]}"
-        do
-            case $opt in
-                "Script!")
-                    sed -i "s/STEPS_CURRENT=.*/STEPS_CURRENT=${STEPS_CURRENT} /g" $OPENFLIXR_SETUP_CONFIG
-                    echo ""
-                    read -p "Press enter to continue" TEMP
-                    if [[ $DEBUG -ne 1 ]]; then
-                        /opt/openflixr/updatewkly.sh
-                    else
-                        echo "This would have run /opt/openflixr/updatewkly.sh"
-                    fi
-                    break
-                ;;
-                "Manually")
-                    echo "Update openflixr again by entering 'sudo /opt/openflixr/updatewkly.sh' into your prompt"
-                    break
-                ;;
-                "Quit")
-                    exit
-                ;;
-                *) echo "Invalid option";;
-            esac
-        done
-        
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
-    ;;
     *)
         echo ""
         echo ""
         echo "COMPLETED!!"
-        echo "Nothing else left for this script to do!"
-        echo "Be sure you exit sudo mode by either typing 'exit' or pressing 'ctrl-d'"
-        echo ""
-        echo ""
-        break
+        echo "Checking data provided..."
+        
+        if [[ $CHANGE_PASS = "Y" && $password = "" ]]; then
+            echo "You selected to have the password changed but no password is set. Either something went wrong or this script was resumed (passwords aren't saved)."
+            echo "We will return you to the password step now."
+            STEPS_CURRENT=3
+            STEPS_CONTINUE=9
+        else
+            echo "Nothing else left for us to do! Let's run the rest!"
+            echo ""
+            echo ""
+            break
+        fi
     ;;
 esac
 
@@ -520,3 +413,27 @@ esac
 sed -i "s/STEPS_CURRENT=.*/STEPS_CURRENT=${STEPS_CURRENT} /g" $OPENFLIXR_SETUP_CONFIG
 
 done
+
+exit
+
+#Find setup.sh and run it. 
+if [ -f "/usr/share/nginx/html/setup/scripts/setup.sh" ]; then
+    echo "Found setup.sh in /usr/share/nginx/html/setup/scripts/"
+    chmod +x /usr/share/nginx/html/setup/scripts/setup.sh
+    source /usr/share/nginx/html/setup/scripts/setup.sh
+elif [ -f "/usr/share/nginx/html/setup/setup.sh" ]; then
+    echo "Found setup.sh in /usr/share/nginx/html/setup/"
+    chmod +x /usr/share/nginx/html/setup/setup.sh
+    source /usr/share/nginx/html/setup/setup.sh
+elif [ -f "/home/openflixr/setup.sh" ]; then
+    echo "Found setup.sh in /home/openflixr/"
+    chmod +x /home/openflixr/setup.sh
+    source /home/openflixr/setup.sh
+elif [ ! -f "/home/openflixr/setup.sh" ]; then
+    echo "Couldn't find setup.sh. Downloading from repo"
+    wget -o /home/openflixr/setup.sh https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/openflixr_setup.sh
+    chmod +x /home/openflixr/setup.sh
+    source /home/openflixr/setup.sh
+else
+    echo "Couldn't find setup.sh to complete the setup."
+fi
