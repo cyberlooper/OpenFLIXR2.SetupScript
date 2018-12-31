@@ -131,12 +131,15 @@ curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: appl
   "SubDir": "headphones"
 }' 'http://localhost:3579/request/api/settings/headphones?apikey='$plexreqapi''
 echo ""
-echo "-- Updating Password"
-curl -s -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-  "CurrentPassword": "'$oldpassword'",
-  "NewPassword": "'$password'"
-}' 'http://localhost:3579/request/api/credentials/openflixr?apikey='$plexreqapi''
-exit
+
+if [[ ! $password = "" ]]; then
+    echo "-- Updating Password"
+    curl -s -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
+    "CurrentPassword": "'$oldpassword'",
+    "NewPassword": "'$password'"
+    }' 'http://localhost:3579/request/api/credentials/openflixr?apikey='$plexreqapi''
+fi
+
 ## usenet
 echo "- Usenet"
 if [ "$usenetpassword" != '' ]
@@ -270,8 +273,10 @@ fi
 #users / apikey + passwordhash
 #usersettings / id3 / otherprefs | sabnzbd api + password
 ## passwords
-echo openflixr:"$password" | sudo chpasswd
-htpasswd -b /etc/nginx/.htpasswd openflixr "$password'"
+if [[ ! $password = "" ]]; then
+    echo openflixr:"$password" | sudo chpasswd
+    htpasswd -b /etc/nginx/.htpasswd openflixr "$password'"
+fi
 ## MySQL
 #service mysql stop
 #killall -vw mysqld
@@ -355,7 +360,9 @@ crudini --set /usr/share/nginx/html/setup/config.ini network ip $ip
 crudini --set /usr/share/nginx/html/setup/config.ini network subnet $subnet
 crudini --set /usr/share/nginx/html/setup/config.ini network gateway $gateway
 crudini --set /usr/share/nginx/html/setup/config.ini network dns $dns
-crudini --set /usr/share/nginx/html/setup/config.ini password oldpassword $password
+if [[ ! $password = "" ]]; then
+    crudini --set /usr/share/nginx/html/setup/config.ini password oldpassword $password
+fi
 crudini --set /usr/share/nginx/html/setup/config.ini access letsencrypt $letsencrypt
 crudini --set /usr/share/nginx/html/setup/config.ini access domainname $domainname
 crudini --set /usr/share/nginx/html/setup/config.ini access email $email
