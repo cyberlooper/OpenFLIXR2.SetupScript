@@ -413,14 +413,14 @@ if [ "$ip" != '' ]
     pihole -g -sd
 fi
 
-echo ""
-echo "Updating OpenFLIXR"
-bash /opt/update/onlineupdate.sh
-sed -i 's/<theme>default<\/theme>/<theme>dark<\/theme><insecureSkipHostcheck>true<\/insecureSkipHostcheck>/' /home/openflixr/.config/syncthing/config.xml
-sed -i 's/<startBrowser>true<\/startBrowser>/<startBrowser>false<\/startBrowser>/' /home/openflixr/.config/syncthing/config.xml
-sed -i 's/<urAccepted>0<\/urAccepted>/<urAccepted>-1<\/urAccepted>/' /home/openflixr/.config/syncthing/config.xml
-bash /opt/openflixr/updatewkly.sh
+#echo ""
+#echo "Updating OpenFLIXR"
+#bash /opt/update/onlineupdate.sh
+#sed -i 's/<theme>default<\/theme>/<theme>dark<\/theme><insecureSkipHostcheck>true<\/insecureSkipHostcheck>/' /home/openflixr/.config/syncthing/config.xml
+#sed -i 's/<startBrowser>true<\/startBrowser>/<startBrowser>false<\/startBrowser>/' /home/openflixr/.config/syncthing/config.xml
+#sed -i 's/<urAccepted>0<\/urAccepted>/<urAccepted>-1<\/urAccepted>/' /home/openflixr/.config/syncthing/config.xml
+#bash /opt/openflixr/updatewkly.sh
 
 echo "System rebooting in about 5 seconds."
-sleep 5000
+sleep 5s
 reboot now
