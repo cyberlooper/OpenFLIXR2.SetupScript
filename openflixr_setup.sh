@@ -136,6 +136,7 @@ case ${config[STEPS_CURRENT]} in
 
         LOG_LINE=""
         while [[ ! $LOG_LINE = "Set Version" ]]; do
+            tail -5 $OPENFLIXR_LOGFILE > $OPENFLIXR_SETUP_PATH"/tmp.log"
             while IFS='' read -r line || [[ -n "$line" ]]; do
                 LOG_LINE="$line"
                 if [[ $DEBUG -eq 1 ]]; then
@@ -144,9 +145,10 @@ case ${config[STEPS_CURRENT]} in
                 if [[ $LOG_LINE = "Set Version" ]]; then
                   break
                 fi
-            done < "$OPENFLIXR_LOGFILE"
-            sleep 10s
+            done < $OPENFLIXR_SETUP_PATH"/tmp.log"
+            sleep 5s
         done
+        rm $OPENFLIXR_SETUP_PATH"/tmp.log"
         echo "OpenFLIXR is ready! Let's GO!"
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
@@ -156,8 +158,6 @@ case ${config[STEPS_CURRENT]} in
         
         dpkg-reconfigure tzdata
         
-                                                                  
-          
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     3)
