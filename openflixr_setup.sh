@@ -59,14 +59,13 @@ source $OPENFLIXR_SETUP_FUNCTIONS
 echo "Initializing: Checking to see if this has been run before."
 if [ ! -f $OPENFLIXR_SETUP_CONFIG ]; then
     echo "First time running or the configuration file has been deleted."
-    mkdir -p $OPENFLIXR_SETUP_CONFIG_PATH
+    mkdir -p $OPENFLIXR_SETUP_PATH
     touch $OPENFLIXR_SETUP_CONFIG
 else
     echo "Config file found! Resuming from where we last left off."
     echo ""
     echo ""
 fi
-
 #Get variables from config file 
 load_config $OPENFLIXR_SETUP_CONFIG
 
