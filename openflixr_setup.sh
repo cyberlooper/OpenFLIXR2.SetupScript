@@ -368,15 +368,8 @@ case ${config[STEPS_CURRENT]} in
         echo "Step ${STEPS_CURRENT}: Mount network shares"
         MOUNT_MANAGE="webmin"
         echo "Visit webmin to complete the setup of your folders. http://${LOCAL_IP}/webmin/"
-        sed -i "s/MOUNT_MANAGE=.*/MOUNT_MANAGE=webmin /g" $OPENFLIXR_SETUP_CONFIG
-        #done=0
-        #while [[ ! $done = 1 ]]; do
-        #    sharetype=$(whiptail --radiolist "Choose network share type" 10 30 2\
-        #                   nfs "NFS" on \
-        #                   cifs "CIFS/SMB" off 3>&1 1>&2 2>&3)
-        #    check_cancel $?;
-        #done
-
+        
+        set_config "MOUNT_MANAGE" $MOUNT_MANAGE
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     8)
