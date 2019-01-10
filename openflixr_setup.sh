@@ -8,10 +8,11 @@ THISUSER=$(whoami)
     if [ $THISUSER != 'root' ]
         then
             echo 'You must use sudo to run this script, sorry!'
-           exit 1
+            exit 1
     fi
 
 #Variables
+preinitialized="yes"
 OPENFLIXIR_UID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXIR_GID=$(id -u $OPENFLIXIR_USERNAME)
 PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
@@ -53,9 +54,6 @@ for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
     config[MOUNT_TYPE[$FOLDER]]=""
 done
 
-#Helper methods
-source $OPENFLIXR_SETUP_FUNCTIONS
-
 echo "Initializing: Checking to see if this has been run before."
 if [ ! -f $OPENFLIXR_SETUP_CONFIG ]; then
     echo "First time running or the configuration file has been deleted."
@@ -66,6 +64,35 @@ else
     echo ""
     echo ""
 fi
+
+#Always get the latest version of these files
+typeset -A EXTERNAL_FILES # init array
+EXTERNAL_FILES=(
+    [setup.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh"
+    [functions.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/functions.sh"
+)
+
+for key in ${!EXTERNAL_FILES[@]}; do
+    file=$key
+    repo_path=${EXTERNAL_FILES[$key]}
+    file_path="$OPENFLIXR_SETUP_PATH$file"
+
+    if [[ $file = "setup.sh" ]]; then
+        SETUP_SCRIPT=$file_path
+    fi
+
+    if [ -f "$file_path" ]; then
+        rm $file_path
+    fi
+
+    wget -O $file_path $repo_path
+    chown openflixr:openflixr $file_path
+    chmod +x $file_path
+done
+
+#Helper methods
+source $OPENFLIXR_SETUP_FUNCTIONS
+
 #Get variables from config file 
 load_config $OPENFLIXR_SETUP_CONFIG
 
@@ -391,29 +418,9 @@ set_config "STEPS_CURRENT" ${config[STEPS_CURRENT]}
 
 done
 
-preinitialized="yes"
 
-setup_paths=(
-    "/usr/share/nginx/html/setup/setup.sh"
-    "/home/openflixr/openflixr_setup/setup.sh"
-)
-setup_repo_path="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh"
 
-exit
-#Find setup.sh and run it. 
-for i in ${!setup_paths[@]}; do
-    path=${setup_paths[$i]}
-    if [ -f "$path" ]; then
-        echo "Found script in $path"
-        chmod +x $path
-        source $path
-        break
-    elif [[ $path = ${setup_paths[-1]} ]]; then
-        echo "Couldn't find setup.sh. Downloading from repo"
-        wget -O $path $setup_repo_path
-        chown openflixr:openflixr $path
-        chmod +x $path
-        source $path
-        break
-    fi    
-done
+#Run setup.sh now that we have everything ready
+if [[ $DEBUG -ne 1 ]]; then
+    source $SETUP_SCRIPT
+fi
