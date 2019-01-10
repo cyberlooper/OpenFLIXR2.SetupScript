@@ -9,10 +9,9 @@ Please DO NOT run this against a working instance of OpenFLIXR. I have no idea w
 
 Some areas in particular that need some additional love or more thorough testing:
 + Let's Encrypt/Certbot usage
-+ NGINX fix
 
 Future things
-+ Network share mounting
++ Network share mounting (currently the script redirects the user to use webmin)
 + Addition of other sections for configuration
 
 Run this script by doing the following:
