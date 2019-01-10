@@ -351,15 +351,30 @@ case ${config[STEPS_CURRENT]} in
     6)
         echo ""
         echo "Step ${STEPS_CURRENT}: Folders"
-        echo "Creating mount folders"
-        for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
-            if [[ $DEBUG -ne 1 ]]; then
-                echo "Creating mount point /mnt/${FOLDER}/"
-                sudo mkdir -p /mnt/${FOLDER}/
-            else
-                echo "Would have created /mnt/${FOLDER}/"
-            fi
-        done
+        
+        mount_dirs=$(mount | grep "/mnt/downloads")
+        if [[ $mount_dirs = 0 ]]; then
+            echo "Creating mount folders"
+            mkdir /mnt/downloads/blackholenzb
+            mkdir /mnt/downloads/books
+            mkdir /mnt/downloads/blackholenzbget
+            mkdir /mnt/downloads/complete
+            mkdir /mnt/downloads/incomplete
+            mkdir /mnt/downloads/music
+            mkdir /mnt/downloads/musicready
+            mkdir /mnt/downloads/temp
+            mkdir /mnt/downloads/tempbooks
+            mkdir /mnt/downloads/lazyimport
+            mkdir /mnt/downloads/tempcomics
+            mkdir /mnt/downloads/tempseries
+            mkdir /mnt/downloads/torrentcomplete
+            mkdir /mnt/downloads/torrentwatch
+            
+            chmod -R 777 /mnt/downloads
+            chown -R openflixr:openflixr /mnt/downloads
+        else
+            echo "Mount folders already created"
+        fi
         
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
