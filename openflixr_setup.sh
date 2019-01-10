@@ -8,109 +8,103 @@ THISUSER=$(whoami)
     if [ $THISUSER != 'root' ]
         then
             echo 'You must use sudo to run this script, sorry!'
-           exit 1
+            exit 1
     fi
 
+echo "Initializing..."
+
 #Variables
-STEPS_CURRENT=0
-STEPS_CONTINUE=0
+preinitialized="yes"
 OPENFLIXIR_UID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXIR_GID=$(id -u $OPENFLIXIR_USERNAME)
-OPENFLIXR_LOGFILE="/var/log/updateof.log"
-OPENFLIXR_SETUP_LOGFILE="/var/log/openflixr_setup.log"
-OPENFLIXR_SETUP_CONFIG="/home/openflixr/openflixr_setup/openflixr_setup.config"
-OPENFLIXR_FOLDERS=(downloads movies series music comics books)
 PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 LOCAL_IP=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
+
+OPENFLIXR_LOGFILE="/var/log/updateof.log"
+OPENFLIXR_SETUP_LOGFILE="/var/log/openflixr_setup.log"
+OPENFLIXR_SETUP_PATH="/home/openflixr/openflixr_setup/"
+OPENFLIXR_SETUP_CONFIG_FILE="openflixr_setup.config"
+OPENFLIXR_SETUP_CONFIG="${OPENFLIXR_SETUP_PATH}${OPENFLIXR_SETUP_CONFIG_FILE}"
+OPENFLIXR_SETUP_FUNCTIONS_FILE="functions.sh"
+OPENFLIXR_SETUP_FUNCTIONS="${OPENFLIXR_SETUP_PATH}${OPENFLIXR_SETUP_FUNCTIONS_FILE}"
+OPENFLIXR_FOLDERS=(downloads movies series music comics books)
+
 FSTAB="/etc/fstab"
 FSTAB_ORIGINAL="/etc/fstab.openflixrsetup.original"
 FSTAB_BACKUP="/etc/fstab.openflixrsetup.bak"
 OPENFLIXIR_CIFS_CREDENTIALS_FILE="/home/${OPENFLIXIR_USERNAME}/.credentials-openflixr"
 
-#Helper methods
-function check_cancel()
-{
-    local input=$1
-    
-    if [[ $input -eq 1 ]]; then
-        echo "'Cancel' selected. Exiting script."
-        exit
-    fi
-}
+typeset -A config # init array
+config=( # set default values in config array
+    [STEPS_CURRENT]=1
+    [CHANGE_PASS]=""
+    [NETWORK]=""
+    [OPENFLIXR_IP]=""
+    [OPENFLIXR_SUBNET]=""
+    [OPENFLIXR_GATEWAY]=""
+    [OPENFLIXR_DNS]=""
+    [ACCESS]=""
+    [LETSENCRYPT_DOMAIN]=""
+    [LETSENCRYPT_EMAIL]=""
+    [MOUNT_MANAGE]=""
+    [HOST_NAME]=""
+    [FSTAB_BACKUP]=0
+    [FSTAB_MODIFIED]=0
+)
 
-function valid_ip()
-{
-    local  ip=$1
-    local  stat=1
+for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
+    config[MOUNT_TYPE_$FOLDER]=""
+done
 
-    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-        OIFS=$IFS
-        IFS='.'
-        ip=($ip)
-        IFS=$OIFS
-        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
-            && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
-        stat=$?
-    fi
-    return $stat
-}
-
-function validate_url()
-{
-  if [[ `wget -S --spider $1  2>&1 | grep 'HTTP/1.1 200 OK'` ]]; then echo "true"; fi
-}
-
-echo "Initializing: Checking to see if this has been run before."
 if [ ! -f $OPENFLIXR_SETUP_CONFIG ]; then
-    echo "First time running or the configuration file has been deleted."
+    mkdir -p $OPENFLIXR_SETUP_PATH
     touch $OPENFLIXR_SETUP_CONFIG
-    echo "STEPS_CURRENT=1" > $OPENFLIXR_SETUP_CONFIG
-    echo "CHANGE_PASS=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "NETWORK=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "OPENFLIXR_IP=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "OPENFLIXR_SUBNET=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "OPENFLIXR_GATEWAY=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "OPENFLIXR_DNS=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "ACCESS=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "LETSENCRYPT_DOMAIN=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "LETSENCRYPT_EMAIL=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "MOUNT_MANAGE=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "MOUNT_TYPE=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "HOST_NAME=" >> $OPENFLIXR_SETUP_CONFIG
-    echo "FSTAB_BACKUP=0" >> $OPENFLIXR_SETUP_CONFIG
-    echo "FSTAB_MODIFIED=0" >> $OPENFLIXR_SETUP_CONFIG
-else
-    echo "Config file found! Resuming from where we last left off."
-    echo ""
-    echo ""
 fi
 
-#Get variables from config file
-shopt -s extglob
-tr -d '\r' < $OPENFLIXR_SETUP_CONFIG > $OPENFLIXR_SETUP_CONFIG.unix
-while IFS='= ' read -r lhs rhs
-do
-    if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
-        rhs="${rhs%%\#*}"    # Del in line right comments
-        rhs="${rhs%%*( )}"   # Del trailing spaces
-        rhs="${rhs%\"*}"     # Del opening string quotes 
-        rhs="${rhs#\"*}"     # Del closing string quotes 
-        declare $lhs="$rhs"
+#Always get the latest version of these files
+typeset -A EXTERNAL_FILES # init array
+EXTERNAL_FILES=(
+    [setup.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh"
+    [functions.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/functions.sh"
+)
+
+for key in ${!EXTERNAL_FILES[@]}; do
+    file=$key
+    repo_path=${EXTERNAL_FILES[$key]}
+    file_path="$OPENFLIXR_SETUP_PATH$file"
+
+    if [[ $file = "setup.sh" ]]; then
+        SETUP_SCRIPT=$file_path
     fi
-done < $OPENFLIXR_SETUP_CONFIG.unix
+
+    if [ -f "$file_path" ]; then
+        rm $file_path
+    fi
+
+    wget -q -O $file_path $repo_path
+    chown openflixr:openflixr $file_path
+    chmod +x $file_path
+done
+
+#Helper methods
+source $OPENFLIXR_SETUP_FUNCTIONS
+
+#Get variables from config file 
+load_config $OPENFLIXR_SETUP_CONFIG
+save_config
 
 
 #From wizard
-networkconfig=$NETWORK
-ip=$OPENFLIXR_IP
-subnet=$OPENFLIXR_SUBNET
-gateway=$OPENFLIXR_GATEWAY
+networkconfig=${config[NETWORK]}
+ip=${config[OPENFLIXR_IP]}
+subnet=${config[OPENFLIXR_SUBNET]}
+gateway=${config[OPENFLIXR_GATEWAY]}
 dns='127.0.0.1'
 password=''
-if [[ $ACCESS = 'remote' ]]; then
+if [[ ${config[ACCESS]} = 'remote' ]]; then
     letsencrypt='on'
-    domainname=$LETSENCRYPT_DOMAIN
-    email=$LETSENCRYPT_EMAIL
+    domainname=${config[LETSENCRYPT_DOMAIN]}
+    email=${config[LETSENCRYPT_EMAIL]}
 else
     letsencrypt='off'
     domainname=''
@@ -149,56 +143,54 @@ imdb=''
 comicvine=''
 
 
-
 while [[ true ]]; do
 
-case $STEPS_CURRENT in
+case ${config[STEPS_CURRENT]} in
     0)
         echo ""
         echo "OOPS! Moving on"
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     1)        
         echo ""
-        echo "Step ${STEPS_CURRENT}: Checking to make sure OpenFLIXR is ready."
+        echo "Step ${config[STEPS_CURRENT]}: Checking to make sure OpenFLIXR is ready."
         echo "This may take about 15 minutes depending on when you ran this script..."
 
         LOG_LINE=""
         while [[ ! $LOG_LINE = "Set Version" ]]; do
+            tail -5 $OPENFLIXR_LOGFILE > $OPENFLIXR_SETUP_PATH"/tmp.log"
             while IFS='' read -r line || [[ -n "$line" ]]; do
                 LOG_LINE="$line"
-                if [[ $DEBUG -eq 1 ]]; then
-                    echo "DEBUG RUN: $LOG_LINE"
-                fi
+                
                 if [[ $LOG_LINE = "Set Version" ]]; then
                   break
                 fi
-            done < "$OPENFLIXR_LOGFILE"
+            done < $OPENFLIXR_SETUP_PATH"/tmp.log"
+            sleep 5s
         done
+        rm $OPENFLIXR_SETUP_PATH"/tmp.log"
         echo "OpenFLIXR is ready! Let's GO!"
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     2)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Timezone Settings"
-        if [[ $DEBUG -ne 1 ]]; then
-            dpkg-reconfigure tzdata
-        else
-            echo "DEBUG RUN: Would have updated timezone Settings"
-        fi
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
+        echo "Step ${config[STEPS_CURRENT]}: Timezone Settings"
+        
+        dpkg-reconfigure tzdata
+        
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     3)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Set new password"
+        echo "Step ${config[STEPS_CURRENT]}: Set new password"
         
         done=0
         while [[ ! $done = 1 ]]; do
-            CHANGE_PASS=$(whiptail --yesno --title "Change Password" "Do you want to change the default password for OpenFLIXR?" 10 40 3>&1 1>&2 2>&3)
-            CHANGE_PASS=$?
+            pass_change=$(whiptail --yesno --title "Change Password" "Do you want to change the default password for OpenFLIXR?" 10 40 3>&1 1>&2 2>&3)
+            pass_change=$?
             
-            if [[ $CHANGE_PASS -eq 0 ]]; then
-                CHANGE_PASS="Y"
+            if [[ $pass_change -eq 0 ]]; then
+                config[CHANGE_PASS]="Y"
                 valid=0
                 while [[ ! $valid = 1 ]]; do
                     pass=$(whiptail --passwordbox --title "Set new password" "Enter password" 10 30 3>&1 1>&2 2>&3)
@@ -215,21 +207,21 @@ case $STEPS_CURRENT in
                     fi
                 done
             else
-                CHANGE_PASS="N"
+                config[CHANGE_PASS]="N"
                 done=1
             fi
-            sed -i "s/CHANGE_PASS=.*/CHANGE_PASS=${CHANGE_PASS} /g" $OPENFLIXR_SETUP_CONFIG
+            set_config "CHANGE_PASS" $CHANGE_PASS
         done
         
         if [[ $STEPS_CONTINUE -gt 0 ]]; then
-            STEPS_CURRENT=$STEPS_CONTINUE
+            set_config "STEPS_CURRENT" $STEPS_CONTINUE
         else
-            STEPS_CURRENT=$((STEPS_CURRENT+1))
+            set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
         fi
     ;;
     4)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Network Settings."
+        echo "Step ${config[STEPS_CURRENT]}: Network Settings."
         
         done=0
         while [[ ! $done = 1 ]]; do
@@ -237,7 +229,7 @@ case $STEPS_CURRENT in
                            dhcp "DHCP" on \
                            static "Static IP" off 3>&1 1>&2 2>&3)
             check_cancel $?;              
-            sed -i "s/NETWORK=.*/NETWORK=${networkconfig} /g" $OPENFLIXR_SETUP_CONFIG
+            set_config "NETWORK" $networkconfig
             
             if [[ $networkconfig = 'static' ]]; then
                 echo "Configuring for Static IP"
@@ -248,7 +240,7 @@ case $STEPS_CURRENT in
                     check_cancel $?;
                     
                     if valid_ip $ip; then
-                        sed -i "s/OPENFLIXR_IP=.*/OPENFLIXR_IP=${ip} /g" $OPENFLIXR_SETUP_CONFIG
+                        set_config "OPENFLIXR_IP" $ip
                         valid=1
                     else
                         whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
@@ -261,7 +253,7 @@ case $STEPS_CURRENT in
                     check_cancel $?;
                     
                     if valid_ip $ip; then
-                        sed -i "s/OPENFLIXR_SUBNET=.*/OPENFLIXR_SUBNET=${subnet} /g" $OPENFLIXR_SETUP_CONFIG
+                        set_config "OPENFLIXR_SUBNET" $subnet
                         valid=1
                     else
                         whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
@@ -274,7 +266,7 @@ case $STEPS_CURRENT in
                     check_cancel $?;
                     
                     if valid_ip $ip; then
-                        sed -i "s/OPENFLIXR_GATEWAY=.*/OPENFLIXR_GATEWAY=${gateway} /g" $OPENFLIXR_SETUP_CONFIG
+                        set_config "OPENFLIXR_GATEWAY" $gateway
                         valid=1
                     else
                         whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
@@ -294,11 +286,11 @@ case $STEPS_CURRENT in
             fi
         done
         
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     5)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Access settings"
+        echo "Step ${config[STEPS_CURRENT]}: Access settings"
         
         done=0
         while [[ ! $done = 1 ]]; do
@@ -306,7 +298,7 @@ case $STEPS_CURRENT in
                            local "Local" on \
                            remote "Remote" off 3>&1 1>&2 2>&3)
             check_cancel $?;
-            sed -i "s/ACCESS=.*/ACCESS=${access} /g" $OPENFLIXR_SETUP_CONFIG
+            set_config "ACCESS" ${access}
             
             if [[ $access = 'local' ]]; then
                 echo "Local access selected. Nothing else to do."
@@ -318,9 +310,9 @@ case $STEPS_CURRENT in
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    domain=$(whiptail --inputbox --ok-button "Next" --title "STEP 1/ : Domain" "Enter your domain (required to obtain certificate). If you don't have one, register one and then enter it here." 10 50 $LETSENCRYPT_DOMAIN 3>&1 1>&2 2>&3)
+                    domain=$(whiptail --inputbox --ok-button "Next" --title "STEP 1/ : Domain" "Enter your domain (required to obtain certificate). If you don't have one, register one and then enter it here." 10 50 ${config[LETSENCRYPT_DOMAIN]} 3>&1 1>&2 2>&3)
                     check_cancel $?;
-                    sed -i "s/LETSENCRYPT_DOMAIN=.*/LETSENCRYPT_DOMAIN=${domain} /g" $OPENFLIXR_SETUP_CONFIG
+                    set_config "LETSENCRYPT_DOMAIN" $domain
                     
                     #TODO: Validate domain
                     valid=1
@@ -331,9 +323,9 @@ case $STEPS_CURRENT in
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    email=$(whiptail --inputbox --title "STEP 1/ : Domain" "Enter your e-mail address (required for lost key recovery)." 10 50 $LETSENCRYPT_EMAIL 3>&1 1>&2 2>&3)
+                    email=$(whiptail --inputbox --title "STEP 1/ : Domain" "Enter your e-mail address (required for lost key recovery)." 10 50 ${config[LETSENCRYPT_EMAIL]} 3>&1 1>&2 2>&3)
                     check_cancel $?;
-                    sed -i "s/LETSENCRYPT_EMAIL=.*/LETSENCRYPT_EMAIL=${email} /g" $OPENFLIXR_SETUP_CONFIG
+                    set_config "LETSENCRYPT_EMAIL" $email
                     
                     #TODO: Validate email
                     valid=1
@@ -348,52 +340,58 @@ case $STEPS_CURRENT in
             fi
         done
         
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     6)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Folders"
-        echo "Creating mount folders"
-        for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
-            if [[ $DEBUG -ne 1 ]]; then
-                echo "Creating mount point /mnt/${FOLDER}/"
-                sudo mkdir -p /mnt/${FOLDER}/
-            else
-                echo "Would have created /mnt/${FOLDER}/"
-            fi
-        done
+        echo "Step ${config[STEPS_CURRENT]}: Folders"
         
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
+        mount_dirs=$(mount | grep "/mnt/downloads")
+        if [[ $mount_dirs = 0 ]]; then
+            echo "Creating mount folders"
+            mkdir /mnt/downloads/blackholenzb
+            mkdir /mnt/downloads/books
+            mkdir /mnt/downloads/blackholenzbget
+            mkdir /mnt/downloads/complete
+            mkdir /mnt/downloads/incomplete
+            mkdir /mnt/downloads/music
+            mkdir /mnt/downloads/musicready
+            mkdir /mnt/downloads/temp
+            mkdir /mnt/downloads/tempbooks
+            mkdir /mnt/downloads/lazyimport
+            mkdir /mnt/downloads/tempcomics
+            mkdir /mnt/downloads/tempseries
+            mkdir /mnt/downloads/torrentcomplete
+            mkdir /mnt/downloads/torrentwatch
+            
+            chmod -R 777 /mnt/downloads
+            chown -R openflixr:openflixr /mnt/downloads
+        else
+            echo "Mount folders already created"
+        fi
+        
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     7)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Mount network shares"
+        echo "Step ${config[STEPS_CURRENT]}: Mount network shares"
         MOUNT_MANAGE="webmin"
         echo "Visit webmin to complete the setup of your folders. http://${LOCAL_IP}/webmin/"
-        sed -i "s/MOUNT_MANAGE=.*/MOUNT_MANAGE=webmin /g" $OPENFLIXR_SETUP_CONFIG
-        #done=0
-        #while [[ ! $done = 1 ]]; do
-        #    sharetype=$(whiptail --radiolist "Choose network share type" 10 30 2\
-        #                   nfs "NFS" on \
-        #                   cifs "CIFS/SMB" off 3>&1 1>&2 2>&3)
-        #    check_cancel $?;
-        #done
-
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
+        
+        set_config "MOUNT_MANAGE" $MOUNT_MANAGE
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     8)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Nginx fix"
-        if [[ $DEBUG -ne 1 ]]; then
-            sed -i "s/listen 443 ssl http2;/#listen 443 ssl http2; /g" /etc/nginx/sites-enabled/reverse
-            echo "Done! Let's test to make sure nginx likes it..."
-            nginx -t
-        else
-            echo "This would have commented out a line in /etc/nginx/sites-enabled/reverse"
-        fi
+        echo "Step ${config[STEPS_CURRENT]}: Nginx fix"
+
+        sed -i "s/listen 443 ssl http2;/#listen 443 ssl http2; /g" /etc/nginx/sites-enabled/reverse
+        echo "Done! Let's test to make sure nginx likes it..."
+        nginx -t
+        
         echo "If the above doesn't say 'syntax ok' and 'test is successful' please edit '/etc/nginx/sites-enabled/reverse' directly to correct any problems."
         
-        STEPS_CURRENT=$((STEPS_CURRENT+1))
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     *)
         echo ""
@@ -401,10 +399,10 @@ case $STEPS_CURRENT in
         echo "COMPLETED!!"
         echo "Checking data provided..."
         
-        if [[ $CHANGE_PASS = "Y" && $password = "" ]]; then
+        if [[ ${config[CHANGE_PASS]} = "Y" && $password = "" ]]; then
             echo "You selected to have the password changed but no password is set. Either something went wrong or this script was resumed (passwords aren't saved)."
             echo "We will return you to the password step now."
-            STEPS_CURRENT=3
+            ${config[STEPS_CURRENT]}=3
             STEPS_CONTINUE=9
         else
             echo "Nothing else left for us to do! Let's run the rest!"
@@ -416,32 +414,9 @@ case $STEPS_CURRENT in
 esac
 
 #UPDATE CONFIG FOR SCRIPT RESUME
-sed -i "s/STEPS_CURRENT=.*/STEPS_CURRENT=${STEPS_CURRENT} /g" $OPENFLIXR_SETUP_CONFIG
+set_config "STEPS_CURRENT" ${config[STEPS_CURRENT]}
 
 done
 
-preinitialized="yes"
-
-setup_paths=(
-    "/usr/share/nginx/html/setup/setup.sh"
-    "/home/openflixr/openflixr_setup/setup.sh"
-)
-setup_repo_path="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh"
-
-#Find setup.sh and run it. 
-for i in ${!setup_paths[@]}; do
-    path=${setup_paths[$i]}
-    if [ -f "$path" ]; then
-        echo "Found script in $path"
-        chmod +x $path
-        source $path
-        break
-    elif [[ $path = ${setup_paths[-1]} ]]; then
-        echo "Couldn't find setup.sh. Downloading from repo"
-        wget -O $path $setup_repo_path
-        chown openflixr:openflixr $path
-        chmod +x $path
-        source $path
-        break
-    fi    
-done
+#Run setup.sh now that we have everything ready
+source $SETUP_SCRIPT
