@@ -81,7 +81,7 @@ for key in ${!EXTERNAL_FILES[@]}; do
         rm $file_path
     fi
 
-    wget -O $file_path $repo_path
+    wget -q -O $file_path $repo_path
     chown openflixr:openflixr $file_path
     chmod +x $file_path
 done
