@@ -11,6 +11,8 @@ THISUSER=$(whoami)
             exit 1
     fi
 
+echo "Initializing..."
+
 #Variables
 preinitialized="yes"
 OPENFLIXIR_UID=$(id -u $OPENFLIXIR_USERNAME)
@@ -51,18 +53,12 @@ config=( # set default values in config array
 )
 
 for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
-    config[MOUNT_TYPE[$FOLDER]]=""
+    config[MOUNT_TYPE_$FOLDER]=""
 done
 
-echo "Initializing: Checking to see if this has been run before."
 if [ ! -f $OPENFLIXR_SETUP_CONFIG ]; then
-    echo "First time running or the configuration file has been deleted."
     mkdir -p $OPENFLIXR_SETUP_PATH
     touch $OPENFLIXR_SETUP_CONFIG
-else
-    echo "Config file found! Resuming from where we last left off."
-    echo ""
-    echo ""
 fi
 
 #Always get the latest version of these files
@@ -95,6 +91,7 @@ source $OPENFLIXR_SETUP_FUNCTIONS
 
 #Get variables from config file 
 load_config $OPENFLIXR_SETUP_CONFIG
+save_config
 
 
 #From wizard
@@ -146,7 +143,6 @@ imdb=''
 comicvine=''
 
 
-
 while [[ true ]]; do
 
 case ${config[STEPS_CURRENT]} in
@@ -165,9 +161,7 @@ case ${config[STEPS_CURRENT]} in
             tail -5 $OPENFLIXR_LOGFILE > $OPENFLIXR_SETUP_PATH"/tmp.log"
             while IFS='' read -r line || [[ -n "$line" ]]; do
                 LOG_LINE="$line"
-                if [[ $DEBUG -eq 1 ]]; then
-                    echo "DEBUG RUN: $LOG_LINE"
-                fi
+                
                 if [[ $LOG_LINE = "Set Version" ]]; then
                   break
                 fi
@@ -350,7 +344,7 @@ case ${config[STEPS_CURRENT]} in
     ;;
     6)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Folders"
+        echo "Step ${config[STEPS_CURRENT]}: Folders"
         
         mount_dirs=$(mount | grep "/mnt/downloads")
         if [[ $mount_dirs = 0 ]]; then
@@ -380,7 +374,7 @@ case ${config[STEPS_CURRENT]} in
     ;;
     7)
         echo ""
-        echo "Step ${STEPS_CURRENT}: Mount network shares"
+        echo "Step ${config[STEPS_CURRENT]}: Mount network shares"
         MOUNT_MANAGE="webmin"
         echo "Visit webmin to complete the setup of your folders. http://${LOCAL_IP}/webmin/"
         
@@ -390,13 +384,11 @@ case ${config[STEPS_CURRENT]} in
     8)
         echo ""
         echo "Step ${config[STEPS_CURRENT]}: Nginx fix"
-        if [[ $DEBUG -ne 1 ]]; then
-            sed -i "s/listen 443 ssl http2;/#listen 443 ssl http2; /g" /etc/nginx/sites-enabled/reverse
-            echo "Done! Let's test to make sure nginx likes it..."
-            nginx -t
-        else
-            echo "This would have commented out a line in /etc/nginx/sites-enabled/reverse"
-        fi
+
+        sed -i "s/listen 443 ssl http2;/#listen 443 ssl http2; /g" /etc/nginx/sites-enabled/reverse
+        echo "Done! Let's test to make sure nginx likes it..."
+        nginx -t
+        
         echo "If the above doesn't say 'syntax ok' and 'test is successful' please edit '/etc/nginx/sites-enabled/reverse' directly to correct any problems."
         
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
@@ -426,9 +418,5 @@ set_config "STEPS_CURRENT" ${config[STEPS_CURRENT]}
 
 done
 
-
-
 #Run setup.sh now that we have everything ready
-if [[ $DEBUG -ne 1 ]]; then
-    source $SETUP_SCRIPT
-fi
+source $SETUP_SCRIPT
