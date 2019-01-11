@@ -87,7 +87,6 @@ for key in ${!EXTERNAL_FILES[@]}; do
 
     shell=$(echo "$file" | grep -c ".sh")
     if [[ $shell > 0 ]]; then
-        echo "shell!"
         chmod +x $file_path
     fi
 done
@@ -373,6 +372,27 @@ case ${config[STEPS_CURRENT]} in
 
         #nginx -t
         #TODO: Perfom a check to make sure this was successful
+        
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
+    ;;
+    9)
+        # Custom Scripts
+        whiptail --title "Custom Scripts" --checklist --separate-output "If you want to install any custom scripts, choose them below." 10 75 1 \
+        "jcs" "Jeremy's Custom Scripts" off \
+        2>results
+
+        while read choice
+        do
+            case $choice in
+                jcs)
+                    git clone https://github.com/jeremysherriff/OpenFLIXR2.CustomScripts.git /opt/custom
+                    echo "" >> /opt/openflixr/userscript.sh
+                    echo "/opt/custom/userscript_wrapper.sh # Added by OpenFLIXR Setup Script" >> /opt/openflixr/userscript.sh
+                ;;
+                *)
+                ;;
+            esac
+        done < results
         
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
