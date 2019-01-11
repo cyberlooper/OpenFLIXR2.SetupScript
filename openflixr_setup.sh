@@ -64,9 +64,9 @@ fi
 #Always get the latest version of these files
 typeset -A EXTERNAL_FILES # init array
 EXTERNAL_FILES=(
-    [setup.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh"
-    [functions.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/functions.sh"
-    [welcome.txt]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/welcome.txt"
+    [setup.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/setup.sh"
+    [functions.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/functions.sh"
+    [welcome.txt]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/welcome.txt"
 )
 
 for key in ${!EXTERNAL_FILES[@]}; do
@@ -85,7 +85,8 @@ for key in ${!EXTERNAL_FILES[@]}; do
     wget -q -O $file_path $repo_path
     chown openflixr:openflixr $file_path
 
-    if [[ echo "$file" | grep -q ".sh" ]]; then
+    shell=$(echo "$file" | grep -c ".sh")
+    if [[ $shell > 0 ]]; then
         chmod +x $file_path
     fi
 done
@@ -146,13 +147,6 @@ spotpass=''
 imdb=''
 comicvine=''
 
-# Define the dialog exit status codes
-: ${DIALOG_OK=0}
-: ${DIALOG_CANCEL=1}
-: ${DIALOG_HELP=2}
-: ${DIALOG_EXTRA=3}
-: ${DIALOG_ITEM_HELP=4}
-: ${DIALOG_ESC=255}
 
 while [[ true ]]; do
 
@@ -378,6 +372,27 @@ case ${config[STEPS_CURRENT]} in
 
         #nginx -t
         #TODO: Perfom a check to make sure this was successful
+        
+        set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
+    ;;
+    9)
+        # Custom Scripts
+        whiptail --title "Custom Scripts" --checklist --separate-output "If you want to install any custom scripts, choose them below." 10 75 1 \
+        "jcs" "Jeremy's Custom Scripts" off \
+        2>results
+
+        while read choice
+        do
+            case $choice in
+                jcs)
+                    git clone https://github.com/jeremysherriff/OpenFLIXR2.CustomScripts.git /opt/custom
+                    echo "" >> /opt/openflixr/userscript.sh
+                    echo "/opt/custom/userscript_wrapper.sh # Added by OpenFLIXR Setup Script" >> /opt/openflixr/userscript.sh
+                ;;
+                *)
+                ;;
+            esac
+        done < results
         
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
