@@ -36,7 +36,7 @@ OPENFLIXIR_CIFS_CREDENTIALS_FILE="/home/${OPENFLIXIR_USERNAME}/.credentials-open
 
 typeset -A config # init array
 config=( # set default values in config array
-    [STEPS_CURRENT]=1
+    [STEPS_CURRENT]=0
     [CHANGE_PASS]=""
     [NETWORK]=""
     [OPENFLIXR_IP]=""
@@ -66,6 +66,7 @@ typeset -A EXTERNAL_FILES # init array
 EXTERNAL_FILES=(
     [setup.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh"
     [functions.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/functions.sh"
+    [welcome.txt]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/welcome.txt"
 )
 
 for key in ${!EXTERNAL_FILES[@]}; do
@@ -83,7 +84,10 @@ for key in ${!EXTERNAL_FILES[@]}; do
 
     wget -q -O $file_path $repo_path
     chown openflixr:openflixr $file_path
-    chmod +x $file_path
+
+    if [[ echo "$file" | grep -q ".sh" ]]; then
+        chmod +x $file_path
+    fi
 done
 
 #Helper methods
@@ -142,60 +146,66 @@ spotpass=''
 imdb=''
 comicvine=''
 
+# Define the dialog exit status codes
+: ${DIALOG_OK=0}
+: ${DIALOG_CANCEL=1}
+: ${DIALOG_HELP=2}
+: ${DIALOG_EXTRA=3}
+: ${DIALOG_ITEM_HELP=4}
+: ${DIALOG_ESC=255}
 
 while [[ true ]]; do
 
 case ${config[STEPS_CURRENT]} in
     0)
-        echo ""
-        echo "OOPS! Moving on"
+        whiptail --title "Welcome!" --msgbox "$(cat $OPENFLIXR_SETUP_PATH"welcome.txt")" 10 75
+
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
-    1)        
-        echo ""
-        echo "Step ${config[STEPS_CURRENT]}: Checking to make sure OpenFLIXR is ready."
-        echo "This may take about 15 minutes depending on when you ran this script..."
+    1)
+        {
+            LOG_LINE=""
+            start=$(date +%s)
+            while [[ ! $LOG_LINE = "Set Version" ]]; do
+                tail -5 $OPENFLIXR_LOGFILE > $OPENFLIXR_SETUP_PATH"/tmp.log"
+                while IFS='' read -r line || [[ -n "$line" ]]; do
+                    LOG_LINE="$line"
+                    
+                    if [[ $LOG_LINE = "Set Version" ]]; then
+                    break
+                    fi
+                done < $OPENFLIXR_SETUP_PATH"/tmp.log"
+                sleep 5s
 
-        LOG_LINE=""
-        while [[ ! $LOG_LINE = "Set Version" ]]; do
-            tail -5 $OPENFLIXR_LOGFILE > $OPENFLIXR_SETUP_PATH"/tmp.log"
-            while IFS='' read -r line || [[ -n "$line" ]]; do
-                LOG_LINE="$line"
-                
-                if [[ $LOG_LINE = "Set Version" ]]; then
-                  break
-                fi
-            done < $OPENFLIXR_SETUP_PATH"/tmp.log"
-            sleep 5s
-        done
-        rm $OPENFLIXR_SETUP_PATH"/tmp.log"
-        echo "OpenFLIXR is ready! Let's GO!"
+                elapsed=$(($(date +%s)-$start))
+                duration=$(date -ud @$elapsed +'%M minutes %S seconds')
+                percent=$(($elapsed/10))
+                echo -e "XXX\n$percent\nDuration: $duration\nXXX"
+            done
+            rm $OPENFLIXR_SETUP_PATH"/tmp.log"
+            echo -e "XXX\n100\nDone!\nXXX"
+        } | whiptail --title "Step ${config[STEPS_CURRENT]}: Checking to make sure OpenFLIXR is ready." --gauge "This may take about 15 minutes depending on when you ran this script..." 10 75 0
+
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     2)
-        echo ""
-        echo "Step ${config[STEPS_CURRENT]}: Timezone Settings"
-        
         dpkg-reconfigure tzdata
         
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     3)
-        echo ""
-        echo "Step ${config[STEPS_CURRENT]}: Set new password"
-        
         done=0
         while [[ ! $done = 1 ]]; do
-            pass_change=$(whiptail --yesno --title "Change Password" "Do you want to change the default password for OpenFLIXR?" 10 40 3>&1 1>&2 2>&3)
+            pass_change=$(whiptail --yesno --title "Step ${config[STEPS_CURRENT]}: Change Password" "Do you want to change the default password for OpenFLIXR?" 10 40 3>&1 1>&2 2>&3)
             pass_change=$?
             
             if [[ $pass_change -eq 0 ]]; then
                 config[CHANGE_PASS]="Y"
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    pass=$(whiptail --passwordbox --title "Set new password" "Enter password" 10 30 3>&1 1>&2 2>&3)
+                    pass=$(whiptail --passwordbox --title "Step ${config[STEPS_CURRENT]}: Change Password" "Enter password" 10 30 3>&1 1>&2 2>&3)
                     check_cancel $?;
-                    cpass=$(whiptail --passwordbox --title "Set new password" "Confirm password" 10 30 3>&1 1>&2 2>&3)
+                    cpass=$(whiptail --passwordbox --title "Step ${config[STEPS_CURRENT]}: Change Password" "Confirm password" 10 30 3>&1 1>&2 2>&3)
                     check_cancel $?;
                     
                     if [[ $pass == $cpass ]]; then
@@ -203,7 +213,7 @@ case ${config[STEPS_CURRENT]} in
                         valid=1
                         done=1
                     else
-                        whiptail --ok-button "Try Again" --msgbox "Passwords do not match =( Try again." 10 30
+                        whiptail --title "Step ${config[STEPS_CURRENT]}: Change Password" --ok-button "Try Again" --msgbox "Passwords do not match =( Try again." 10 30
                     fi
                 done
             else
@@ -220,12 +230,9 @@ case ${config[STEPS_CURRENT]} in
         fi
     ;;
     4)
-        echo ""
-        echo "Step ${config[STEPS_CURRENT]}: Network Settings."
-        
         done=0
         while [[ ! $done = 1 ]]; do
-            networkconfig=$(whiptail --radiolist "Choose network configuration" 10 30 2\
+            networkconfig=$(whiptail --radiolist "Step ${config[STEPS_CURRENT]}: Choose network configuration" 10 30 2\
                            dhcp "DHCP" on \
                            static "Static IP" off 3>&1 1>&2 2>&3)
             check_cancel $?;              
@@ -236,40 +243,40 @@ case ${config[STEPS_CURRENT]} in
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    ip=$(whiptail --inputbox --title "Network configuration" "IP Address" 10 30 3>&1 1>&2 2>&3)
+                    ip=$(whiptail --inputbox --title "Step ${config[STEPS_CURRENT]}: Network configuration" "IP Address" 10 30 3>&1 1>&2 2>&3)
                     check_cancel $?;
                     
                     if valid_ip $ip; then
                         set_config "OPENFLIXR_IP" $ip
                         valid=1
                     else
-                        whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
+                        whiptail --title "Step ${config[STEPS_CURRENT]}: Network configuration" --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
                     fi
                 done
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    subnet=$(whiptail --inputbox --title "Network configuration" "Subnet Mask" 10 30 3>&1 1>&2 2>&3)
+                    subnet=$(whiptail --inputbox --title "Step ${config[STEPS_CURRENT]}: Network configuration" "Subnet Mask" 10 30 3>&1 1>&2 2>&3)
                     check_cancel $?;
                     
                     if valid_ip $ip; then
                         set_config "OPENFLIXR_SUBNET" $subnet
                         valid=1
                     else
-                        whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
+                        whiptail --title "Step ${config[STEPS_CURRENT]}: Network configuration" --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
                     fi
                 done
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    gateway=$(whiptail --inputbox --title "Network configuration" "Gateway" 10 30 3>&1 1>&2 2>&3)
+                    gateway=$(whiptail --inputbox --title "Step ${config[STEPS_CURRENT]}: Network configuration" "Gateway" 10 30 3>&1 1>&2 2>&3)
                     check_cancel $?;
                     
                     if valid_ip $ip; then
                         set_config "OPENFLIXR_GATEWAY" $gateway
                         valid=1
                     else
-                        whiptail --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
+                        whiptail --title "Step ${config[STEPS_CURRENT]}: Network configuration" --ok-button "Try Again" --msgbox "Invalid IP Address" 10 30
                     fi
                 done
                 
@@ -282,35 +289,33 @@ case ${config[STEPS_CURRENT]} in
             fi
             
             if [[ $networkconfig = '' ]]; then
-                read -p "Something went wrong... Press enter to repeat this step or press ctrl+c to exit: " TEMP
+                whiptail --title "Step ${config[STEPS_CURRENT]}: Network configuration" --yes-button "Try Again" --no-button "Cancel" --yesno "Something went wrong getting Network Configuration settings... Try again or select cancel to quit" 10 30
+                check_cancel $?;
             fi
         done
         
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     5)
-        echo ""
-        echo "Step ${config[STEPS_CURRENT]}: Access settings"
-        
         done=0
         while [[ ! $done = 1 ]]; do
-            access=$(whiptail --radiolist "How do you want to access OpenFLIXR?" 10 30 2\
+            access=$(whiptail --title "Step ${config[STEPS_CURRENT]}: Access settings" --radiolist "How do you want to access OpenFLIXR?" 10 30 2\
                            local "Local" on \
                            remote "Remote" off 3>&1 1>&2 2>&3)
             check_cancel $?;
             set_config "ACCESS" ${access}
             
             if [[ $access = 'local' ]]; then
-                echo "Local access selected. Nothing else to do."
+                # Local access selected. Nothing else to do.
                 done=1
             fi
             
             if [[ $access = 'remote' ]]; then
-                echo "Configuring for Remote access."
+                # Configuring for Remote access.
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    domain=$(whiptail --inputbox --ok-button "Next" --title "STEP 1/ : Domain" "Enter your domain (required to obtain certificate). If you don't have one, register one and then enter it here." 10 50 ${config[LETSENCRYPT_DOMAIN]} 3>&1 1>&2 2>&3)
+                    domain=$(whiptail --inputbox --ok-button "Next" --title "Step ${config[STEPS_CURRENT]}: Access settings - Remote" "Enter your domain (required to obtain certificate). If you don't have one, register one and then enter it here." 10 50 ${config[LETSENCRYPT_DOMAIN]} 3>&1 1>&2 2>&3)
                     check_cancel $?;
                     set_config "LETSENCRYPT_DOMAIN" $domain
                     
@@ -318,12 +323,12 @@ case ${config[STEPS_CURRENT]} in
                     valid=1
                 done
                 
-                whiptail --ok-button "Next" --msgbox "Add/Edit the A records for ${domain} and www.${domain} to point to ${PUBLIC_IP}" 10 50
-                whiptail --ok-button "Next" --msgbox "Forward port 443 (only!) on your router to your local IP (${LOCAL_IP})" 10 50
+                whiptail --title "Step ${config[STEPS_CURRENT]}: Access settings - Remote" --ok-button "Next" --msgbox "Add/Edit the A records for ${domain} and www.${domain} to point to ${PUBLIC_IP}" 10 50
+                whiptail --title "Step ${config[STEPS_CURRENT]}: Access settings - Remote" --ok-button "Next" --msgbox "Forward port 443 (only!) on your router to your local IP (${LOCAL_IP})" 10 50
                 
                 valid=0
                 while [[ ! $valid = 1 ]]; do
-                    email=$(whiptail --inputbox --title "STEP 1/ : Domain" "Enter your e-mail address (required for lost key recovery)." 10 50 ${config[LETSENCRYPT_EMAIL]} 3>&1 1>&2 2>&3)
+                    email=$(whiptail --inputbox --title "Step ${config[STEPS_CURRENT]}: Access settings - Remote" "Enter your e-mail address (required for lost key recovery)." 10 50 ${config[LETSENCRYPT_EMAIL]} 3>&1 1>&2 2>&3)
                     check_cancel $?;
                     set_config "LETSENCRYPT_EMAIL" $email
                     
@@ -336,60 +341,43 @@ case ${config[STEPS_CURRENT]} in
             fi
             
             if [[ $access = '' ]]; then
-                read -p "Something went wrong... Press enter to repeat this step or press ctrl+c to exit: " TEMP
+                whiptail --title "Step ${config[STEPS_CURRENT]}: Access settings" --yes-button "Try Again" --no-button "Cancel" --yesno "Something went wrong... Try again or select cancel to quit" 10 30
+                check_cancel $?;
             fi
         done
         
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
-    6)
-        echo ""
-        echo "Step ${config[STEPS_CURRENT]}: Folders"
-        
-        mount_dirs=$(mount | grep "/mnt/downloads")
-        if [[ $mount_dirs = 0 ]]; then
-            echo "Creating mount folders"
-            mkdir /mnt/downloads/blackholenzb
-            mkdir /mnt/downloads/books
-            mkdir /mnt/downloads/blackholenzbget
-            mkdir /mnt/downloads/complete
-            mkdir /mnt/downloads/incomplete
-            mkdir /mnt/downloads/music
-            mkdir /mnt/downloads/musicready
-            mkdir /mnt/downloads/temp
-            mkdir /mnt/downloads/tempbooks
-            mkdir /mnt/downloads/lazyimport
-            mkdir /mnt/downloads/tempcomics
-            mkdir /mnt/downloads/tempseries
-            mkdir /mnt/downloads/torrentcomplete
-            mkdir /mnt/downloads/torrentwatch
-            
-            chmod -R 777 /mnt/downloads
-            chown -R openflixr:openflixr /mnt/downloads
-        else
-            echo "Mount folders already created"
-        fi
-        
+    6)        
+        {
+            for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
+                mkdir -p /mnt/${FOLDER}/
+                #TODO: chown openflixr
+            done            
+            echo -e "XXX\n100\nFolders created!\nXXX"
+            sleep 2s
+        } | whiptail --title "Step ${config[STEPS_CURRENT]}: Folders" --gauge "Creating folders" 10 75 0
+
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     7)
-        echo ""
-        echo "Step ${config[STEPS_CURRENT]}: Mount network shares"
         MOUNT_MANAGE="webmin"
-        echo "Visit webmin to complete the setup of your folders. http://${LOCAL_IP}/webmin/"
+        whiptail --title "Step ${config[STEPS_CURRENT]}: Mount folders" --msgbox "Visit webmin to complete the setup of your folders. http://${LOCAL_IP}/webmin/" 10 75
+        check_cancel $?;
         
         set_config "MOUNT_MANAGE" $MOUNT_MANAGE
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
     8)
-        echo ""
-        echo "Step ${config[STEPS_CURRENT]}: Nginx fix"
+        {
+            sleep 2s
+            sed -i "s/listen 443 ssl http2;/#listen 443 ssl http2; /g" /etc/nginx/sites-enabled/reverse
+            echo -e "XXX\n100\nFixed!\nXXX"
+            sleep 2s
+        } | whiptail --title "Step ${config[STEPS_CURRENT]}: Nginx fix" --gauge "Fixing nginx" 10 75 0
 
-        sed -i "s/listen 443 ssl http2;/#listen 443 ssl http2; /g" /etc/nginx/sites-enabled/reverse
-        echo "Done! Let's test to make sure nginx likes it..."
-        nginx -t
-        
-        echo "If the above doesn't say 'syntax ok' and 'test is successful' please edit '/etc/nginx/sites-enabled/reverse' directly to correct any problems."
+        #nginx -t
+        #TODO: Perfom a check to make sure this was successful
         
         set_config "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
     ;;
@@ -398,10 +386,12 @@ case ${config[STEPS_CURRENT]} in
         echo ""
         echo "COMPLETED!!"
         echo "Checking data provided..."
+
         
         if [[ ${config[CHANGE_PASS]} = "Y" && $password = "" ]]; then
             echo "You selected to have the password changed but no password is set. Either something went wrong or this script was resumed (passwords aren't saved)."
             echo "We will return you to the password step now."
+            sleep 2s
             ${config[STEPS_CURRENT]}=3
             STEPS_CONTINUE=9
         else
