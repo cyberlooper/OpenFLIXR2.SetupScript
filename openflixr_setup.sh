@@ -85,7 +85,9 @@ for key in ${!EXTERNAL_FILES[@]}; do
     wget -q -O $file_path $repo_path
     chown openflixr:openflixr $file_path
 
-    if [[ echo "$file" | grep -q ".sh" ]]; then
+    shell=$(echo "$file" | grep -c ".sh")
+    if [[ $shell > 0 ]]; then
+        echo "shell!"
         chmod +x $file_path
     fi
 done
@@ -146,13 +148,6 @@ spotpass=''
 imdb=''
 comicvine=''
 
-# Define the dialog exit status codes
-: ${DIALOG_OK=0}
-: ${DIALOG_CANCEL=1}
-: ${DIALOG_HELP=2}
-: ${DIALOG_EXTRA=3}
-: ${DIALOG_ITEM_HELP=4}
-: ${DIALOG_ESC=255}
 
 while [[ true ]]; do
 
