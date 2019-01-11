@@ -64,9 +64,9 @@ fi
 #Always get the latest version of these files
 typeset -A EXTERNAL_FILES # init array
 EXTERNAL_FILES=(
-    [setup.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/setup.sh"
-    [functions.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/functions.sh"
-    [welcome.txt]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/dev/welcome.txt"
+    [setup.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/setup.sh"
+    [functions.sh]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/functions.sh"
+    [welcome.txt]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/welcome.txt"
 )
 
 for key in ${!EXTERNAL_FILES[@]}; do
