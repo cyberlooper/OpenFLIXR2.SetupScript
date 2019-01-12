@@ -19,9 +19,9 @@ OPENFLIXIR_UID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXIR_GID=$(id -u $OPENFLIXIR_USERNAME)
 PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 if [[ $? -eq 0 ]]; then
-    HAS_INTERNET=true
+    HAS_INTERNET=1
 else
-    HAS_INTERNET=false
+    HAS_INTERNET=0
 fi
 LOCAL_IP=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
 
@@ -74,6 +74,7 @@ EXTERNAL_FILES=(
     [welcome.txt]="https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/welcome.txt"
 )
 
+
 for key in ${!EXTERNAL_FILES[@]}; do
     file=$key
     repo_path=${EXTERNAL_FILES[$key]}
@@ -83,13 +84,18 @@ for key in ${!EXTERNAL_FILES[@]}; do
         SETUP_SCRIPT=$file_path
     fi
 
-    if [[ HAS_INTERNET ]]; then
+    if [[ HAS_INTERNET -eq 1 ]]; then
         if [ -f "$file_path" ]; then
             rm $file_path
         fi
 
         wget -q -O $file_path $repo_path
-        chown openflixr:openflixr $file_path        
+        chown openflixr:openflixr $file_path
+    else
+        if [ ! -f "$file_path" ]; then
+            whiptail --title "OH NO!" --msgbox "It appears that you don't have internet connection and the necessary external files haven't been downloaded." 10 75
+            exit
+        fi
     fi
 
     shell=$(echo "$file" | grep -c ".sh")
@@ -324,7 +330,7 @@ case ${config[STEPS_CURRENT]} in
                     valid=1
                 done
                 
-                if [[ HAS_INTERNET ]]; then
+                if [[ HAS_INTERNET -eq 1 ]]; then
                     remote_message="Add/Edit the A records for ${domain} and www.${domain} to point to ${PUBLIC_IP}"
                 else
                     remote_message="Add/Edit the A records for ${domain} and www.${domain} to point to your Public IP (Script failed to get your Public IP)."
