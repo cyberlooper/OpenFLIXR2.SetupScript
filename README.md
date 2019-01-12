@@ -21,15 +21,24 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 	+ [Jeremy's Custom Scripts](https://github.com/jeremysherriff/OpenFLIXR2.CustomScripts)
 
 ## To-do:
+
 + Let's Encrypt/Certbot usage
 + Configure folder/network share mounting
 + Addition of other sections for configuration
 
 ## Usage
 Run this script by doing the following:
-1. Upload `openflixr_setup.sh` to your OpenFLIXIR box
-2. Make it executable: `chmod +x openflixr_setup.sh`
-4. Run the script: `sudo ./openflixr_setup.sh`
+### Option 1 (Preferred)
+1. Log in to your OpenFLIXR box
+2. Copy and paste the following into your command line (prompt) making sure it is all one line: `wget -O openflixr_setup.sh  https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/openflixr_setup.sh && sudo bash openflixr_setup.sh`
+### Option 2
+ 1. Upload `openflixr_setup.sh` to your OpenFLIXIR box, in the home directory
+ 2. Run the script: `sudo bash openflixr_setup.sh`
+### Option 3
+If for some reason Option 2 won't work for you
+ 1. Upload `openflixr_setup.sh` to your OpenFLIXIR box, in the home directory
+ 2. Make it executable: `chmod +x openflixr_setup.sh` 
+ 3. Run the script: `sudo ./openflixr_setup.sh`
 
 ### Notes
 This script was originally largely based on the guide by Jeremy found here: http://www.openflixr.com/forum/discussion/559/setup-instructions-without-web-wizard but now is based on what WebWizard outputs - https://github.com/mfrelink/OpenFLIXR2.Wizard
