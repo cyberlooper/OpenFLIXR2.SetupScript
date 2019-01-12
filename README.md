@@ -21,7 +21,6 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 	+ [Jeremy's Custom Scripts](https://github.com/jeremysherriff/OpenFLIXR2.CustomScripts)
 
 ## To-do:
-
 + Let's Encrypt/Certbot usage
 + Configure folder/network share mounting
 + Addition of other sections for configuration
