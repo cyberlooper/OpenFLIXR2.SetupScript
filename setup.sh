@@ -275,7 +275,7 @@ fi
 ## passwords
 if [[ ! $password = "" ]]; then
     echo openflixr:"$password" | sudo chpasswd
-    htpasswd -b /etc/nginx/.htpasswd openflixr "$password'"
+    htpasswd -b /etc/nginx/.htpasswd openflixr "$password"
 fi
 ## MySQL
 #service mysql stop
