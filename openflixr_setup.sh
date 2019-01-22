@@ -15,6 +15,7 @@ echo "Initializing..."
 
 #Variables
 preinitialized="yes"
+OPENFLIXIR_USERNAME="openflixr"
 OPENFLIXIR_UID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXIR_GID=$(id -u $OPENFLIXIR_USERNAME)
 PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
