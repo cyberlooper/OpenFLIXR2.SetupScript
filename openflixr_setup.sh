@@ -13,8 +13,18 @@ THISUSER=$(whoami)
 
 echo "Initializing..."
 
+if [[ $(grep -c "dns-nameservers 127.0.0.1" /etc/network/interfaces) -ne 0 ]]; then
+    echo "Fixing an issue with pihole sometimes not cooperating."
+    echo "You will lose connection. Reconnect in a minute and run this script again."
+    sleep 5s
+    sed -i "s/dns-nameservers 127.0.0.1/dns-nameservers 8.8.8.8/g" /etc/network/interfaces
+    ifdown eth0 ; ifup eth0
+    exit
+fi 
+
 #Variables
 preinitialized="yes"
+OPENFLIXIR_USERNAME="openflixr"
 OPENFLIXIR_UID=$(id -u $OPENFLIXIR_USERNAME)
 OPENFLIXIR_GID=$(id -u $OPENFLIXIR_USERNAME)
 PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
@@ -383,10 +393,17 @@ case ${config[STEPS_CURRENT]} in
     8)
         {
             sleep 2s
+            if [[ $(grep -c "dns-nameservers 8.8.8.8" /etc/network/interfaces) = 0 ]]; then
+                sed -i "s/dns-nameservers 8.8.8.8/dns-nameservers 127.0.0.1/g" /etc/network/interfaces
+                echo -e "XXX\n25\nReverted network nameservers back to 127.0.0.1\nXXX"
+                sleep 2s
+            fi 
             sed -i "s/listen 443 ssl http2;/#listen 443 ssl http2; /g" /etc/nginx/sites-enabled/reverse
-            echo -e "XXX\n100\nFixed!\nXXX"
+            echo -e "XXX\n50\nFixed nginx\nXXX"
             sleep 2s
-        } | whiptail --title "Step ${config[STEPS_CURRENT]}: Nginx fix" --gauge "Fixing nginx" 10 75 0
+            echo -e "XXX\n100\nDone!\nXXX"
+            sleep 2s
+        } | whiptail --title "Step ${config[STEPS_CURRENT]}: Fixes" --gauge "Fixing things..." 10 75 0
 
         #nginx -t
         #TODO: Perfom a check to make sure this was successful
