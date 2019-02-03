@@ -27,6 +27,11 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 + Addition of other sections for configuration
 
 ## Usage
+1. Install Virtualbox or your favorite hypervisor
+2. Download OpenFLIXR - http://www.openflixr.com/#Download
+3. Import in hypervisor and power on
+3. Follow one of the options below to run the this script...
+
 Run this script by doing the following:
 ### Option 1 (Preferred)
 1. Log in to your OpenFLIXR box
