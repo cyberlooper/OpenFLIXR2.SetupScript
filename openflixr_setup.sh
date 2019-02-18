@@ -197,7 +197,21 @@ case ${config[STEPS_CURRENT]} in
                 elapsed=$(($(date +%s)-$start))
                 duration=$(date -ud @$elapsed +'%M minutes %S seconds')
                 percent=$(($elapsed/10))
-                echo -e "XXX\n$percent\nDuration: $duration\nXXX"
+
+                if [[ $(date -ud @$elapsed +%M) -ge 16 ]]; then
+                    echo -e "XXX\n100\Failure!\nXXX"
+                    echo "Failed to detect completion of the OpenFLIXR box after ${duration}." >> $OPENFLIXR_SETUP_LOGFILE
+                    echo "OpenFLIXR log file (last 5 lines)" >> $OPENFLIXR_SETUP_LOGFILE
+                    tail -5 $OPENFLIXR_LOGFILE  >> $OPENFLIXR_SETUP_LOGFILE
+                    echo "OpenFLIXR Setup tmp file" >> $OPENFLIXR_SETUP_LOGFILE
+                    cat $OPENFLIXR_SETUP_PATH"/tmp.log" >> $OPENFLIXR_SETUP_LOGFILE
+                    echo "Exiting OpenFLIXR Setup" >> $OPENFLIXR_SETUP_LOGFILE
+                    
+                    echo "Failed to detect completion of the OpenFLIXR box after ${duration}. Exiting setup."
+                    exit 1
+                else
+                    echo -e "XXX\n$percent\nDuration: $duration\nXXX"
+                fi
             done
             rm $OPENFLIXR_SETUP_PATH"/tmp.log"
             echo -e "XXX\n100\nDone!\nXXX"
