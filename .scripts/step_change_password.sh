@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-step_changepassword() {
+step_change_password() {
     done=0
     while [[ ! $done = 1 ]]; do
         pass_change=$(dialog \
