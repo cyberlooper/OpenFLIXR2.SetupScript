@@ -28,9 +28,9 @@ tzSelectionMenu() {
 
             whiptail --title "Step ${step_number}: ${step_name}" \
                     --backtitle "$1" \
-                    --yes-label "Yes, correct" \
-                    --no-label "No, I'll choose it" \
-                    --yesno "Your timezone was detected as $detected ($offset). Is it correct?" 7 50
+                    --yes-button "Yes, correct" \
+                    --no-button "No, I'll choose it" \
+                    --yesno "Your timezone was detected as $detected ($offset). Is it correct?" 0 0
             selected=$?
             detected_short=$detected
             detected="/usr/share/zoneinfo/$detected"
@@ -51,7 +51,7 @@ tzSelectionMenu() {
     region=$(whiptail --stdout \
                       --title "Step ${step_number}: ${step_name}" \
                       --backtitle "$1" \
-                      --ok-label "Next" \
+                      --ok-button "Next" \
                       --no-cancel \
                       --menu "Select a continent or ocean from the menu:" \
                       20 30 30 \
@@ -68,8 +68,8 @@ tzSelectionMenu() {
     tz=$(whiptail --stdout \
                     --title "Step ${step_number}: ${step_name}" \
                     --backtitle "$1" \
-                    --ok-label "Next" \
-                    --cancel-label "Back to Regions" \
+                    --ok-button "Next" \
+                    --cancel-button "Back to Regions" \
                     --menu "Select your timezone in ${region}:" \
                     20 40 30 \
                     "${optionsArray[@]}")
