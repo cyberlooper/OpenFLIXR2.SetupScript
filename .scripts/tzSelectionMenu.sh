@@ -4,7 +4,7 @@
 
 detectTimezone() {
     if command_exists tzupdate ; then
-        dialog --infobox "Please wait, detecting your timezone... " 5 50; detected=$(tzupdate -p | sed "s/Detected timezone is //" | sed "s/\.//")
+        whiptail --infobox "Please wait, detecting your timezone... " 5 50; detected=$(tzupdate -p | sed "s/Detected timezone is //" | sed "s/\.//")
         return
     fi
 
@@ -26,7 +26,7 @@ tzSelectionMenu() {
         if [ -f "/usr/share/zoneinfo/$detected" ]; then
             offset=$(TZ="$detected" date +%z | sed "s/00$/:00/g")
 
-            dialog --title "Step ${step_number}: ${step_name}" \
+            whiptail --title "Step ${step_number}: ${step_name}" \
                     --backtitle "$1" \
                     --yes-label "Yes, correct" \
                     --no-label "No, I'll choose it" \
@@ -48,7 +48,7 @@ tzSelectionMenu() {
         regionsArray+=($name "")
     done <<< "$regions"
 
-    region=$(dialog --stdout \
+    region=$(whiptail --stdout \
                       --title "Step ${step_number}: ${step_name}" \
                       --backtitle "$1" \
                       --ok-label "Next" \
@@ -65,7 +65,7 @@ tzSelectionMenu() {
         optionsArray+=($name "($offset)")
     done <<< "$options"
 
-    tz=$(dialog --stdout \
+    tz=$(whiptail --stdout \
                     --title "Step ${step_number}: ${step_name}" \
                     --backtitle "$1" \
                     --ok-label "Next" \

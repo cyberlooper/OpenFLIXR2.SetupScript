@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 step_access() {
-    access=$(dialog \
+    access=$(whiptail \
                 --backtitle "OpenFLIXR Setup" \
                 --title "Step ${step_number}: ${step_name}" \
                 --clear \
@@ -24,7 +24,7 @@ step_access() {
     if [[ $access -eq 2 ]]; then
         # Configuring for Remote access.
         info "Folder access set to Remote"
-        domain=$(dialog \
+        domain=$(whiptail \
                 --backtitle "OpenFLIXR Setup" \
                 --title "Step ${step_number}: ${step_name} - Remote" \
                 --clear \
@@ -35,7 +35,7 @@ step_access() {
         check_response $?
         set_config "OPENFLIXR_DOMAIN" $domain
 
-        email=$(dialog \
+        email=$(whiptail \
                 --backtitle "OpenFLIXR Setup" \
                 --title "Step ${step_number}: ${step_name} - Remote" \
                 --clear \
@@ -52,7 +52,7 @@ step_access() {
             remote_message="Add/Edit the A records for ${domain} and www.${domain} to point to your Public IP (Script failed to get your Public IP)."
         fi
 
-        dialog \
+        whiptail \
             --backtitle "OpenFLIXR Setup" \
             --title "Step ${step_number}: ${step_name} - Remote" \
             --clear \
@@ -60,7 +60,7 @@ step_access() {
             --msgbox "${remote_message}" $HEIGHT $WIDTH
         check_response $?
 
-        dialog \
+        whiptail \
             --backtitle "OpenFLIXR Setup" \
             --title "Step ${step_number}: ${step_name} - Remote" \
             --clear \
