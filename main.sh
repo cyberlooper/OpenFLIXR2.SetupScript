@@ -49,8 +49,12 @@ get_scriptname() {
 }
 readonly SCRIPTNAME="$(get_scriptname)"
 readonly SCRIPTPATH="$(cd -P "$(dirname "${SCRIPTNAME}")" > /dev/null && pwd)"
-readonly PREINIT="yes"
 
+# Other variables
+readonly PREINIT="yes"
+readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
+readonly NIC=$(ip -o -4 route show to default | awk '{print $5}')
+readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
 # Init config array
 typeset -A config
 config=(
