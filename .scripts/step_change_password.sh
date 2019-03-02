@@ -5,25 +5,26 @@ IFS=$'\n\t'
 step_change_password() {
     done=0
     while [[ ! $done = 1 ]]; do
-        pass_change=$(dialog \
+        pass_change=$(whiptail \
                         --backtitle "OpenFLIXR Setup" \
                         --title "Step ${step_number}: ${step_name}" \
                         --clear \
                         --defaultno \
                         --yesno "Do you want to change the default password for OpenFLIXR?" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
         pass_change=$?
+        info "Pass change set to $pass_change"
 
         if [[ $pass_change -eq 0 ]]; then
             info "Changing password."
             config[CHANGE_PASS]="Y"
             valid=0
             while [[ ! $valid = 1 ]]; do
-                pass=$(dialog \
+                pass=$(whiptail \
                         --backtitle "OpenFLIXR Setup" \
                         --title "Step ${step_number}: ${step_name}" \
                         --passwordbox "Enter password" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
                 run_script 'check_response'  $?
-                cpass=$(dialog \
+                cpass=$(whiptail \
                         --backtitle "OpenFLIXR Setup" \
                         --title "Step ${step_number}: ${step_name}" \
                         --passwordbox "Confirm password" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
@@ -34,7 +35,7 @@ step_change_password() {
                     valid=1
                     done=1
                 else
-                    dialog \
+                    whiptail \
                         --backtitle "OpenFLIXR Setup" \
                         --title "Step ${step_number}: ${step_name}" \
                         --ok-button "Try Again" \

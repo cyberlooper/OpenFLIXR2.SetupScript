@@ -10,7 +10,7 @@ step_welcome() {
     WIDTH=75
 
     # Dialog to display
-    dialog \
+    whiptail \
         --backtitle "OpenFLIXR Setup" \
         --title "Step ${step_number}: ${step_name}" \
         --clear \

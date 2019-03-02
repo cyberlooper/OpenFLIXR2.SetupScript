@@ -16,7 +16,7 @@ steps=(
 run_steps() {
     if [ "${config[STEPS_CURRENT]}" != "0" ]; then
         info "Configuration step set to ${config[STEPS_CURRENT]}"
-        dialog \
+        whiptail \
             --backtitle "OpenFLIXR Setup" \
             --title "Resume?" \
             --clear \
