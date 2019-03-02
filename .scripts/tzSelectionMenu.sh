@@ -30,7 +30,7 @@ tzSelectionMenu() {
                     --backtitle "$1" \
                     --yes-button "Yes, correct" \
                     --no-button "No, I'll choose it" \
-                    --yesno "Your timezone was detected as $detected ($offset). Is it correct?" 7 50
+                    --yesno "Your timezone was detected as $detected ($offset). Is it correct?" 0 0
             selected=$?
             detected_short=$detected
             detected="/usr/share/zoneinfo/$detected"
