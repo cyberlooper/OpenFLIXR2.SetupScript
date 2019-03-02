@@ -21,12 +21,12 @@ step_changepassword() {
                         --backtitle "OpenFLIXR Setup" \
                         --title "Step ${step_number}: ${step_name}" \
                         --passwordbox "Enter password" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
-                check_response $?
+                run_script 'check_response'  $?
                 cpass=$(dialog \
                         --backtitle "OpenFLIXR Setup" \
                         --title "Step ${step_number}: ${step_name}" \
                         --passwordbox "Confirm password" $HEIGHT $WIDTH 3>&1 1>&2 2>&3)
-                check_response $?
+                run_script 'check_response'  $?
 
                 if [[ $pass == $cpass ]]; then
                     OPENFLIXIR_PASSWORD=$pass
