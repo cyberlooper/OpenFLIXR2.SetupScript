@@ -12,7 +12,7 @@ steps=(
 
 run_steps() {
     if [ "${config[STEPS_CURRENT]}" != "0" ]; then
-        log "Configuration step set to ${config[STEPS_CURRENT]}"
+        info "Configuration step set to ${config[STEPS_CURRENT]}"
         dialog \
             --backtitle "OpenFLIXR Setup" \
             --title "Resume?" \
@@ -23,14 +23,12 @@ run_steps() {
             $HEIGHT $WIDTH
 
         if [ $? -eq 1 ]; then
-            log "[START OVER] selected"
+            info "[START OVER] selected"
             set_config "STEPS_CURRENT" 0
-            apps=()
         else
-            log "[RESUME] selected"
-            IFS=',' read -r -a apps <<< "${config[APPS]}"
+            info "[RESUME] selected"
         fi
-        check_response $?
+        run_script 'check_response' $?
     fi
 
     for i in ${!steps[@]};
