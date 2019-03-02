@@ -6,7 +6,7 @@ set_config()
 {
     config_file="${DETECTED_HOMEDIR}/openflixr_setup/openflixr_setup.config"
     key=$1
-    val=$2
+    val=${2:-}
 
     config[$key]=$val
 
