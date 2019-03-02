@@ -2,7 +2,7 @@
 
 # Pulled from https://github.com/happy-hacking-linux/timezone-selector
 
-detectTimezone () {
+detectTimezone() {
     if command_exists tzupdate ; then
         dialog --infobox "Please wait, detecting your timezone... " 5 50; detected=$(tzupdate -p | sed "s/Detected timezone is //" | sed "s/\.//")
         return
@@ -11,15 +11,15 @@ detectTimezone () {
     detected=""
 }
 
-tzOptionsByRegion () {
+tzOptionsByRegion() {
     options=$(cd /usr/share/zoneinfo/$1 && find . | sed "s|^\./||" | sed "s/^\.//" | sed '/^$/d')
 }
 
-tzRegions () {
+tzRegions() {
     regions=$(find /usr/share/zoneinfo/. -maxdepth 1 -type d | cut -d "/" -f6 | sed '/^$/d')
 }
 
-tzSelectionMenu () {
+tzSelectionMenu() {
     detectTimezone
 
     if [[ -n "${detected// }" ]]; then

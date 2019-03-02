@@ -2,6 +2,6 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-step_wait () {
+step_wait() {
 
 }

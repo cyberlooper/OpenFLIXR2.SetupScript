@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-step_wait () {
+step_welcome() {
     # Variables
     HEIGHT_ORIGINAL=$HEIGHT
     WIDTH_ORIGINAL=$WIDTH
