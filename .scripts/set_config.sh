@@ -13,6 +13,6 @@ set_config()
     if [[ $(grep -c "$key" $config_file) = 0 ]]; then
         echo "$key=$val" >> $config_file
     else
-        sed -i "s/$key=.*/$key=$val /g" $config_file
+        sed -i "s#$key=.*#$key=$val #g" $config_file
     fi
 }
