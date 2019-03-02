@@ -6,7 +6,10 @@ steps=(
     "Welcome"
     "Timezone"
     "Change Password"
+    "Network Configuration"
     "Access"
+    "Folder Creation"
+    "Folder Mounting"
     "Wait"
 )
 

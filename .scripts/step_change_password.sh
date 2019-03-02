@@ -14,6 +14,7 @@ step_change_password() {
         pass_change=$?
 
         if [[ $pass_change -eq 0 ]]; then
+            info "Changing password."
             config[CHANGE_PASS]="Y"
             valid=0
             while [[ ! $valid = 1 ]]; do
@@ -41,6 +42,7 @@ step_change_password() {
                 fi
             done
         else
+            info "Keeping default password."
             config[CHANGE_PASS]="N"
             done=1
         fi
