@@ -239,8 +239,7 @@ main() {
     imdb=''
     comicvine=''
 
-    HEIGHT=10
-    WIDTH=50
+    readonly PROMPT="GUI"
     run_script 'run_steps'
 }
 main
