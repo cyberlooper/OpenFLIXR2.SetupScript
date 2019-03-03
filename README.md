@@ -12,7 +12,7 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 + Resume where you left off
 + Check to make sure OpenFLIXR is ready for setup
 + Configure timezone
-+ Change password 
++ Change password
 + Configure Network settings
 + Configure Access settings (remote option still needs some work)
 + Create mount folders
@@ -21,7 +21,6 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 	+ [Jeremy's Custom Scripts](https://github.com/jeremysherriff/OpenFLIXR2.CustomScripts)
 
 ## To-do:
-
 + Let's Encrypt/Certbot usage
 + Configure folder/network share mounting
 + Addition of other sections for configuration
@@ -30,20 +29,16 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 1. Install Virtualbox or your favorite hypervisor
 2. Download OpenFLIXR - http://www.openflixr.com/#Download
 3. Import in hypervisor and power on
-3. Follow one of the options below to run the this script...
+4. Log in to your OpenFLIXR box
+5. Run the following
+```bash
+sudo apt-get install curl git
+bash -c "$(curl -fsSL https://magicalcodemonkey.github.io/OpenFLIXR2.SetupScript/main.sh)"
+```
 
-Run this script by doing the following:
-### Option 1 (Preferred)
-1. Log in to your OpenFLIXR box
-2. Copy and paste the following into your command line (prompt) making sure it is all one line: `wget -O openflixr_setup.sh  https://raw.githubusercontent.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript/master/openflixr_setup.sh && sudo bash openflixr_setup.sh`
-### Option 2
- 1. Upload `openflixr_setup.sh` to your OpenFLIXIR box, in the home directory
- 2. Run the script: `sudo bash openflixr_setup.sh`
-### Option 3
-If for some reason Option 2 won't work for you
- 1. Upload `openflixr_setup.sh` to your OpenFLIXIR box, in the home directory
- 2. Make it executable: `chmod +x openflixr_setup.sh` 
- 3. Run the script: `sudo ./openflixr_setup.sh`
+## Special Thanks
+Thanks to OpenFLIXR for being an awesome setup that motivated me to work on this as well as a bunch of other projects.
 
-### Notes
-This script was originally largely based on the guide by Jeremy found here: http://www.openflixr.com/forum/discussion/559/setup-instructions-without-web-wizard but now is based on what WebWizard outputs - https://github.com/mfrelink/OpenFLIXR2.Wizard
+Thanks to Jeremy for making the guide for how to setup OpenFLIXR when the WebWizard went down that helped me build the original version of this script. The guide can be found here: http://www.openflixr.com/forum/discussion/559/setup-instructions-without-web-wizard but now is based on what WebWizard outputs - https://github.com/mfrelink/OpenFLIXR2.Wizard
+
+Thanks to [GhostWriters](https://github.com/GhostWriters), specifically their work on [DockSTARTer](https://github.com/GhostWriters/DockSTARTer) and the framework they built for scripts!
