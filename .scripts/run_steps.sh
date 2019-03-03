@@ -15,23 +15,12 @@ steps=(
 
 run_steps() {
     if [ "${config[STEPS_CURRENT]}" != "0" ]; then
-        info "Configuration step set to ${config[STEPS_CURRENT]}"
-        whiptail \
-            --backtitle "OpenFLIXR Setup" \
-            --title "Resume?" \
-            --clear \
-            --yes-label "RESUME" \
-            --no-label "START OVER" \
-            --yesno "It has been detected that you last left off on Step ${config[STEPS_CURRENT]}. Do you want to [RESUME] from where you left off or [START OVER]?" \
-            $HEIGHT $WIDTH
-
-        if [ $? -eq 1 ]; then
-            info "[START OVER] selected"
-            set_config "STEPS_CURRENT" 0
+        if run_script 'question_prompt' Y "It has been detected that you last left off on Step ${config[STEPS_CURRENT]}. Do you want to resume from where you left off?"; then
+            info "Chose to resume"
         else
-            info "[RESUME] selected"
+            info "Chose to start over"
+            set_config "STEPS_CURRENT" 0
         fi
-        run_script 'check_response' $?
     fi
 
     for i in ${!steps[@]};
