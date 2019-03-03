@@ -4,10 +4,8 @@ IFS=$'\n\t'
 
 step_welcome() {
     # Variables
-    HEIGHT_ORIGINAL=$HEIGHT
-    WIDTH_ORIGINAL=$WIDTH
-    HEIGHT=30
-    WIDTH=75
+    local HEIGHT=30
+    local WIDTH=75
 
     # Dialog to display
     whiptail \
@@ -15,8 +13,5 @@ step_welcome() {
         --title "Step ${step_number}: ${step_name}" \
         --clear \
         --msgbox "$(cat ${SCRIPTPATH}/.misc/welcome.txt)" \
-        $HEIGHT $WIDTH
-
-    HEIGHT=$HEIGHT_ORIGINAL
-    WIDTH=$WIDTH_ORIGINAL
+        ${HEIGHT:-0} ${WIDTH:-0}
 }
