@@ -1,2 +1,0 @@
-Welcome to the OpenFLIXR Setup Script!
-This script will help you get your OpenFLIXR box setup and ready for application configuration.
