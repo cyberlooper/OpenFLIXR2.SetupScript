@@ -28,7 +28,6 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 4. Log in to your OpenFLIXR box
 5. Run the following
 ```bash
-sudo apt-get install curl git
 bash -c "$(curl -fsSL https://openflixr.github.io/OpenFLIXR2.SetupScript/main.sh)"
 ```
 
