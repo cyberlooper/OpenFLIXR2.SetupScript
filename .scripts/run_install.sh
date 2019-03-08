@@ -3,6 +3,6 @@ set -euo pipefail
 IFS=$'\n\t'
 
 run_install() {
-    run_script 'update_system'
+    # TODO: fix this - run_script 'update_system'
     run_script 'install_tzupdate'
 }
