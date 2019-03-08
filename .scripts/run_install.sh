@@ -4,4 +4,5 @@ IFS=$'\n\t'
 
 run_install() {
     run_script 'update_system'
+    run_script 'install_tzupdate'
 }
