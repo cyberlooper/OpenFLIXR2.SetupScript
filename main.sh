@@ -135,7 +135,7 @@ run_test() {
 # Root Check
 root_check() {
     if [[ ${DETECTED_PUID} == "0" ]] || [[ ${DETECTED_HOMEDIR} == "/root" ]]; then
-        fatal "Running as root is not supported. Please run as a standard user with sudo."
+        fatal "Running as root is not supported. Please run as openflixr user using sudo."
     fi
 }
 
