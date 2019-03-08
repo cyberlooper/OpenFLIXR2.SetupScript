@@ -190,6 +190,9 @@ main() {
     run_script 'load_config'
     run_script 'save_config'
 
+    readonly PROMPT="GUI"
+    run_script 'run_steps'
+
     # Set setup variables
     # TODO: Move/rename these at some point
     networkconfig=${config[NETWORK]}
@@ -197,7 +200,7 @@ main() {
     subnet=${config[OPENFLIXR_SUBNET]}
     gateway=${config[OPENFLIXR_GATEWAY]}
     dns='127.0.0.1'
-    password=''
+    password="${OPENFLIXIR_PASSWORD:-}"
     if [[ ${config[ACCESS]} = 'remote' ]]; then
         letsencrypt='on'
         domainname=${config[LETSENCRYPT_DOMAIN]}
@@ -238,8 +241,5 @@ main() {
     spotpass=''
     imdb=''
     comicvine=''
-
-    readonly PROMPT="GUI"
-    run_script 'run_steps'
 }
 main
