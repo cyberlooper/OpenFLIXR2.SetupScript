@@ -55,6 +55,7 @@ readonly PREINIT="yes"
 readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 readonly NIC=$(ip -o -4 route show to default | awk '{print $5}')
 readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
+readonly OPENFLIXR_FOLDERS=(downloads movies series music comics books)
 # Init config array
 typeset -A config
 config=(
