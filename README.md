@@ -16,12 +16,8 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 + Configure Network settings
 + Configure Access settings (remote option still needs some work)
 + Create mount folders
-+ nginx fix
-+ Add custom scripts. Supported scripts:
-	+ [Jeremy's Custom Scripts](https://github.com/jeremysherriff/OpenFLIXR2.CustomScripts)
 
 ## To-do:
-+ Let's Encrypt/Certbot usage
 + Configure folder/network share mounting
 + Addition of other sections for configuration
 
@@ -33,7 +29,7 @@ Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no 
 5. Run the following
 ```bash
 sudo apt-get install curl git
-bash -c "$(curl -fsSL https://magicalcodemonkey.github.io/OpenFLIXR2.SetupScript/main.sh)"
+bash -c "$(curl -fsSL https://openflixr.github.io/OpenFLIXR2.SetupScript/main.sh)"
 ```
 
 ## Special Thanks
