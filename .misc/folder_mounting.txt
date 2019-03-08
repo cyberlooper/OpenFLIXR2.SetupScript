@@ -1,0 +1,4 @@
+You need to mount your folders using CIFS or NFS.
+If you need help doing this, please post in the OpenFLIXR forum or join Discord.
+
+Once completed, visit webmin to complete the mounting of your folders.
