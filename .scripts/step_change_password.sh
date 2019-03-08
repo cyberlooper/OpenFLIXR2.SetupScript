@@ -29,6 +29,7 @@ step_change_password() {
                 run_script 'check_response'  $?
 
                 if [[ $pass == $cpass ]]; then
+                    # DO NOT save the password to the config
                     OPENFLIXIR_PASSWORD=$pass
                     valid=1
                     done=1
