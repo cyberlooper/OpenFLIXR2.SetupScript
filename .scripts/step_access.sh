@@ -47,9 +47,9 @@ step_access() {
         set_config "OPENFLIXR_EMAIL" $email
 
         if [[ $HAS_INTERNET -eq 1 ]]; then
-            remote_message="Add/Edit the A records for ${domain} and www.${domain} to point to ${PUBLIC_IP}"
+            remote_message="Add/Edit the A records for ${config[OPENFLIXR_DOMAIN]} and www.${config[OPENFLIXR_DOMAIN]} to point to ${PUBLIC_IP}"
         else
-            remote_message="Add/Edit the A records for ${domain} and www.${domain} to point to your Public IP (Script failed to get your Public IP)."
+            remote_message="Add/Edit the A records for ${config[OPENFLIXR_DOMAIN]} and www.${config[OPENFLIXR_DOMAIN]} to point to your Public IP (Script failed to get your Public IP)."
         fi
 
         whiptail \
