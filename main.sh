@@ -194,6 +194,7 @@ main() {
     readonly PROMPT="GUI"
     run_script 'run_steps'
 
+    info 'Preparing for setup...'
     # Set setup variables
     # TODO: Move/rename these at some point
     networkconfig=${config[NETWORK]}
@@ -242,5 +243,8 @@ main() {
     spotpass=''
     imdb=''
     comicvine=''
+
+    info 'Running setup!'
+    run_script 'run_setup.sh'
 }
 main
