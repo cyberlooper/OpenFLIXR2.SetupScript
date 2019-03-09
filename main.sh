@@ -178,7 +178,7 @@ main() {
                 warning "Removing ${DETECTED_HOMEDIR}/openflixr_setup/"
             fi
             warning "Attempting to clone OpenFLIXR2 Setup Script repo to ${DETECTED_HOMEDIR}/openflixr_setup location."
-            git clone https://github.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript "${DETECTED_HOMEDIR}/openflixr_setup" || fatal "Failed to clone OpenFLIXR2 Setup Script repo to ${DETECTED_HOMEDIR}/openflixr_setup location."
+            git clone https://openflixr.github.io/OpenFLIXR2.SetupScript "${DETECTED_HOMEDIR}/openflixr_setup" || fatal "Failed to clone OpenFLIXR2 Setup Script repo to ${DETECTED_HOMEDIR}/openflixr_setup location."
             info "Performing first run install."
             (sudo bash "${DETECTED_HOMEDIR}/openflixr_setup/main.sh" "-i") || fatal "Failed first run install, please try again."
             exit
