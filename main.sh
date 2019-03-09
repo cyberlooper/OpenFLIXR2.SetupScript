@@ -116,13 +116,6 @@ debug() {
     fi
 }
 
-# shellcheck source=/dev/null
-source "${SCRIPTPATH}/.scripts/cmdline.sh"
-cmdline "${ARGS[@]:-}"
-
-debug "DETECTED_HOME=$DETECTED_HOMEDIR"
-debug "SCRIPTPATH=$SCRIPTPATH"
-
 # Script Runner Function
 run_script() {
     local SCRIPTSNAME="${1:-}"
@@ -202,6 +195,12 @@ main() {
         exit
     fi
     run_script 'symlink_openflixrsetup'
+    # shellcheck source=/dev/null
+    source "${SCRIPTPATH}/.scripts/cmdline.sh"
+    cmdline "${ARGS[@]:-}"
+
+    debug "DETECTED_HOME=$DETECTED_HOMEDIR"
+    debug "SCRIPTPATH=$SCRIPTPATH"
 
     run_script 'load_config'
     run_script 'save_config'
