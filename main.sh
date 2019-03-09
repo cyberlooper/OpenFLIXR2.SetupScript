@@ -106,6 +106,18 @@ fatal() {
     echo -e "${NC}$(date +"%F %T") ${RED}[FATAL]${NC}      $*${NC}" | tee -a "${LOG_FILE}" >&2
     exit 1
 }
+debug() {
+    if [[ -v DEBUG && $DEBUG == '-x' ]] || [[ -v VERBOSE && $VERBOSE == 1 ]]; then
+        echo -e "${NC}$(date +"%F %T") ${GRN}[DEBUG]${NC}      $*${NC}" | tee -a "${LOG_FILE}" >&2
+    fi
+}
+
+# shellcheck source=/dev/null
+source "${SCRIPTPATH}/.scripts/cmdline.sh"
+cmdline "${ARGS[@]:-}"
+
+debug "DETECTED_HOME=$DETECTED_HOMEDIR"
+debug "SCRIPTPATH=$SCRIPTPATH"
 
 # Script Runner Function
 run_script() {
@@ -184,9 +196,6 @@ main() {
         (sudo bash "${SCRIPTNAME:-}" "${ARGS[@]:-}") || true
         exit
     fi
-    # shellcheck source=/dev/null
-    source "${SCRIPTPATH}/.scripts/cmdline.sh"
-    cmdline "${ARGS[@]:-}"
 
     run_script 'load_config'
     run_script 'save_config'
