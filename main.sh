@@ -245,6 +245,6 @@ main() {
     comicvine=''
 
     info 'Running setup!'
-    run_script 'run_setup.sh'
+    run_script 'run_setup'
 }
 main
