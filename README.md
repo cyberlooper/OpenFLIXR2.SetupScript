@@ -7,21 +7,8 @@ A script to help with OpenFLIXR2 setup without the web wizard.
 While this will help you get started, it doesn't get you to a fully functioning box, you will still need to do some configuring of the various applications once complete.
 Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no idea what that might do. Fortunately, OpenFLIXR is container-based, so you can spin up a new one and test it out there.
 
-## Features:
-+ Automatically gets the latest extra scripts/files from the repository
-+ Resume where you left off
-+ Check to make sure OpenFLIXR is ready for setup
-+ Configure timezone
-+ Change password
-+ Configure Network settings
-+ Configure Access settings (remote option still needs some work)
-+ Create mount folders
-
-## To-do:
-+ Configure folder/network share mounting
-+ Addition of other sections for configuration
-
 ## Usage
+NOTE: This will only work with OpenFLIXR 2.9 running on Ubuntu 18.04. Since OpenFLIXR 2.9 hasn't been released yet, please wait to run this.
 1. Install Virtualbox or your favorite hypervisor
 2. Download OpenFLIXR - http://www.openflixr.com/#Download
 3. Import in hypervisor and power on
