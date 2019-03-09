@@ -166,6 +166,11 @@ main() {
     if [[ ${ARCH} != "aarch64" ]] && [[ ${ARCH} != "armv7l" ]] && [[ ${ARCH} != "x86_64" ]]; then
         fatal "Unsupported architecture."
     fi
+    # Ubuntu Version Check
+    readonly UBU_VER=$(lsb_release -rs)
+    if [[ ${UBU_VER} != "18.04" ]]; then
+        fatal "Unsupported Ubuntu Version. This setup can only be run for OpenFLIXR running Ubuntu 18.04"
+    fi
     # Terminal Check
     if [[ -n ${PS1:-} ]] || [[ ${-} == *"i"* ]]; then
         root_check
@@ -180,7 +185,7 @@ main() {
             info "First install completed."
             info "Running 'openflixrsetup'"
             (openflixrsetup)
-            info "Run the setup again by using 'openflixrsetup'."
+            info "Run the setup again by running 'openflixrsetup' in your terminal."
             exit
         elif [[ ${SCRIPTPATH} != "${DETECTED_HOMEDIR}/openflixr_setup" ]]; then
             (bash "${DETECTED_HOMEDIR}/openflixr_setup/main.sh" "-u") || true
