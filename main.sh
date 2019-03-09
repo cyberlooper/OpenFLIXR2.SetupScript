@@ -189,11 +189,6 @@ main() {
             exit
         fi
     fi
-    # Sudo Check
-    if [[ ${EUID} != "0" ]]; then
-        (sudo bash "${SCRIPTNAME:-}" "${ARGS[@]:-}") || true
-        exit
-    fi
     run_script 'symlink_openflixrsetup'
     # shellcheck source=/dev/null
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
