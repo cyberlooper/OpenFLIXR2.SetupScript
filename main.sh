@@ -197,6 +197,7 @@ main() {
         (sudo bash "${SCRIPTNAME:-}" "${ARGS[@]:-}") || true
         exit
     fi
+    run_script 'symlink_openflixrsetup'
 
     run_script 'load_config'
     run_script 'save_config'
