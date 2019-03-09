@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ ! $preinitialized = "yes" ]]; then
+if [[ ! $PREINIT = "yes" ]]; then
     echo "setup.sh has not been preinitialized. Exiting"
     exit;
 fi
