@@ -182,11 +182,12 @@ main() {
             fi
             warning "Attempting to clone OpenFLIXR2 Setup Script repo to ${DETECTED_HOMEDIR}/openflixr_setup location."
             git clone https://github.com/MagicalCodeMonkey/OpenFLIXR2.SetupScript "${DETECTED_HOMEDIR}/openflixr_setup" || fatal "Failed to clone OpenFLIXR2 Setup Script repo to ${DETECTED_HOMEDIR}/openflixr_setup location."
-
             info "Performing first run install."
             (sudo bash "${DETECTED_HOMEDIR}/openflixr_setup/main.sh" "-i") || fatal "Failed first run install, please try again."
             exit
         elif [[ ${SCRIPTPATH} != "${DETECTED_HOMEDIR}/openflixr_setup" ]]; then
+            (sudo bash "${DETECTED_HOMEDIR}/openflixr_setup/main.sh" "-u") || true
+            warning "Attempting to run OpenFLIXR2 Setup Script from ${DETECTED_HOMEDIR}/openflixr_setup location."
             (sudo bash "${DETECTED_HOMEDIR}/openflixr_setup/main.sh") || true
             exit
         fi
