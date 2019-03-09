@@ -3,6 +3,10 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Usage Information
+#/ Usage: sudo openflixrsetup [OPTION]
+#/ NOTE: openflixrsetup shortcut is only available after the first run of
+#/       sudo bash ~/openflixr_setup/main.sh
+#/
 #/ This is the main OpenFLIXR2 Setup Script script.
 #/
 #/ Usage: vms [OPTION]
