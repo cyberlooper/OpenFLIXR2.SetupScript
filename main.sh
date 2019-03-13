@@ -3,8 +3,8 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # Usage Information
-#/ Usage: sudo openflixrsetup [OPTION]
-#/ NOTE: openflixrsetup shortcut is only available after the first run of
+#/ Usage: sudo setupopenflixr [OPTION]
+#/ NOTE: setupopenflixr shortcut is only available after the first run of
 #/       sudo bash ~/openflixr_setup/main.sh
 #/
 #/ This is the main OpenFLIXR2 Setup Script script.
@@ -120,11 +120,11 @@ debug() {
 run_script() {
     local SCRIPTSNAME="${1:-}"
     shift
-    if [[ -f ${DETECTED_HOMEDIR}/openflixr_setup/.scripts/${SCRIPTSNAME}.sh ]]; then
-        source "${DETECTED_HOMEDIR}/openflixr_setup/.scripts/${SCRIPTSNAME}.sh"
+    if [[ -f /opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh ]]; then
+        source "/opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh"
         ${SCRIPTSNAME} "$@"
     else
-        fatal "${DETECTED_HOMEDIR}/openflixr_setup/.scripts/${SCRIPTSNAME}.sh not found."
+        fatal "/opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh not found."
     fi
 }
 
@@ -150,7 +150,7 @@ root_check() {
 
 # Cleanup Function
 cleanup() {
-    if [[ ${SCRIPTPATH} == "${DETECTED_HOMEDIR}/openflixr_setup" ]]; then
+    if [[ ${SCRIPTPATH} == "/opt/OpenFLIXR2.SetupScript" ]]; then
         chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "${SCRIPTNAME} must be executable."
     fi
     if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]] && [[ ${TRAVIS_SECURE_ENV_VARS} == false ]]; then
@@ -175,26 +175,6 @@ main() {
     if [[ -n ${PS1:-} ]] || [[ ${-} == *"i"* ]]; then
         root_check
     fi
-    if [[ ${CI:-} != true ]] && [[ ${TRAVIS:-} != true ]] && [[ -z ${ARGS[*]:-} ]]; then
-        root_check
-        if [[ ! -d "${DETECTED_HOMEDIR}/openflixr_setup/.git" ]]; then
-            warning "Attempting to clone OpenFLIXR2 Setup Script repo to ${DETECTED_HOMEDIR}/openflixr_setup location."
-            git clone https://github.com/openflixr/OpenFLIXR2.SetupScript.git "${DETECTED_HOMEDIR}/openflixr_setup" || fatal "Failed to clone OpenFLIXR2 Setup Script repo to ${DETECTED_HOMEDIR}/openflixr_setup location."
-            info "Performing first run install."
-            (bash "${DETECTED_HOMEDIR}/openflixr_setup/main.sh" "-i") || fatal "Failed first run install, please try again."
-            info "First install completed."
-            info "Running 'openflixrsetup'"
-            (openflixrsetup)
-            info "Run the setup again by running 'openflixrsetup' in your terminal."
-            exit
-        elif [[ ${SCRIPTPATH} != "${DETECTED_HOMEDIR}/openflixr_setup" ]]; then
-            (bash "${DETECTED_HOMEDIR}/openflixr_setup/main.sh" "-u") || true
-            warning "Attempting to run OpenFLIXR2 Setup Script from ${DETECTED_HOMEDIR}/openflixr_setup location."
-            (bash "${DETECTED_HOMEDIR}/openflixr_setup/main.sh") || true
-            exit
-        fi
-    fi
-    run_script 'symlink_openflixrsetup'
     # shellcheck source=/dev/null
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"

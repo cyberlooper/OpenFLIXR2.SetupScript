@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 set_config()
 {
-    config_file="${DETECTED_HOMEDIR}/openflixr_setup/openflixr_setup.config"
+    config_file="/opt/OpenFLIXR2.SetupScript/openflixr_setup.config"
     key=$1
     val=${2:-}
 

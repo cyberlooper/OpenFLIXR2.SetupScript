@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 load_config() {
-    config_file="${DETECTED_HOMEDIR}/openflixr_setup/openflixr_setup.config"
+    config_file="/opt/OpenFLIXR2.SetupScript/openflixr_setup.config"
 
     if [[ ! -f "${config_file}" ]]; then
         touch ${config_file}
