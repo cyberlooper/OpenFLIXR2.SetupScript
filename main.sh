@@ -4,8 +4,6 @@ IFS=$'\n\t'
 
 # Usage Information
 #/ Usage: sudo setupopenflixr [OPTION]
-#/ NOTE: setupopenflixr shortcut is only available after the first run of
-#/       sudo bash ~/openflixr_setup/main.sh
 #/
 #/ This is the main OpenFLIXR2 Setup Script script.
 #/
@@ -120,7 +118,7 @@ debug() {
 run_script() {
     local SCRIPTSNAME="${1:-}"
     shift
-    if [[ -f /opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh ]]; then
+    if [[ -f "/opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh" ]]; then
         source "/opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh"
         ${SCRIPTSNAME} "$@"
     else
