@@ -4,13 +4,13 @@ IFS=$'\n\t'
 
 steps=(
     "Welcome"
-    "Timezone"
     "Change Password"
     "Network Configuration"
     "Access"
     "Folder Creation"
     "Folder Mounting"
     "Wait"
+    "Timezone"
 )
 
 run_steps() {
