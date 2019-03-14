@@ -76,6 +76,7 @@ tzSelectionMenu() {
     else
         selected="/usr/share/zoneinfo/$region/$tz"
         selected_short="$region/$tz"
+        TZ_CORRECT="N"
     fi
 }
 
