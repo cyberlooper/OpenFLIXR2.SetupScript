@@ -7,6 +7,10 @@ question_prompt() {
     DEFAULT=${1:-Y}
     local QUESTION
     QUESTION=${2:-}
+    local TITLE
+    TITLE=${3:-}
+    local BACKTITLE
+    BACKTITLE=${4:-}
     local YN
     while true; do
         if [[ ${PROMPT:-} == "CLI" ]]; then
@@ -20,7 +24,7 @@ question_prompt() {
             local ANSWER
             set +e
             ANSWER=$(
-                eval whiptail --fb --clear --title "DockSTARTer" "${WHIPTAIL_DEFAULT:-}" --yesno \""${QUESTION}"\" 0 0 3>&1 1>&2 2>&3
+                eval whiptail --fb --clear --backtitle \""${BACKTITLE}"\" --title \""${TITLE}"\" "${WHIPTAIL_DEFAULT:-}" --yesno \""${QUESTION}"\" 0 0 3>&1 1>&2 2>&3
                 echo $?
             )
             set -e
