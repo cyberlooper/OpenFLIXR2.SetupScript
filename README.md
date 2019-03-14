@@ -6,6 +6,8 @@ While this will help you get started, it doesn't get you to a fully functioning 
 Also, Please DO NOT run this against a working instance of OpenFLIXR. I have no idea what that might do. Fortunately, OpenFLIXR is container-based, so you can spin up a new one and test it out there.
 
 ## Usage
+NOTE: OpenFLIXR 2.9 hasn't been release yey but will be released soon.
+
 As of OpenFLIXR 2.9, the setup script is included!
 To run the setup, you now can simply go to `/setup` in your browser!
 
