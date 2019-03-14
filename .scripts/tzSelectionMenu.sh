@@ -47,15 +47,13 @@ tzSelectionMenu() {
         regionsArray+=("$name" "")
     done <<< "$regions"
 
-    # TODO: Figure out why whiptail doesn't like this
     region=$(whiptail --title "Step ${step_number}: ${step_name}" \
                       --backtitle "$1" \
                       --ok-button "Next" \
-                      --no-cancel \
+                      --nocancel \
                       --menu "Select a continent or ocean from the menu:" \
                       20 30 10 \
                       "${regionsArray[@]}" 3>&1 1>&2 2>&3)
-    warning "AFTER REGION"
 
     tzOptionsByRegion $region
 
