@@ -111,8 +111,8 @@ sed -i "s/api_key =.*/api_key = \"$plexpyapi\"/g" "/opt/plexpy/config.ini"
 
 ## plexrequests
 echo "- PlexRequests"
-OMBI_TOKEN=$(curl -s -X POST "http://localhost:3579/api/v1/Token" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"username\": \"openflixr\", \"password\": \"openflixr\"}" | jq -r '.access_token')
-plexreqapi=$(curl -s -X GET --header 'Accept: application/json' --header 'Content-Type: application/json' --header 'Authorization: Bearer '$OMBI_TOKEN'' 'http://localhost:3579/request/api/v1/Settings/Ombi/' | jq -r '.apiKey')
+OMBI_TOKEN=$(curl -s -X POST "http://localhost:3579/api/v1/Token" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"username\": \"openflixr\", \"password\": \"openflixr\"}" | jq -r '.access_token' | tr -d '[:space:]')
+plexreqapi=$(curl -s -X GET --header 'Accept: application/json' --header 'Content-Type: application/json' --header 'Authorization: Bearer '$OMBI_TOKEN'' 'http://localhost:3579/request/api/v1/Settings/Ombi/' | jq -r '.apiKey' | tr -d '[:space:]')
 echo ""
 echo "-- Updating API Key for Couchpotato"
 curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
