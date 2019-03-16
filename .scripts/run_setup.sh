@@ -1,102 +1,79 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
 
-if [[ ! $PREINIT = "yes" ]]; then
-    echo "setup.sh has not been preinitialized. Exiting"
-    exit;
-fi
+SERVICES=(
+    # System Processes
+    [monit]=monit
+    [htpcmanager]=htpcmanager
+    # Apps
+    [couchpotato]=couchpotato
+    [sickrage]=sickrage
+    [headphones]=headphones
+    [mylar]=mylar
+    [sabnzbd]=sabnzbdplus
+    [jackett]=jackett
+    [sonarr]=sonarr
+    [radarr]=radarr
+    [plexpy]=plexpy
+    # Apps - other
+    [ombi]=ombi
+    [lidarr]=lidarr
+    [lazylibrarian]=lazylibrarian
+    [mopidy]=mopidy
+    [nzbhydra2]=nzbhydra2
+)
+declare -A API_KEYS
 
-echo ""
-echo "Stopping services"
-## stop services
-service monit stop
-service couchpotato stop
-service sickrage stop
-service headphones stop
-service mylar stop
-service sabnzbdplus stop
-service jackett stop
-service sonarr stop
-service radarr stop
-service lidarr stop
-service lazylibrarian stop
-service htpcmanager stop
-service mopidy stop
-service nzbhydra2 stop
+run_script 'setup_stop_services'
+run_script 'setup_generate_api_keys'
 
-## generate api keys
-echo ""
-echo "Generating API Keys"
-couchapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-sickapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-headapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-mylapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-sabapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-jackapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-sonapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-radapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-lidapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-lazapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-nzbhydrapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-plexpyapi=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
-echo "Couchpotato $couchapi" >/opt/openflixr/api.keys
-echo "Sickrage $sickapi" >>/opt/openflixr/api.keys
-echo "Headphones $headapi" >>/opt/openflixr/api.keys
-echo "Mylar $mylapi" >>/opt/openflixr/api.keys
-echo "SABnzbd $sabapi" >>/opt/openflixr/api.keys
-echo "Jackett $jackapi" >>/opt/openflixr/api.keys
-echo "Sonarr $sonapi" >>/opt/openflixr/api.keys
-echo "Radarr $radapi" >>/opt/openflixr/api.keys
-echo "Lidarr $lidapi" >>/opt/openflixr/api.keys
-echo "LazyLibrarian $lazapi" >>/opt/openflixr/api.keys
-echo "NZBHydra $nzbhydrapi" >>/opt/openflixr/api.keys
-echo "PlexPy $plexpyapi" >>/opt/openflixr/api.keys
-
-echo ""
-echo "Updating API Keys"
+info "Updating API Keys"
 ## htpcmanager
 echo "- HTPC"
-cd /opt/HTPCManager/userdata
-sqlite3 database.db "UPDATE setting SET val='$couchapi' where key='couchpotato_apikey';"
-sqlite3 database.db "UPDATE setting SET val='$sickapi' where key='sickrage_apikey';"
-sqlite3 database.db "UPDATE setting SET val='$headapi' where key='headphones_apikey';"
-sqlite3 database.db "UPDATE setting SET val='$mylapi' where key='mylar_apikey';"
-sqlite3 database.db "UPDATE setting SET val='$sabapi' where key='sabnzbd_apikey';"
-sqlite3 database.db "UPDATE setting SET val='$jackapi' where key='torrents_jackett_apikey';"
-sqlite3 database.db "UPDATE setting SET val='$sonapi' where key='sonarr_apikey';"
-sqlite3 database.db "UPDATE setting SET val='$radapi' where key='radarr_apikey';"
-sqlite3 database.db "UPDATE setting SET val='$plexpyapi' where key='plexpy_apikey';"
+for service in "${SERVICES[@]}"; do
+    if [[ "${service}" != "monit" ]] && [[ "${service}" != "htpcmanager" ]]
+        && [[ "${service}" != "lidarr" ]] && [[ "${service}" != "lazylibrarian" ]]
+        && [[ "${service}" != "mopidy" ]] && [[ "${service}" != "nzbhydra2" ]]; then
+        if [[ "${service}" == "jackett" ]]; then
+            sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${API_KEYS[$service]}' where key='torrents_${service}_apikey';"
+        else
+            sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${API_KEYS[$service]}' where key='${service}_apikey';"
+        fi
+    fi
+done
 ## couchpotato
 echo "- Couchpotato"
-crudini --set /opt/CouchPotato/settings.conf core api_key $couchapi
-crudini --set /opt/CouchPotato/settings.conf sabnzbd api_key $sabapi
+crudini --set /opt/CouchPotato/settings.conf core api_key ${API_KEYS[couchpotato]}
+crudini --set /opt/CouchPotato/settings.conf sabnzbd api_key ${API_KEYS[sabnzbd]}
 ## sickrage
 echo "- Sickrage"
-crudini --set /opt/sickrage/config.ini SABnzbd sab_apikey $sabapi
-crudini --set /opt/sickrage/config.ini General api_key $sickapi
+crudini --set /opt/sickrage/config.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
+crudini --set /opt/sickrage/config.ini General api_key ${API_KEYS[sickrage]}
 ## headphones
 echo "- Headphones"
-crudini --set /opt/headphones/config.ini General api_key $headapi
-crudini --set /opt/headphones/config.ini SABnzbd sab_apikey $sabapi
+crudini --set /opt/headphones/config.ini General api_key ${API_KEYS[headphones]}
+crudini --set /opt/headphones/config.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
 ## mylar
 echo "- Mylar"
-crudini --set /opt/Mylar/config.ini General api_key $mylapi
-crudini --set /opt/Mylar/config.ini SABnzbd sab_apikey $sabapi
+crudini --set /opt/Mylar/config.ini General api_key ${API_KEYS[mylar]}
+crudini --set /opt/Mylar/config.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
 ## jackett
 echo "- Jackett"
-sed -i 's/"APIKey": "03fl3cs2txrxmrvpwmb2sp8b73ko4frl".*,/"APIKey": "'$jackapi'", /g' /root/.config/Jackett/ServerConfig.json
+sed -i 's/"APIKey": "03fl3cs2txrxmrvpwmb2sp8b73ko4frl".*,/"APIKey": "'${API_KEYS[jackett]}'", /g' /root/.config/Jackett/ServerConfig.json
 ## sonarr
 echo "- Sonarr"
-sed -i 's/^  <ApiKey>.*/  <ApiKey>'$sonapi'<\/ApiKey>/' /root/.config/NzbDrone/config.xml
+sed -i 's/^  <ApiKey>.*/  <ApiKey>'${API_KEYS[sonarr]}'<\/ApiKey>/' /root/.config/NzbDrone/config.xml
 #Sabnzbd en NZBget API keys invullen, voor alle applicaties
 ## radarr
 echo "- Radarr"
-sed -i 's/^  <ApiKey>.*/  <ApiKey>'$radapi'<\/ApiKey>/' /root/.config/Radarr/config.xml
+sed -i 's/^  <ApiKey>.*/  <ApiKey>'${API_KEYS[radarr]}'<\/ApiKey>/' /root/.config/Radarr/config.xml
 ## lidarr
 echo "- Lidarr"
-sed -i 's/^  <ApiKey>.*/  <ApiKey>'$lidapi'<\/ApiKey>/' /home/openflixr/.config/Lidarr/config.xml
+sed -i 's/^  <ApiKey>.*/  <ApiKey>'${API_KEYS[lidarr]}'<\/ApiKey>/' /home/openflixr/.config/Lidarr/config.xml
 ## lazylibrarian
 echo "- Lazylibrarian"
-crudini --set /opt/LazyLibrarian/lazylibrarian.ini SABnzbd sab_apikey $sabapi
+crudini --set /opt/LazyLibrarian/lazylibrarian.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
 
 #[USENET]
 nzb_downloader_sabnzbd=1
@@ -107,30 +84,30 @@ nzb_downloader_nzbget=0
 
 ## plexpy
 echo "- Tautulli (PlexPy)"
-sed -i "s/api_key =.*/api_key = \"$plexpyapi\"/g" "/opt/plexpy/config.ini"
+sed -i "s/api_key =.*/api_key = \"${API_KEYS[plexpy]}\"/g" "/opt/plexpy/config.ini"
 
 ## plexrequests
 echo "- PlexRequests"
 OMBI_TOKEN=$(curl -s -X POST "http://localhost:3579/api/v1/Token" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"username\": \"openflixr\", \"password\": \"$oldpassword\"}" | jq -r '.access_token' | tr -d '[:space:]')
-plexreqapi=$(curl -s -X GET --header 'Accept: application/json' --header 'Content-Type: application/json' --header 'Authorization: Bearer '$OMBI_TOKEN'' 'http://localhost:3579/request/api/v1/Settings/Ombi/' | jq -r '.apiKey' | tr -d '[:space:]')
+API_KEYS[ombi]=$(curl -s -X GET --header 'Accept: application/json' --header 'Content-Type: application/json' --header 'Authorization: Bearer '$OMBI_TOKEN'' 'http://localhost:3579/request/api/v1/Settings/Ombi/' | jq -r '.apiKey' | tr -d '[:space:]')
 echo ""
 echo "-- Updating API Key for Couchpotato"
 curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-  "ApiKey": "'$couchapi'",
+  "ApiKey": "'${API_KEYS[couchpotato]}'",
   "Enabled": true,
   "Ip": "localhost",
   "Port": 5050,
   "SubDir": "couchpotato"
-}' 'http://localhost:3579/request/api/settings/couchpotato?apikey='$plexreqapi''
+}' 'http://localhost:3579/request/api/settings/couchpotato?apikey='${API_KEYS[ombi]}''
 echo ""
 echo "-- Updating API Key for Headphones"
 curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-  "ApiKey": "'$headapi'",
+  "ApiKey": "'${API_KEYS[headphones]}'",
   "Enabled": true,
   "Ip": "localhost",
   "Port": 8181,
   "SubDir": "headphones"
-}' 'http://localhost:3579/request/api/settings/headphones?apikey='$plexreqapi''
+}' 'http://localhost:3579/request/api/settings/headphones?apikey='${API_KEYS[ombi]}''
 echo ""
 
 if [[ ! $password = "" ]]; then
@@ -138,7 +115,7 @@ if [[ ! $password = "" ]]; then
     curl -s -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
     "CurrentPassword": "'$oldpassword'",
     "NewPassword": "'$password'"
-    }' 'http://localhost:3579/request/api/credentials/openflixr?apikey='$plexreqapi''
+    }' 'http://localhost:3579/request/api/credentials/openflixr?apikey='${API_KEYS[ombi]}''
 fi
 
 ## usenet
@@ -159,7 +136,7 @@ if [ "$usenetpassword" != '' ]
       curl -s 'http://localhost:8080/api?mode=set_config&section=servers&keyword=OpenFLIXR_Usenet_Server&output=xml&port=$usenetport&apikey=1234567890'
       curl -s 'http://localhost:8080/api?mode=set_config&section=servers&keyword=OpenFLIXR_Usenet_Server&output=xml&connections=$usenetthreads&apikey=1234567890'
       service sabnzbdplus stop
-      sed -i 's/^api_key.*/api_key = '$sabapi'/' /home/openflixr/.sabnzbd/sabnzbd.ini
+      sed -i 's/^api_key.*/api_key = '${API_KEYS[sabnzbd]}'/' /home/openflixr/.sabnzbd/sabnzbd.ini
 else
       service sabnzbdplus stop
       sleep 5
@@ -168,7 +145,7 @@ else
       sleep 5
       curl -s 'http://localhost:8080/api?mode=set_config&section=servers&keyword=OpenFLIXR_Usenet_Server&output=xml&enable=0&apikey=1234567890'
       service sabnzbdplus stop
-      sed -i 's/^api_key.*/api_key = '$sabapi'/' /home/openflixr/.sabnzbd/sabnzbd.ini
+      sed -i 's/^api_key.*/api_key = '${API_KEYS[sabnzbd]}'/' /home/openflixr/.sabnzbd/sabnzbd.ini
 fi
 ## newznab
 # echo "- Tautulli (PlexPy)"
@@ -183,25 +160,25 @@ echo "- TV Show Downloader"
 if [ "$tvshowdl" == 'sickrage' ]; then
     echo "-- Sickrage"
     curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-      "ApiKey": "'$sickapi'",
+      "ApiKey": "'${API_KEYS[sickrage]}'",
       "qualityProfile": "default",
       "Enabled": true,
       "Ip": "localhost",
       "Port": 8081,
       "SubDir": "sickrage"
-    }' 'http://localhost:3579/request/api/settings/sickrage?apikey='$plexreqapi''
+    }' 'http://localhost:3579/request/api/settings/sickrage?apikey='${API_KEYS[ombi]}''
         sqlite3 database.db "UPDATE setting SET val='on' where key='sickrage_enable';"
         sqlite3 database.db "UPDATE setting SET val='0' where key='sonarr_enable';"
 else
     echo "-- Sonarr"
     curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-      "ApiKey": "'$sonapi'",
+      "ApiKey": "'${API_KEYS[sonarr]}'",
       "qualityProfile": "default",
       "Enabled": false,
       "Ip": "localhost",
       "Port": 8081,
       "SubDir": "sickrage"
-    }' 'http://localhost:3579/request/api/settings/sickrage?apikey='$plexreqapi''
+    }' 'http://localhost:3579/request/api/settings/sickrage?apikey='${API_KEYS[ombi]}''
         sqlite3 database.db "UPDATE setting SET val='0' where key='sickrage_enable';"
         sqlite3 database.db "UPDATE setting SET val='on' where key='sonarr_enable';"
 fi
@@ -390,13 +367,13 @@ crudini --set /usr/share/nginx/html/setup/config.ini extras spotuser $spotuser
 crudini --set /usr/share/nginx/html/setup/config.ini extras spotpass $spotpass
 crudini --set /usr/share/nginx/html/setup/config.ini extras imdb $imdb
 crudini --set /usr/share/nginx/html/setup/config.ini extras comicvine $comicvine
-crudini --set /usr/share/nginx/html/setup/config.ini custom custom10 $couchapi
-crudini --set /usr/share/nginx/html/setup/config.ini custom custom11 $sickapi
-crudini --set /usr/share/nginx/html/setup/config.ini custom custom12 $headapi
-crudini --set /usr/share/nginx/html/setup/config.ini custom custom13 $mylapi
-crudini --set /usr/share/nginx/html/setup/config.ini custom custom14 $sabapi
-crudini --set /usr/share/nginx/html/setup/config.ini custom custom15 $jackapi
-crudini --set /usr/share/nginx/html/setup/config.ini custom custom16 $sonapi
+crudini --set /usr/share/nginx/html/setup/config.ini custom custom10 ${API_KEYS[couchpotato]}
+crudini --set /usr/share/nginx/html/setup/config.ini custom custom11 ${API_KEYS[sickrage]}
+crudini --set /usr/share/nginx/html/setup/config.ini custom custom12 ${API_KEYS[headphones]}
+crudini --set /usr/share/nginx/html/setup/config.ini custom custom13 ${API_KEYS[mylar]}
+crudini --set /usr/share/nginx/html/setup/config.ini custom custom14 ${API_KEYS[sabnzbd]}
+crudini --set /usr/share/nginx/html/setup/config.ini custom custom15 ${API_KEYS[jackett]}
+crudini --set /usr/share/nginx/html/setup/config.ini custom custom16 ${API_KEYS[sonarr]}
 systemctl --system daemon-reload
 
 #PiHole
