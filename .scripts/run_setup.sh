@@ -338,20 +338,20 @@ if [ "$domainname" != '' ]
       failed2=$(cat /var/log/letsencrypt/letsencrypt.log | grep "is not a FQDN")
         if [ "$failed1" == '' ] && [ "$failed2" == '' ]
         then
-            sed -i 's/^server_name.*/server_name openflixr '$domainname' www.'$domainname';  #donotremove_domainname/' /etc/nginx/sites-enabled/reverse
-            sed -i 's/^.*#donotremove_certificatepath/ssl_certificate \/etc\/letsencrypt\/live\/'$domainname'\/fullchain.pem; #donotremove_certificatepath/' /etc/nginx/sites-enabled/reverse
-            sed -i 's/^.*#donotremove_certificatekeypath/ssl_certificate_key \/etc\/letsencrypt\/live\/'$domainname'\/privkey.pem; #donotremove_certificatekeypath/' /etc/nginx/sites-enabled/reverse
-            sed -i 's/^.*#donotremove_trustedcertificatepath/ssl_trusted_certificate \/etc\/letsencrypt\/live\/'$domainname'\/fullchain.pem; #donotremove_trustedcertificatepath/' /etc/nginx/sites-enabled/reverse
+            sed -i 's/^server_name.*/server_name openflixr '$domainname' www.'$domainname';  #donotremove_domainname/' /etc/nginx/sites-enabled/openflixr.conf
+            sed -i 's/^.*#donotremove_certificatepath/ssl_certificate \/etc\/letsencrypt\/live\/'$domainname'\/fullchain.pem; #donotremove_certificatepath/' /etc/nginx/sites-enabled/openflixr.conf
+            sed -i 's/^.*#donotremove_certificatekeypath/ssl_certificate_key \/etc\/letsencrypt\/live\/'$domainname'\/privkey.pem; #donotremove_certificatekeypath/' /etc/nginx/sites-enabled/openflixr.conf
+            sed -i 's/^.*#donotremove_trustedcertificatepath/ssl_trusted_certificate \/etc\/letsencrypt\/live\/'$domainname'\/fullchain.pem; #donotremove_trustedcertificatepath/' /etc/nginx/sites-enabled/openflixr.conf
         else
             echo "Failed authorization procedure or is not a FQDN"
             cp /opt/letsencrypt/cli.ini.bak /opt/letsencrypt/cli.ini
             cp /opt/config/monit/certificate.bak /opt/config/monit/certificate
         fi
 else
-      sed -i 's/^server_name.*/server_name openflixr;  #donotremove_domainname/' /etc/nginx/sites-enabled/reverse
-      sed -i 's/^.*#donotremove_certificatepath/#ssl_certificate \/etc\/letsencrypt\/live\/example\/fullchain.pem; #donotremove_certificatepath/' /etc/nginx/sites-enabled/reverse
-      sed -i 's/^.*#donotremove_certificatekeypath/#ssl_certificate_key \/etc\/letsencrypt\/live\/example\/privkey.pem; #donotremove_certificatekeypath/' /etc/nginx/sites-enabled/reverse
-      sed -i 's/^.*#donotremove_trustedcertificatepath/#ssl_trusted_certificate \/etc\/letsencrypt\/live\/example\/fullchain.pem; #donotremove_trustedcertificatepath/' /etc/nginx/sites-enabled/reverse
+      sed -i 's/^server_name.*/server_name openflixr;  #donotremove_domainname/' /etc/nginx/sites-enabled/openflixr.conf
+      sed -i 's/^.*#donotremove_certificatepath/#ssl_certificate \/etc\/letsencrypt\/live\/example\/fullchain.pem; #donotremove_certificatepath/' /etc/nginx/sites-enabled/openflixr.conf
+      sed -i 's/^.*#donotremove_certificatekeypath/#ssl_certificate_key \/etc\/letsencrypt\/live\/example\/privkey.pem; #donotremove_certificatekeypath/' /etc/nginx/sites-enabled/openflixr.conf
+      sed -i 's/^.*#donotremove_trustedcertificatepath/#ssl_trusted_certificate \/etc\/letsencrypt\/live\/example\/fullchain.pem; #donotremove_trustedcertificatepath/' /etc/nginx/sites-enabled/openflixr.conf
 fi
 
 echo ""
