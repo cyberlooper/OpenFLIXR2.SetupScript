@@ -55,6 +55,11 @@ readonly SCRIPTPATH="$(cd -P "$(dirname "${SCRIPTNAME}")" > /dev/null && pwd)"
 # Other variables
 readonly PREINIT="yes"
 readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
+if [ $? -eq 0 ]; then
+    HAS_INTERNET=1
+else
+    HAS_INTERNET=0
+fi
 readonly NIC=$(ip -o -4 route show to default | awk '{print $5}')
 readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
 readonly OPENFLIXR_FOLDERS=(downloads movies series music comics books)
