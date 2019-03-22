@@ -6,7 +6,7 @@ step_change_password() {
     local PASS_CHANGE
     done=0
     while [[ ! $done = 1 ]]; do
-        if run_script 'question_prompt' N "Do you want to change the default password for OpenFLIXR?"; then
+        if run_script 'question_prompt' N "Do you want to change the default password for OpenFLIXR?" "Step ${step_number}: ${step_name}"; then
             PASS_CHANGE="Y"
         else
             PASS_CHANGE="N"
