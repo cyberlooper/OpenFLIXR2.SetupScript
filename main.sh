@@ -55,6 +55,11 @@ readonly SCRIPTPATH="$(cd -P "$(dirname "${SCRIPTNAME}")" > /dev/null && pwd)"
 # Other variables
 readonly PREINIT="yes"
 readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
+if [ $? -eq 0 ]; then
+    HAS_INTERNET=1
+else
+    HAS_INTERNET=0
+fi
 readonly NIC=$(ip -o -4 route show to default | awk '{print $5}')
 readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
 readonly OPENFLIXR_FOLDERS=(downloads movies series music comics books)
@@ -148,9 +153,9 @@ root_check() {
 
 # Cleanup Function
 cleanup() {
-    if [[ ${SCRIPTPATH} == "/opt/OpenFLIXR2.SetupScript" ]]; then
-        chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "${SCRIPTNAME} must be executable."
-    fi
+    #if [[ ${SCRIPTPATH} == "/opt/OpenFLIXR2.SetupScript" ]]; then
+    #    chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "${SCRIPTNAME} must be executable."
+    #fi
     if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]] && [[ ${TRAVIS_SECURE_ENV_VARS} == false ]]; then
         warning "TRAVIS_SECURE_ENV_VARS is false for Pull Requests from remote branches. Please retry failed builds!"
     fi
