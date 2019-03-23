@@ -2,6 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+declare -A SERVICES
 SERVICES=(
     # System Processes
     [monit]=monit
@@ -30,6 +31,11 @@ run_setup()
     run_script 'setup_stop_services'
     run_script 'setup_generate_api_keys'
     run_script 'setup_update_api_keys'
+
+
+    #[USENET]
+    nzb_downloader_sabnzbd=1
+    nzb_downloader_nzbget=0
 
     ## sonarr
     service sonarr stop
