@@ -29,6 +29,4 @@ step_timezone() {
     pihole -w -d freegeoip.app > /dev/null
     pihole -w -d geoip.nekudo.com > /dev/null
     pihole -w -d timezoneapi.io > /dev/null
-
-    fatal "DEV"
 }
