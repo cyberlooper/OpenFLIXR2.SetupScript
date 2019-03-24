@@ -11,11 +11,16 @@ steps=(
     "Folder Mounting"
     "Wait"
     "Timezone"
+    "Setup"
 )
 
 run_steps() {
-    if [ "${config[STEPS_CURRENT]}" != "0" ]; then
-        if run_script 'question_prompt' Y "It has been detected that you last left off on Step ${config[STEPS_CURRENT]}. Do you want to resume from where you left off?" "Resume?" "OpenFLIXR Setup"; then
+    local current_step_number
+    current_step_number=${config[STEPS_CURRENT]}
+    local current_step_name
+    current_step_name=${steps[$current_step_number]}
+    if [[ $current_step_number > 0 ]]; then
+        if run_script 'question_prompt' Y "It has been detected that you last left off on Step ${current_step_number}: ${current_step_name}. Do you want to resume from where you left off?" "Resume?" "OpenFLIXR Setup"; then
             info "Chose to resume"
         else
             info "Chose to start over"
@@ -32,7 +37,10 @@ run_steps() {
             step_file_name="step_${step_file_name// /_}"
             info "Running step ${step_number}: ${step_name}"
             run_script "${step_file_name}"
-            run_script 'set_config' "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
+
+            if [[ $current_step_number < ${#steps[@]} ]]; then
+                run_script 'set_config' "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
+            fi
         fi
     done
 }
