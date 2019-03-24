@@ -6,11 +6,16 @@ setup_update_api_keys()
 {
     info "Updating API Keys"
     ## htpcmanager
-    echo "- HTPC"
-    for service in "${SERVICES[@]}"; do
-        if [[ "${service}" != "monit" ]] && [[ "${service}" != "htpcmanager" ]]
-            && [[ "${service}" != "lidarr" ]] && [[ "${service}" != "lazylibrarian" ]]
-            && [[ "${service}" != "mopidy" ]] && [[ "${service}" != "nzbhydra2" ]]; then
+    info "-- HTPC"
+    for service in "${!API_KEYS[@]}"; do
+        if [[ "${service}" != "monit"
+            && "${service}" != "htpcmanager"
+            && "${service}" != "lidarr"
+            && "${service}" != "lazylibrarian"
+            && "${service}" != "mopidy"
+            && "${service}" != "nzbhydra2"
+        ]]; then
+            info "   Updating HTPC for ${service}"
             if [[ "${service}" == "jackett" ]]; then
                 sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${API_KEYS[$service]}' where key='torrents_${service}_apikey';"
             else
@@ -19,85 +24,109 @@ setup_update_api_keys()
         fi
     done
     ## couchpotato
-    echo "- Couchpotato"
+    info "-- Couchpotato"
     crudini --set /opt/CouchPotato/settings.conf core api_key ${API_KEYS[couchpotato]}
     crudini --set /opt/CouchPotato/settings.conf sabnzbd api_key ${API_KEYS[sabnzbd]}
     ## sickrage
-    echo "- Sickrage"
+    info "-- Sickrage"
     crudini --set /opt/sickrage/config.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
     crudini --set /opt/sickrage/config.ini General api_key ${API_KEYS[sickrage]}
     ## headphones
-    echo "- Headphones"
+    info "-- Headphones"
     crudini --set /opt/headphones/config.ini General api_key ${API_KEYS[headphones]}
     crudini --set /opt/headphones/config.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
     ## mylar
-    echo "- Mylar"
+    info "-- Mylar"
     crudini --set /opt/Mylar/config.ini General api_key ${API_KEYS[mylar]}
     crudini --set /opt/Mylar/config.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
     ## jackett
-    echo "- Jackett"
-    sed -i 's/"APIKey": "03fl3cs2txrxmrvpwmb2sp8b73ko4frl".*,/"APIKey": "'${API_KEYS[jackett]}'", /g' /root/.config/Jackett/ServerConfig.json
+    info "-- Jackett"
+    sed -i 's/"APIKey":.*,/"APIKey": "'${API_KEYS[jackett]}'", /g' /root/.config/Jackett/ServerConfig.json
     ## sonarr
-    echo "- Sonarr"
+    info "-- Sonarr"
     sed -i 's/^  <ApiKey>.*/  <ApiKey>'${API_KEYS[sonarr]}'<\/ApiKey>/' /root/.config/NzbDrone/config.xml
-    #Sabnzbd en NZBget API keys invullen, voor alle applicaties
+    #Sabnzbd en NZBget API keys invullen, voor alle applicaties / Enter Sabnzbd and NZBget API keys for all applications
     ## radarr
-    echo "- Radarr"
+    info "-- Radarr"
     sed -i 's/^  <ApiKey>.*/  <ApiKey>'${API_KEYS[radarr]}'<\/ApiKey>/' /root/.config/Radarr/config.xml
     ## lidarr
-    echo "- Lidarr"
+    info "-- Lidarr"
     sed -i 's/^  <ApiKey>.*/  <ApiKey>'${API_KEYS[lidarr]}'<\/ApiKey>/' /home/openflixr/.config/Lidarr/config.xml
     ## lazylibrarian
-    echo "- Lazylibrarian"
+    info "-- Lazylibrarian"
     crudini --set /opt/LazyLibrarian/lazylibrarian.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
 
-    #[USENET]
-    nzb_downloader_sabnzbd=1
-    nzb_downloader_nzbget=0
-
-    ## nzbhydra (is dat de enige apiKey?)
+    ## nzbhydra (is dat de enige apiKey? / is that the only apiKey?)
     #/opt/nzbhydra2/data/nzbhydra.yml apiKey: "aqpep52c61fkbc8br0tiu53508"
 
     ## plexpy
-    echo "- Tautulli (PlexPy)"
+    info "-- Tautulli (PlexPy)"
     sed -i "s/api_key =.*/api_key = \"${API_KEYS[plexpy]}\"/g" "/opt/plexpy/config.ini"
 
-    ## plexrequests
-    echo "- PlexRequests"
+    ## Ombi (plexrequests)
+    info "-- Ombi (plexrequests)"
     OMBI_TOKEN=$(curl -s -X POST "http://localhost:3579/api/v1/Token" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"username\": \"openflixr\", \"password\": \"$oldpassword\"}" | jq -r '.access_token' | tr -d '[:space:]')
     API_KEYS[ombi]=$(curl -s -X GET --header 'Accept: application/json' --header 'Content-Type: application/json' --header 'Authorization: Bearer '$OMBI_TOKEN'' 'http://localhost:3579/request/api/v1/Settings/Ombi/' | jq -r '.apiKey' | tr -d '[:space:]')
-    echo ""
-    echo "-- Updating API Key for Couchpotato"
+
+    info "   Updating API Key for Couchpotato"
     curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
     "ApiKey": "'${API_KEYS[couchpotato]}'",
     "Enabled": true,
     "Ip": "localhost",
     "Port": 5050,
     "SubDir": "couchpotato"
-    }' 'http://localhost:3579/request/api/settings/couchpotato?apikey='${API_KEYS[ombi]}''
-    echo ""
-    echo "-- Updating API Key for Headphones"
-    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-    "ApiKey": "'${API_KEYS[headphones]}'",
-    "Enabled": true,
-    "Ip": "localhost",
-    "Port": 8181,
-    "SubDir": "headphones"
-    }' 'http://localhost:3579/request/api/settings/headphones?apikey='${API_KEYS[ombi]}''
-    echo ""
+    }' 'http://localhost:3579/request/api/v1/settings/couchpotato?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+
+    info "   TV Show Downloader"
+    if [ "$tvshowdl" == 'sickrage' ]; then
+        info "   - Sickrage"
+        curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
+        "ApiKey": "'${API_KEYS[sickrage]}'",
+        "qualityProfile": "default",
+        "Enabled": true,
+        "Ip": "localhost",
+        "Port": 8081,
+        "SubDir": "sickrage"
+        }' 'http://localhost:3579/request/api/v1/settings/sickrage?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+
+        sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='on' where key='sickrage_enable';"
+        sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='0' where key='sonarr_enable';"
+    else
+        info "   - Sonarr"
+        curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
+        "ApiKey": "'${API_KEYS[sonarr]}'",
+        "qualityProfile": "default",
+        "Enabled": false,
+        "Ip": "localhost",
+        "Port": 8081,
+        "SubDir": "sickrage"
+        }' 'http://localhost:3579/request/api/v1/settings/sickrage?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+
+        sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='0' where key='sickrage_enable';"
+        sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='on' where key='sonarr_enable';"
+    fi
+
+# Ombi dropped support for Headphones
+#    info "   Updating API Key for Headphones"
+#    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
+#    "ApiKey": "'${API_KEYS[headphones]}'",
+#    "Enabled": true,
+#    "Ip": "localhost",
+#    "Port": 8181,
+#    "SubDir": "headphones"
+#    }' 'http://localhost:3579/request/api/v1/settings/headphones?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
     if [[ ! $password = "" ]]; then
-        echo "-- Updating Password"
+        info "   Updating Password"
         curl -s -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
         "CurrentPassword": "'$oldpassword'",
         "NewPassword": "'$password'"
-        }' 'http://localhost:3579/request/api/credentials/openflixr?apikey='${API_KEYS[ombi]}''
+        }' 'http://localhost:3579/request/api/credentials/openflixr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
     fi
 
     ## usenet
-    echo "- Usenet"
-    if [ "$usenetpassword" != '' ]
-        then
+    info "-- Usenet"
+    if [ "$usenetpassword" != '' ]; then
         service sabnzbdplus stop
         sleep 5
         sed -i 's/^api_key.*/api_key = '1234567890'/' /home/openflixr/.sabnzbd/sabnzbd.ini
@@ -124,7 +153,7 @@ setup_update_api_keys()
         sed -i 's/^api_key.*/api_key = '${API_KEYS[sabnzbd]}'/' /home/openflixr/.sabnzbd/sabnzbd.ini
     fi
     ## newznab
-    # echo "- Tautulli (PlexPy)"
+    # info "-- Tautulli (PlexPy)"
     #    if [ "$newznabapi" != '' ]
     #        then
     #         newznab config
@@ -132,32 +161,4 @@ setup_update_api_keys()
     #         reverse
     #    fi
     ## tv shows downloader
-    echo "- TV Show Downloader"
-    if [ "$tvshowdl" == 'sickrage' ]; then
-        echo "-- Sickrage"
-        curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-        "ApiKey": "'${API_KEYS[sickrage]}'",
-        "qualityProfile": "default",
-        "Enabled": true,
-        "Ip": "localhost",
-        "Port": 8081,
-        "SubDir": "sickrage"
-        }' 'http://localhost:3579/request/api/settings/sickrage?apikey='${API_KEYS[ombi]}''
-
-        sqlite3 database.db "UPDATE setting SET val='on' where key='sickrage_enable';"
-        sqlite3 database.db "UPDATE setting SET val='0' where key='sonarr_enable';"
-    else
-        echo "-- Sonarr"
-        curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-        "ApiKey": "'${API_KEYS[sonarr]}'",
-        "qualityProfile": "default",
-        "Enabled": false,
-        "Ip": "localhost",
-        "Port": 8081,
-        "SubDir": "sickrage"
-        }' 'http://localhost:3579/request/api/settings/sickrage?apikey='${API_KEYS[ombi]}''
-
-        sqlite3 database.db "UPDATE setting SET val='0' where key='sickrage_enable';"
-        sqlite3 database.db "UPDATE setting SET val='on' where key='sonarr_enable';"
-    fi
 }
