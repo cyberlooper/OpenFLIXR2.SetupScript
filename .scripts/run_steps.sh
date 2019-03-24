@@ -15,7 +15,7 @@ steps=(
 
 run_steps() {
     if [ "${config[STEPS_CURRENT]}" != "0" ]; then
-        if run_script 'question_prompt' Y "It has been detected that you last left off on Step ${config[STEPS_CURRENT]}. Do you want to resume from where you left off?"; then
+        if run_script 'question_prompt' Y "It has been detected that you last left off on Step ${config[STEPS_CURRENT]}. Do you want to resume from where you left off?" "Resume?" "OpenFLIXR Setup"; then
             info "Chose to resume"
         else
             info "Chose to start over"
