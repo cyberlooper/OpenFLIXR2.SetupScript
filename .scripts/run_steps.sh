@@ -38,7 +38,7 @@ run_steps() {
             info "Running step ${step_number}: ${step_name}"
             run_script "${step_file_name}"
 
-            if [[ $current_step_number < ${#steps[@]} ]]; then
+            if [[ $current_step_number < $((${#steps[@]}-1)) ]]; then
                 run_script 'set_config' "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
             fi
         fi
