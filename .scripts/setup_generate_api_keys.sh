@@ -10,7 +10,7 @@ setup_generate_api_keys()
     fi
 
     info "Generating/Retrieving API Keys"
-    for service in "${SERVICES[@]}"; do
+    for service in "${!SERVICES[@]}"; do
         info "-- $service"
         if grep -q "^${service}" "/opt/openflixr/api.keys"; then
             info "   Found API Key for ${service}. Retrieving..."
