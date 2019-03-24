@@ -33,8 +33,4 @@ run_setup()
     run_script 'setup_update_api_keys'
     run_script 'setup_configure_network'
     run_script 'setup_configure_apps'
-
-    echo "System rebooting in about 5 seconds."
-    sleep 5s
-    reboot now
 }

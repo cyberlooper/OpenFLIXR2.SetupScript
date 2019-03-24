@@ -193,5 +193,7 @@ main() {
 
     readonly PROMPT="GUI"
     run_script 'run_steps'
+
+    warning "System reboot needed. Please reboot your system when you are ready."
 }
 main
