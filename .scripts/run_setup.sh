@@ -31,15 +31,6 @@ run_setup()
     run_script 'setup_stop_services'
     run_script 'setup_generate_api_keys'
     run_script 'setup_update_api_keys'
-
-
-    #[USENET]
-    nzb_downloader_sabnzbd=1
-    nzb_downloader_nzbget=0
-
-    ## sonarr
-    service sonarr stop
-
     run_script 'setup_configure_network'
     run_script 'setup_configure_apps'
 
