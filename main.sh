@@ -153,6 +153,9 @@ root_check() {
 
 # Cleanup Function
 cleanup() {
+    if [[ $? = 1 ]]; then
+        fatal "It appears and error occurred. Please post on Discord and DM MattyLightCU your setup log:'${LOG_FILE}'"
+    fi
     #if [[ ${SCRIPTPATH} == "/opt/OpenFLIXR2.SetupScript" ]]; then
     #    chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "${SCRIPTNAME} must be executable."
     #fi
