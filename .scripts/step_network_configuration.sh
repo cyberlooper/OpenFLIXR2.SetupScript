@@ -19,7 +19,7 @@ step_network_configuration() {
                 ip=$(whiptail --inputbox --title "Step ${step_number}: ${step_name}" "IP Address" 0 0 3>&1 1>&2 2>&3)
                 run_script 'check_response' $?;
 
-                valid_ip=run_script 'validate_ip' $ip
+                valid_ip=$(run_script 'validate_ip' $ip)
                 if $valid_ip; then
                     info "IP Address: ${ip}"
                     set_config "OPENFLIXR_IP" $ip
