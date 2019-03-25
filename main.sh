@@ -53,8 +53,8 @@ readonly SCRIPTNAME="$(get_scriptname)"
 readonly SCRIPTPATH="$(cd -P "$(dirname "${SCRIPTNAME}")" > /dev/null && pwd)"
 
 # Other variables
-readonly GH_COMMIT=$(git rev-parse --short HEAD)
-readonly OF_BACKTITLE="OpenFLIXR Setup - $GH_COMMIT"
+readonly LOCAL_COMMIT=$(git rev-parse --short master)
+readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
 readonly PREINIT="yes"
 readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 if [ $? -eq 0 ]; then
@@ -188,8 +188,10 @@ main() {
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"
 
+    git fetch
+    readonly GH_COMMIT=$(git rev-parse --short origin/master)
     GIT_DIFF=$(git diff origin/master -- | cut -c1-5)
-    if [[ "$GIT_DIFF" != "" ]]; then
+    if [[ "${LOCAL_COMMIT}" != "${GH_COMMIT}" || "$GIT_DIFF" != "" ]]; then
         warning "OpenFLIXR Setup Script is not up-to-date."
         #warning "Please run 'sudo setupopenflixr -u' to get the latest."
         warning "Please run 'sudo bash /opt/OpenFLIXR2.SetupScript/main.sh -u' to get the latest."
