@@ -188,7 +188,7 @@ main() {
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"
 
-    git fetch
+    git fetch > /dev/null
     readonly GH_COMMIT=$(git rev-parse --short origin/master)
     GIT_DIFF=$(git diff origin/master -- | cut -c1-5)
     if [[ "${LOCAL_COMMIT}" != "${GH_COMMIT}" || "$GIT_DIFF" != "" ]]; then
