@@ -54,7 +54,7 @@ readonly SCRIPTPATH="$(cd -P "$(dirname "${SCRIPTNAME}")" > /dev/null && pwd)"
 
 # Other variables
 readonly GH_COMMIT=$(git rev-parse --short HEAD)
-readonly BACKTITLE="OpenFLIXR Setup - $GH_COMMIT"
+readonly OF_BACKTITLE="OpenFLIXR Setup - $GH_COMMIT"
 readonly PREINIT="yes"
 readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 if [ $? -eq 0 ]; then
@@ -169,6 +169,7 @@ trap 'cleanup' 0 1 2 3 6 14 15
 
 # Main Function
 main() {
+    info "${OF_BACKTITLE}"
     # Arch Check
     readonly ARCH=$(uname -m)
     if [[ ${ARCH} != "aarch64" ]] && [[ ${ARCH} != "armv7l" ]] && [[ ${ARCH} != "x86_64" ]]; then
@@ -186,6 +187,14 @@ main() {
     # shellcheck source=/dev/null
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"
+
+    GIT_DIFF=$(git diff master origin/master | cut -c1-5)
+    if [[ "$GIT_DIFF" = "" ]]; then
+        warning "OpenFLIXR Setup Script is not up-to-date."
+        #warning "Please run 'sudo setupopenflixr -u' to get the latest."
+        warning "Please run 'sudo bash /opt/OpenFLIXR2.SetupScript/main.sh -u' to get the latest."
+        exit 0
+    fi
 
     debug "DETECTED_HOME=$DETECTED_HOMEDIR"
     debug "SCRIPTPATH=$SCRIPTPATH"
