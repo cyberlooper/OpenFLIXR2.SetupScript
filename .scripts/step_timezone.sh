@@ -11,7 +11,7 @@ step_timezone() {
     pihole -w timezoneapi.io > /dev/null
 
     # Run timezone selector
-    run_script 'tzSelectionMenu' "OpenFLIXR Setup"
+    run_script 'tzSelectionMenu' ${BACKTITLE}
 
     if [ "$TZ_CORRECT" = "Y" ]; then
         set_config "OPENFLIXR_TIMEZONE" $detected

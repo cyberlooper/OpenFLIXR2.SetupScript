@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 step_access() {
     access=$(whiptail \
-                --backtitle "OpenFLIXR Setup" \
+                --backtitle ${BACKTITLE} \
                 --title "Step ${step_number}: ${step_name}" \
                 --clear \
                 --radiolist "How do you want to access OpenFLIXR?" \
@@ -25,7 +25,7 @@ step_access() {
         # Configuring for Remote access.
         info "Folder access set to Remote"
         domain=$(whiptail \
-                --backtitle "OpenFLIXR Setup" \
+                --backtitle ${BACKTITLE} \
                 --title "Step ${step_number}: ${step_name} - Remote" \
                 --clear \
                 --ok-button "Next" \
@@ -36,7 +36,7 @@ step_access() {
         set_config "OPENFLIXR_DOMAIN" $domain
 
         email=$(whiptail \
-                --backtitle "OpenFLIXR Setup" \
+                --backtitle ${BACKTITLE} \
                 --title "Step ${step_number}: ${step_name} - Remote" \
                 --clear \
                 --ok-button "Next" \
@@ -53,7 +53,7 @@ step_access() {
         fi
 
         whiptail \
-            --backtitle "OpenFLIXR Setup" \
+            --backtitle ${BACKTITLE} \
             --title "Step ${step_number}: ${step_name} - Remote" \
             --clear \
             --ok-button "Next" \
@@ -61,7 +61,7 @@ step_access() {
         run_script 'check_response' $?
 
         whiptail \
-            --backtitle "OpenFLIXR Setup" \
+            --backtitle ${BACKTITLE} \
             --title "Step ${step_number}: ${step_name} - Remote" \
             --clear \
             --ok-button "Next" \

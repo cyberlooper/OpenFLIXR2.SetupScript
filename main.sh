@@ -53,6 +53,8 @@ readonly SCRIPTNAME="$(get_scriptname)"
 readonly SCRIPTPATH="$(cd -P "$(dirname "${SCRIPTNAME}")" > /dev/null && pwd)"
 
 # Other variables
+readonly GH_COMMIT=$(git rev-parse --short HEAD)
+readonly BACKTITLE="OpenFLIXR Setup - $GH_COMMIT"
 readonly PREINIT="yes"
 readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 if [ $? -eq 0 ]; then

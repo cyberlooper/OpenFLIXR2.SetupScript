@@ -20,7 +20,7 @@ run_steps() {
     local current_step_name
     current_step_name=${steps[$current_step_number]}
     if [[ $current_step_number > 0 ]]; then
-        if run_script 'question_prompt' Y "It has been detected that you last left off on Step ${current_step_number}: ${current_step_name}. Do you want to resume from where you left off?" "Resume?" "OpenFLIXR Setup"; then
+        if run_script 'question_prompt' Y "It has been detected that you last left off on Step ${current_step_number}: ${current_step_name}. Do you want to resume from where you left off?" "Resume?" ${BACKTITLE}; then
             info "Chose to resume"
         else
             info "Chose to start over"
