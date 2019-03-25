@@ -18,12 +18,12 @@ step_change_password() {
             valid=0
             while [[ ! $valid = 1 ]]; do
                 pass=$(whiptail \
-                        --backtitle ${BACKTITLE} \
+                        --backtitle ${OF_BACKTITLE} \
                         --title "Step ${step_number}: ${step_name}" \
                         --passwordbox "Enter password" ${HEIGHT:-0} ${WIDTH:-0} 3>&1 1>&2 2>&3)
                 run_script 'check_response'  $?
                 cpass=$(whiptail \
-                        --backtitle ${BACKTITLE} \
+                        --backtitle ${OF_BACKTITLE} \
                         --title "Step ${step_number}: ${step_name}" \
                         --passwordbox "Confirm password" ${HEIGHT:-0} ${WIDTH:-0} 3>&1 1>&2 2>&3)
                 run_script 'check_response'  $?
@@ -35,7 +35,7 @@ step_change_password() {
                     done=1
                 else
                     whiptail \
-                        --backtitle ${BACKTITLE} \
+                        --backtitle ${OF_BACKTITLE} \
                         --title "Step ${step_number}: ${step_name}" \
                         --ok-button "Try Again" \
                         --msgbox "Passwords do not match =( Try again." ${HEIGHT:-0} ${WIDTH:-0}

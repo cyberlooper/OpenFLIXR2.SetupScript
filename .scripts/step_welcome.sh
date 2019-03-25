@@ -9,7 +9,7 @@ step_welcome() {
 
     # Dialog to display
     whiptail \
-        --backtitle ${BACKTITLE} \
+        --backtitle ${OF_BACKTITLE} \
         --title "Step ${step_number}: ${step_name}" \
         --clear \
         --msgbox "$(cat ${SCRIPTPATH}/.misc/welcome.txt)" \
