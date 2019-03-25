@@ -29,7 +29,7 @@ step_wait() {
             UPDATEOF_LOG_LINE=$(tail -1 $UPDATEOF_LOGFILE)
             ONLINEUPDATE_LOG_LINE=$(tail -1 $ONLINEUPDATE_LOGFILE)
             if [[ -f "/opt/OpenFLIXR2.SetupScript/stop_wait" ]]; then
-                echo -e "XXX\n100\Failure!\nXXX"
+                echo -e "XXX\n100\Skipping wait!\nXXX"
                 break
             elif [[ "$UPDATEOF_LOG_LINE" = "updateof finished"
                     || "$ONLINEUPDATE_LOG_LINE" = "onlineupdate finished" ]]; then
@@ -52,11 +52,9 @@ step_wait() {
     UPDATEOF_LOG_LINE=$(tail -1 $UPDATEOF_LOGFILE)
     ONLINEUPDATE_LOG_LINE=$(tail -1 $ONLINEUPDATE_LOGFILE)
     if [[ -f "/opt/OpenFLIXR2.SetupScript/stop_wait" ]]; then
-        info "Found stop_wait file"
+        waring "Found stop_wait file. Skipping the wait step."
         info "Removing stop_wait file"
-        rm "/opt/OpenFLIXR2.SetupScript/stop_wait" || fatal "Could not remove stop_wait file. Please remove manually: /opt/OpenFLIXR2.SetupScript/stop_wait"
-        fatal "Exiting OpenFLIXR Setup"
-        exit 1
+        rm "/opt/OpenFLIXR2.SetupScript/stop_wait" || warning "Could not remove stop_wait file. Please remove manually: /opt/OpenFLIXR2.SetupScript/stop_wait"
     elif [[ "$UPDATEOF_LOG_LINE" = "updateof finished" ]]; then
         info "Found 'updateof finished' in $UPDATEOF_LOGFILE"
     elif [[ "$ONLINEUPDATE_LOG_LINE" = "onlineupdate finished" ]]; then
