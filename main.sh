@@ -189,7 +189,7 @@ main() {
     cmdline "${ARGS[@]:-}"
 
     GIT_DIFF=$(git diff master origin/master | cut -c1-5)
-    if [[ "$GIT_DIFF" = "" ]]; then
+    if [[ "$GIT_DIFF" != "" ]]; then
         warning "OpenFLIXR Setup Script is not up-to-date."
         #warning "Please run 'sudo setupopenflixr -u' to get the latest."
         warning "Please run 'sudo bash /opt/OpenFLIXR2.SetupScript/main.sh -u' to get the latest."
