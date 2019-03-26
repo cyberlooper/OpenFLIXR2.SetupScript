@@ -108,6 +108,7 @@ readonly NC='\e[0m'
 # Log Functions
 readonly LOG_FILE="/var/log/openflixr_setup.log"
 sudo chown "${DETECTED_PUID:-$DETECTED_UNAME}":"${DETECTED_PGID:-$DETECTED_UGROUP}" "${LOG_FILE}" > /dev/null 2>&1 || true # This line should always use sudo
+log() { echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" >> "${LOG_FILE}"; }
 info() { echo -e "${NC}$(date +"%F %T") ${BLU}[INFO]${NC}       $*${NC}" | tee -a "${LOG_FILE}" >&2; }
 warning() { echo -e "${NC}$(date +"%F %T") ${YLW}[WARNING]${NC}    $*${NC}" | tee -a "${LOG_FILE}" >&2; }
 error() { echo -e "${NC}$(date +"%F %T") ${RED}[ERROR]${NC}      $*${NC}" | tee -a "${LOG_FILE}" >&2; }
@@ -156,6 +157,8 @@ root_check() {
 # Cleanup Function
 cleanup() {
     if [[ $? = 1 ]]; then
+        run_script 'save_config'
+        run_script 'load_config'
         fatal "It appears an has error occurred. Please post on Discord and DM MattyLightCU your setup log:'${LOG_FILE}'"
     fi
     #if [[ ${SCRIPTPATH} == "/opt/OpenFLIXR2.SetupScript" ]]; then
