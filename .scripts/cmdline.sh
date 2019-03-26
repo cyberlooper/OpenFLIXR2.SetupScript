@@ -64,12 +64,13 @@ cmdline() {
                         ;;
                     u)
                         run_script 'update_self'
+                        exit
                         ;;
                     *)
                         fatal "${OPTARG} requires an option."
+                        exit
                         ;;
                 esac
-                exit
                 ;;
             *)
                 usage
