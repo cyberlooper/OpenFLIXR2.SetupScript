@@ -12,6 +12,8 @@ IFS=$'\n\t'
 #/
 #/ For regular usage you can run without providing any options.
 #/
+#/  -d --devmode <dev_level>
+#/      run in devmode. <dev_level> defaults to 1 if no level is provided
 #/  -t --test <test_name>
 #/      run tests to check the program
 #/  -u --update
@@ -53,9 +55,6 @@ readonly SCRIPTNAME="$(get_scriptname)"
 readonly SCRIPTPATH="$(cd -P "$(dirname "${SCRIPTNAME}")" > /dev/null && pwd)"
 
 # Other variables
-readonly LOCAL_COMMIT=$(git rev-parse --short master)
-readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
-readonly PREINIT="yes"
 readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 if [ $? -eq 0 ]; then
     HAS_INTERNET=1
@@ -170,7 +169,6 @@ trap 'cleanup' 0 1 2 3 6 14 15
 
 # Main Function
 main() {
-    info "${OF_BACKTITLE}"
     # Arch Check
     readonly ARCH=$(uname -m)
     if [[ ${ARCH} != "aarch64" ]] && [[ ${ARCH} != "armv7l" ]] && [[ ${ARCH} != "x86_64" ]]; then
@@ -185,29 +183,26 @@ main() {
     if [[ -n ${PS1:-} ]] || [[ ${-} == *"i"* ]]; then
         root_check
     fi
+    cd "${SCRIPTPATH}" || fatal "Failed to change to ${SCRIPTPATH} directory."
+    readonly LOCAL_COMMIT=$(git rev-parse --short master)
+    readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
+    readonly PROMPT="GUI"
+
+    run_script 'symlink_setupopenflixr'
     # shellcheck source=/dev/null
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"
 
-    if [[ ! -v DEVMODE ]]; then
-        git fetch > /dev/null
-        readonly GH_COMMIT=$(git rev-parse --short origin/master)
-        GIT_DIFF=$(git diff origin/master -- | cut -c1-5)
-        if [[ "${LOCAL_COMMIT}" != "${GH_COMMIT}" || "$GIT_DIFF" != "" ]]; then
-            warning "OpenFLIXR Setup Script is not up-to-date."
-            #warning "Please run 'sudo setupopenflixr -u' to get the latest."
-            warning "Please run 'sudo bash /opt/OpenFLIXR2.SetupScript/main.sh -u' to get the latest."
-            exit 0
-        fi
-    fi
-
-    debug "DETECTED_HOME=$DETECTED_HOMEDIR"
+    info "${OF_BACKTITLE}"
+    debug "DETECTED_HOMEDIR=$DETECTED_HOMEDIR"
     debug "SCRIPTPATH=$SCRIPTPATH"
+    debug "SCRIPTNAME=${SCRIPTNAME}"
+    debug "PROMPT='${PROMPT:-}'"
 
+    run_script 'check_version'
     run_script 'load_config'
     run_script 'save_config'
 
-    readonly PROMPT="GUI"
     run_script 'run_steps'
 
     warning "System reboot needed. Please reboot your system when you are ready."
