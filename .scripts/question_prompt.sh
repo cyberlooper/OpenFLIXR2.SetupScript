@@ -28,6 +28,7 @@ question_prompt() {
                 echo $?
             )
             set -e
+            debug "Question prompt answer: ${ANSWER}"
             if [[ ${ANSWER} == 0 ]]; then
                 YN=Y
             else
