@@ -11,6 +11,7 @@ cmdline() {
         local DELIM=""
         case "${ARG}" in
             #translate --gnu-long-options to -g (short options)
+            --devmode) LOCAL_ARGS="${LOCAL_ARGS:-}-d " ;;
             --help) LOCAL_ARGS="${LOCAL_ARGS:-}-h " ;;
             --install) LOCAL_ARGS="${LOCAL_ARGS:-}-i " ;;
             --test) LOCAL_ARGS="${LOCAL_ARGS:-}-t " ;;
@@ -28,10 +29,10 @@ cmdline() {
     #Reset the positional parameters to the short options
     eval set -- "${LOCAL_ARGS:-}"
 
-    while getopts ":dhit:u:vx" OPTION; do
+    while getopts ":d:hit:u:vx" OPTION; do
         case ${OPTION} in
             d)
-                readonly DEVMODE=1
+                readonly DEVMODE=${OPTARG}
                 ;;
             h)
                 usage
@@ -58,6 +59,9 @@ cmdline() {
                 ;;
             :)
                 case ${OPTARG} in
+                    d)
+                        readonly DEVMODE=1
+                        ;;
                     u)
                         run_script 'update_self'
                         ;;
