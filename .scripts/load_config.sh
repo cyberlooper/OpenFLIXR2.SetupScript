@@ -19,6 +19,7 @@ load_config() {
             rhs="${rhs%\"*}"     # Del opening string quotes
             rhs="${rhs#\"*}"     # Del closing string quotes
             config[$lhs]="$rhs"
+            log "config[$lhs]=\"$rhs\""
         fi
     done < $config_file.unix
 
