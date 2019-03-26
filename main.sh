@@ -183,6 +183,11 @@ main() {
     if [[ -n ${PS1:-} ]] || [[ ${-} == *"i"* ]]; then
         root_check
     fi
+    # Sudo Check
+    if [[ ${EUID} != "0" ]]; then
+        (sudo setupopenflixr "${ARGS[@]:-}") || true
+        exit
+    fi
     cd "${SCRIPTPATH}" || fatal "Failed to change to ${SCRIPTPATH} directory."
     readonly LOCAL_COMMIT=$(git rev-parse --short master)
     readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
