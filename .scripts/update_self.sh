@@ -17,4 +17,5 @@ update_self() {
     git pull > /dev/null 2>&1 || fatal "Failed to pull recent changes from git."
     git for-each-ref --format '%(refname:short)' refs/heads | grep -v master | xargs git branch -D > /dev/null 2>&1 || true
     chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "OpenFLIXR2 Setup Script must be executable."
+    info "OpenFLIXR2 Setup Script has been updated"
 }
