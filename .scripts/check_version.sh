@@ -8,7 +8,6 @@ check_version() {
         readonly GH_COMMIT=$(git rev-parse --short origin/master)
         if [[ "${LOCAL_COMMIT}" != "${GH_COMMIT}" ]]; then
             warning "OpenFLIXR Setup Script is not up-to-date."
-            #warning "Please run 'sudo setupopenflixr -u' to get the latest."
             warning "Please run 'sudo setupopenflixr -u' to get the latest."
             exit 0
         fi
