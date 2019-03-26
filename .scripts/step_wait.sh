@@ -67,6 +67,7 @@ step_wait() {
                     && $(echo "${OF_VERSION_WEB_MAJOR}.${OF_VERSION_WEB_MINOR} >= 2.9" | bc -l) = 1
                     && "${OF_UPDATE_PS}" == "" ]]; then
                 echo -e "XXX\n100\nDone!\nXXX"
+                WAIT_STATUS=8
                 break
             fi
 
