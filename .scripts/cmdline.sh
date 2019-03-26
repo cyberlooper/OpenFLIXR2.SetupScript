@@ -28,8 +28,11 @@ cmdline() {
     #Reset the positional parameters to the short options
     eval set -- "${LOCAL_ARGS:-}"
 
-    while getopts ":hit:u:vx" OPTION; do
+    while getopts ":dhit:u:vx" OPTION; do
         case ${OPTION} in
+            d)
+                readonly DEVMODE=1
+                ;;
             h)
                 usage
                 exit
@@ -50,7 +53,7 @@ cmdline() {
                 readonly VERBOSE=1
                 ;;
             x)
-                readonly DEBUG='-x'
+                readonly DEBUG=1
                 set -x
                 ;;
             :)

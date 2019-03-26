@@ -85,6 +85,7 @@ config=(
     [OPENFLIXR_PLEX_CLAIM]="claim-YYYYYYYYY"
     [OPENFLIXR_TIMEZONE]=""
     [OPENFLIXR_TIMEZONE_SHORT]=""
+    [OPENFLIXR_READY]=""
 )
 for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
     config[MOUNT_TYPE_$FOLDER]=""
@@ -116,7 +117,7 @@ fatal() {
     exit 1
 }
 debug() {
-    if [[ -v DEBUG && $DEBUG == '-x' ]] || [[ -v VERBOSE && $VERBOSE == 1 ]]; then
+    if [[ -v DEBUG && $DEBUG == 1 ]] || [[ -v VERBOSE && $VERBOSE == 1 ]] || [[ -v DEVMODE && $DEVMODE == 1 ]]; then
         echo -e "${NC}$(date +"%F %T") ${GRN}[DEBUG]${NC}      $*${NC}" | tee -a "${LOG_FILE}" >&2
     fi
 }
@@ -188,14 +189,16 @@ main() {
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"
 
-    git fetch > /dev/null
-    readonly GH_COMMIT=$(git rev-parse --short origin/master)
-    GIT_DIFF=$(git diff origin/master -- | cut -c1-5)
-    if [[ "${LOCAL_COMMIT}" != "${GH_COMMIT}" || "$GIT_DIFF" != "" ]]; then
-        warning "OpenFLIXR Setup Script is not up-to-date."
-        #warning "Please run 'sudo setupopenflixr -u' to get the latest."
-        warning "Please run 'sudo bash /opt/OpenFLIXR2.SetupScript/main.sh -u' to get the latest."
-        exit 0
+    if [[ ! -v DEVMODE ]]; then
+        git fetch > /dev/null
+        readonly GH_COMMIT=$(git rev-parse --short origin/master)
+        GIT_DIFF=$(git diff origin/master -- | cut -c1-5)
+        if [[ "${LOCAL_COMMIT}" != "${GH_COMMIT}" || "$GIT_DIFF" != "" ]]; then
+            warning "OpenFLIXR Setup Script is not up-to-date."
+            #warning "Please run 'sudo setupopenflixr -u' to get the latest."
+            warning "Please run 'sudo bash /opt/OpenFLIXR2.SetupScript/main.sh -u' to get the latest."
+            exit 0
+        fi
     fi
 
     debug "DETECTED_HOME=$DETECTED_HOMEDIR"
