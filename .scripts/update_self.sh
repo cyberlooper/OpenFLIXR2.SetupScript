@@ -9,7 +9,7 @@ update_self() {
         info "Updating OpenFLIXR2 Setup Script to ${BRANCH}."
     else
         info "OpenFLIXR2 Setup Script will not be updated to ${BRANCH}."
-        return 1
+        return 0
     fi
     cd "${SCRIPTPATH}" || fatal "Failed to change to ${SCRIPTPATH} directory."
     git fetch > /dev/null 2>&1 || fatal "Failed to fetch recent changes from git."
