@@ -62,6 +62,12 @@ step_wait() {
                 echo -e "XXX\n100\nDone!\nXXX"
                 WAIT_STATUS=5
                 break
+            elif [[ "${OF_VERSION_FULL}" == "${OF_VERSION_WEB}"
+                    && $(echo "${OF_VERSION_MAJOR}.${OF_VERSION_MINOR} >= 2.9" | bc -l) = 1
+                    && $(echo "${OF_VERSION_WEB_MAJOR}.${OF_VERSION_WEB_MINOR} >= 2.9" | bc -l) = 1
+                    && "${OF_UPDATE_PS}" == "" ]]; then
+                echo -e "XXX\n100\nDone!\nXXX"
+                break
             fi
 
             elapsed_minutes=$(date -ud @$elapsed +%M)
