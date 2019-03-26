@@ -107,6 +107,10 @@ readonly NC='\e[0m'
 
 # Log Functions
 readonly LOG_FILE="/var/log/openflixr_setup.log"
+if [ -f "$LOG_FILE" ];then
+    timestamp=`date +%s`
+    mv "$LOG_FILE" "$LOG_FILE.$timestamp"
+fi
 sudo chown "${DETECTED_PUID:-$DETECTED_UNAME}":"${DETECTED_PGID:-$DETECTED_UGROUP}" "${LOG_FILE}" > /dev/null 2>&1 || true # This line should always use sudo
 log() { echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" >> "${LOG_FILE}"; }
 info() { echo -e "${NC}$(date +"%F %T") ${BLU}[INFO]${NC}       $*${NC}" | tee -a "${LOG_FILE}" >&2; }
