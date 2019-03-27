@@ -68,43 +68,90 @@ setup_update_api_keys()
     OMBI_TOKEN=$(curl -s -X POST "http://localhost:3579/api/v1/Token" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"username\": \"openflixr\", \"password\": \"$oldpassword\"}" | jq -r '.access_token' | tr -d '[:space:]')
     API_KEYS[ombi]=$(curl -s -X GET --header 'Accept: application/json' --header 'Content-Type: application/json' --header 'Authorization: Bearer '$OMBI_TOKEN'' 'http://localhost:3579/request/api/v1/Settings/Ombi/' | jq -r '.apiKey' | tr -d '[:space:]')
 
-    info "   Updating API Key for Couchpotato"
+    local ENABLED_HTPC
+    local ENABLED_OMBI
+
+    info "   Movies Manager"
+    if [ "${config[MOVIE_MANAGER]}" == 'couchpotato' ]; then
+        info "   - Enabling Couchpotato in OMBI and HTPC"
+        ENABLED_HTPC="on"
+        ENABLED_OMBI="true"
+    else
+        info "   - Disabling Couchpotato in OMBI and HTPC"
+        ENABLED_HTPC="0"
+        ENABLED_OMBI="false"
+    fi
+
     curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
     "ApiKey": "'${API_KEYS[couchpotato]}'",
-    "Enabled": true,
+    "Enabled": '$ENABLED_OMBI',
     "Ip": "localhost",
     "Port": 5050,
     "SubDir": "couchpotato"
     }' 'http://localhost:3579/request/api/v1/settings/couchpotato?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
-    info "   TV Show Downloader"
-    if [ "$tvshowdl" == 'sickrage' ]; then
-        info "   - Sickrage"
-        curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-        "ApiKey": "'${API_KEYS[sickrage]}'",
-        "qualityProfile": "default",
-        "Enabled": true,
-        "Ip": "localhost",
-        "Port": 8081,
-        "SubDir": "sickrage"
-        }' 'http://localhost:3579/request/api/v1/settings/sickrage?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+    #sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 
-        sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='on' where key='sickrage_enable';"
-        sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='0' where key='sonarr_enable';"
+    if [ "${config[MOVIE_MANAGER]}" == 'radarr' ]; then
+        info "   - Enabling Radarr in OMBI and HTPC"
+        ENABLED_HTPC="on"
+        ENABLED_OMBI="true"
     else
-        info "   - Sonarr"
-        curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-        "ApiKey": "'${API_KEYS[sonarr]}'",
-        "qualityProfile": "default",
-        "Enabled": false,
-        "Ip": "localhost",
-        "Port": 8081,
-        "SubDir": "sickrage"
-        }' 'http://localhost:3579/request/api/v1/settings/sickrage?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
-
-        sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='0' where key='sickrage_enable';"
-        sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='on' where key='sonarr_enable';"
+        info "   - Disabling Radarr in OMBI and HTPC"
+        ENABLED_HTPC="0"
+        ENABLED_OMBI="false"
     fi
+
+    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
+    "ApiKey": "'${API_KEYS[radarr]}'",
+    "Enabled": '$ENABLED_OMBI',
+    "Ip": "localhost",
+    "Port": 5050,
+    "SubDir": "radarr"
+    }' 'http://localhost:3579/request/api/v1/settings/radarr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+
+    #sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
+
+    info "   TV Show Manager"
+    if [ "${config[SERIES_MANAGER]}" == 'sickrage' ]; then
+        info "   - Enabling Sickrage in OMBI and HTPC"
+        ENABLED_HTPC="on"
+        ENABLED_OMBI="true"
+    else
+        info "   - Disabling Sickrage in OMBI and HTPC"
+        ENABLED_HTPC="0"
+        ENABLED_OMBI="false"
+    fi
+    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
+    "ApiKey": "'${API_KEYS[sickrage]}'",
+    "qualityProfile": "default",
+    "Enabled": '$ENABLED_OMBI',
+    "Ip": "localhost",
+    "Port": 8081,
+    "SubDir": "sickrage"
+    }' 'http://localhost:3579/request/api/v1/settings/sickrage?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+
+    sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='sickrage_enable';"
+
+    if [ "${config[SERIES_MANAGER]}" == 'sonarr' ]; then
+        info "   - Enabling Sonarr in OMBI and HTPC"
+        ENABLED_HTPC="on"
+        ENABLED_OMBI="true"
+    else
+        info "   - Disabling Sickrage in OMBI and HTPC"
+        ENABLED_HTPC="0"
+        ENABLED_OMBI="false"
+    fi
+    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
+    "ApiKey": "'${API_KEYS[sickrage]}'",
+    "qualityProfile": "default",
+    "Enabled": '$ENABLED_OMBI',
+    "Ip": "localhost",
+    "Port": 8081,
+    "SubDir": "sonarr"
+    }' 'http://localhost:3579/request/api/v1/settings/sonarr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+
+    sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='sonarr_enable';"
 
 # Ombi dropped support for Headphones
 #    info "   Updating API Key for Headphones"

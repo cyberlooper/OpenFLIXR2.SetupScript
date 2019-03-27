@@ -39,7 +39,6 @@ step_setup() {
     newznabprovider=''
     newznaburl=''
     newznabapi=''
-    tvshowdl='sickrage' #sickrage or sonarr
     nzbdl='sabnzbd' #sabnzbd or nzbget
     mopidy='enabled'
     hass='enabled'
