@@ -5,10 +5,9 @@ IFS=$'\n\t'
 setup_configure_network()
 {
     ## network
-    echo ""
-    echo "Configuring network..."
-    if [ "$ip" != '' ]
-    then
+    info "Configuring network..."
+
+    if [[ "${config[NETWORK]}" == "static" ]]; then
         cat > /etc/network/interfaces<<EOF
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
@@ -18,13 +17,13 @@ auto lo eth0
 iface lo inet loopback
 # The primary network interface
 iface eth0 inet static
-address $ip
-netmask $subnet
-gateway $gateway
+address ${config[OPENFLIXR_IP]}
+netmask ${config[OPENFLIXR_SUBNET]}
+gateway ${config[OPENFLIXR_GATEWAY]}
 dns-nameservers 127.0.0.1
 EOF
-else
-    cat > /etc/network/interfaces<<EOF
+    else
+        cat > /etc/network/interfaces<<EOF
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 source /etc/network/interfaces.d/*
