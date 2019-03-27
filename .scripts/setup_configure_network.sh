@@ -22,6 +22,7 @@ netmask ${config[OPENFLIXR_SUBNET]}
 gateway ${config[OPENFLIXR_GATEWAY]}
 dns-nameservers 127.0.0.1
 EOF
+        info "Network configured using Static IP"
     else
         cat > /etc/network/interfaces<<EOF
 # This file describes the network interfaces available on your system
@@ -34,5 +35,6 @@ iface lo inet loopback
 iface eth0 inet dhcp
 dns-nameservers 127.0.0.1
 EOF
+        info "Network configured using DHCP"
     fi
 }
