@@ -17,6 +17,13 @@ steps=(
 run_steps() {
     local current_step_number
     current_step_number=${config[STEPS_CURRENT]}
+    if [[ $current_step_number -ge ${#steps[@]} ]]; then
+        debug "current_step_number too large! Fixing..."
+        debug "current_step_number: $current_step_number"
+        current_step_number=$((${#steps[@]}-1))
+        run_script 'set_config' "STEPS_CURRENT" $current_step_number
+        debug "current_step_number: $current_step_number"
+    fi
     local current_step_name
     current_step_name=${steps[$current_step_number]}
     if [[ $current_step_number > 0 ]]; then
@@ -27,7 +34,6 @@ run_steps() {
             set_config "STEPS_CURRENT" 0
         fi
     fi
-
     for i in ${!steps[@]};
     do
         if [ "${config[STEPS_CURRENT]}" = "$i" ]; then
@@ -38,7 +44,9 @@ run_steps() {
             info "Running step ${step_number}: ${step_name}"
             run_script "${step_file_name}"
 
-            if [[ $current_step_number < $((${#steps[@]}-1)) ]]; then
+            debug "step_number: $step_number"
+            debug "Number of steps: ${#steps[@]}"
+            if [[ $step_number < $((${#steps[@]}-1)) ]]; then
                 run_script 'set_config' "STEPS_CURRENT" $((${config[STEPS_CURRENT]}+1))
             fi
         fi
