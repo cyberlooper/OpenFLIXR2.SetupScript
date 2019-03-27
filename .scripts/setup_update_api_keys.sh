@@ -138,7 +138,7 @@ setup_update_api_keys()
         ENABLED_HTPC="on"
         ENABLED_OMBI="true"
     else
-        info "   - Disabling Sickrage in OMBI and HTPC"
+        info "   - Disabling Sonarr in OMBI and HTPC"
         ENABLED_HTPC="0"
         ENABLED_OMBI="false"
     fi
