@@ -1,4 +1,5 @@
 # OpenFLIXR2.SetupScript
+[![Discord chat](https://img.shields.io/discord/505749119802015756.svg?logo=discord)](https://discord.gg/PcCErTQ)
 ## Information
 A script to help with OpenFLIXR setup.
 
@@ -15,6 +16,15 @@ An alternative is to run the following after connecting to OpenFLIXR via SSH
 ```bash
 sudo setupopenflixr
 ```
+
+## Testing
+Want to help with testing new development work and features of the setup? We'd really appreciate it!
+Ask on [Discord](https://discord.gg/PcCErTQ) what the current development branch is, then do the following.
+```bash
+sudo setupopenflixr -u <branch>
+sudo setupopenflixr -d
+```
+After running through the setup, let us know how it went and send us your logs.
 
 ## Special Thanks
 Thanks to OpenFLIXR for being an awesome setup that motivated me to work on this as well as a bunch of other projects.
