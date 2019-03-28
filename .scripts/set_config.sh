@@ -4,15 +4,14 @@ IFS=$'\n\t'
 
 set_config()
 {
-    config_file="/opt/OpenFLIXR2.SetupScript/openflixr_setup.config"
     key=$1
     val=${2:-}
 
     config[$key]=$val
 
-    if [[ $(grep -c "$key" $config_file) = 0 ]]; then
-        echo "$key=$val" >> $config_file
+    if [[ $(grep -c "$key" $CONFIG_FILE) = 0 ]]; then
+        echo "$key=$val" >> $CONFIG_FILE
     else
-        sed -i "s#$key=.*#$key=$val #g" $config_file
+        sed -i "s#$key=.*#$key=$val #g" $CONFIG_FILE
     fi
 }

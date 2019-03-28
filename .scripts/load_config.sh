@@ -3,13 +3,14 @@ set -euo pipefail
 IFS=$'\n\t'
 
 load_config() {
-    config_file="/opt/OpenFLIXR2.SetupScript/openflixr_setup.config"
+    if [[ -f "${CONFIG_FILE_OLD}" ]]; then
+        mv "${CONFIG_FILE_OLD}" "${CONFIG_FILE}"
 
-    if [[ ! -f "${config_file}" ]]; then
-        touch ${config_file}
+    if [[ ! -f "${CONFIG_FILE}" ]]; then
+        touch ${CONFIG_FILE}
     fi
     shopt -s extglob
-    tr -d '\r' < $config_file > $config_file.unix
+    tr -d '\r' < $CONFIG_FILE > $CONFIG_FILE.unix
 
     while IFS='= ' read -r lhs rhs
     do
@@ -21,7 +22,7 @@ load_config() {
             config[$lhs]="$rhs"
             log "config[$lhs]=\"$rhs\""
         fi
-    done < $config_file.unix
+    done < $CONFIG_FILE.unix
 
-    rm $config_file.unix
+    rm $CONFIG_FILE.unix
 }
