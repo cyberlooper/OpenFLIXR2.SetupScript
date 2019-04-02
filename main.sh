@@ -63,6 +63,8 @@ else
 fi
 readonly NIC=$(ip -o -4 route show to default | awk '{print $5}')
 readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
+readonly CONFIG_FILE="/home/openflixr/openflixr_setup.config"
+readonly CONFIG_FILE_OLD="/home/openflixr/openflixr_setup.config"
 readonly OPENFLIXR_FOLDERS=(downloads movies series music comics books)
 # Init config array
 typeset -A config
@@ -73,10 +75,14 @@ config=(
     [OPENFLIXR_IP]=${LOCAL_IP}
     [OPENFLIXR_SUBNET]=""
     [OPENFLIXR_GATEWAY]=""
-    [OPENFLIXR_DNS]=""
+    [OPENFLIXR_DNS]="127.0.0.1"
     [ACCESS]=""
+    [LETSENCRYPT]="off"
     [OPENFLIXR_DOMAIN]=""
     [OPENFLIXR_EMAIL]=""
+    [SERIES_MANAGER]='sickrage'
+    [MOVIE_MANAGER]='couchpotato'
+    [NZB_DOWNLOADER]='sabnzbd'
     [MOUNT_MANAGE]=""
     [HOST_NAME]=""
     [FSTAB_BACKUP]=0

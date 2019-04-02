@@ -17,13 +17,15 @@ step_access() {
 
     if [[ $access -eq 1 ]]; then
         # Local access selected. Nothing else to do.
-        info "Folder access set to Local"
+        info "OpenFLIXR access set to Local"
+        set_config "LETSENCRYPT" "off"
         set_config "OPENFLIXR_DOMAIN" $LOCAL_IP
     fi
 
     if [[ $access -eq 2 ]]; then
         # Configuring for Remote access.
-        info "Folder access set to Remote"
+        info "OpenFLIXR access set to Remote"
+        set_config "LETSENCRYPT" "on"
         domain=$(whiptail \
                 --backtitle ${OF_BACKTITLE} \
                 --title "Step ${step_number}: ${step_name} - Remote" \
