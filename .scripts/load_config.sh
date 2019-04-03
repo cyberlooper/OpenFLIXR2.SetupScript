@@ -5,6 +5,7 @@ IFS=$'\n\t'
 load_config() {
     if [[ -f "${CONFIG_FILE_OLD}" ]]; then
         mv "${CONFIG_FILE_OLD}" "${CONFIG_FILE}"
+    fi
 
     if [[ ! -f "${CONFIG_FILE}" ]]; then
         touch ${CONFIG_FILE}
