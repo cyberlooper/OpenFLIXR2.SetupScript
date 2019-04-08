@@ -17,6 +17,13 @@ An alternative is to run the following after connecting to OpenFLIXR via SSH
 sudo setupopenflixr
 ```
 
+## Troubleshooting
+If there are any issues with the script that cause it to error, it will let you know and direct you to this section.
+To provide logs for troubleshooting run the following, then send `/tmp/setup_logs.tar.gz` to MattyLightCU so that he can look into the issue.
+```bash
+tar -czvf /tmp/setup_logs.tar.gz /var/log/openflixr_setup.*
+```
+
 ## Testing
 Want to help with testing new development work and features of the setup? We'd really appreciate it!
 Ask on [Discord](https://discord.gg/PcCErTQ) what the current development branch is, then do the following.
