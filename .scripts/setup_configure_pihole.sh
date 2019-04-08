@@ -6,7 +6,7 @@ setup_configure_pihole()
 {
     info "Updating PiHole"
     if [[ "${config[NETWORK]}" == "static" ]]; then
-        sed -i 's/IPV4_ADDRESS.*/IPV4_ADDRESS='$ip'/' /etc/pihole/setupVars.conf
+        sed -i 's/IPV4_ADDRESS.*/IPV4_ADDRESS='${config[OPENFLIXR_IP]}'/' /etc/pihole/setupVars.conf
         service pihole-FTL restart
         pihole -g -sd
     else
