@@ -45,6 +45,45 @@ setup_configure_movie_manager()
     info "- Radarr"
     info "  Updating API Key"
     sed -i 's/^  <ApiKey>.*/  <ApiKey>'${API_KEYS[radarr]}'<\/ApiKey>/' /root/.config/Radarr/config.xml
+    info "  Updating Radarr settings"
+
+    info "  - Updating Indexer settings"
+    info "    NZBHydra"
+    local radarr_nzbhydra_id
+    radarr_nzbhydra_id=$(sqlite3 /root/.config/Radarr/nzbdrone.db "SELECT id FROM Indexers WHERE Name='NZBHydra'")
+    local radarr_nzbhydra_settings
+    radarr_nzbhydra_settings=$(sqlite3 /root/.config/Radarr/nzbdrone.db "SELECT Settings FROM Indexers WHERE id=$radarr_nzbhydra_id")
+    # Set NZBHydra API Key
+    debug "Setting API Key to: ${API_KEYS[nzbhydra2]}"
+    radarr_nzbhydra_settings=$(sed 's/"apiKey":.*/"apiKey": "'${API_KEYS[nzbhydra2]}'",/' <<< $radarr_nzbhydra_settings)
+    # Set NZBHydra baseUrl
+    debug "Setting Base URL to: http://localhost:5075/nzbhydra"
+    radarr_nzbhydra_settings=$(sed 's#"baseUrl":.*#"baseUrl": "http://localhost:5075/nzbhydra",#' <<< $radarr_nzbhydra_settings)
+    debug "Updating DB"
+    sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE Indexers SET Settings='$radarr_nzbhydra_settings' WHERE id=$radarr_nzbhydra_id"
+
+    info "  - Updating Downloader settings"
+    info "    NZBget"
+    local radarr_nzbget_id
+    radarr_nzbget_id=$(sqlite3 /root/.config/Radarr/nzbdrone.db "SELECT id FROM DownloadClients WHERE Name='NZBget'")
+    local radarr_nzbget_settings
+    radarr_nzbget_settings=$(sqlite3 /root/.config/Radarr/nzbdrone.db "SELECT Settings FROM DownloadClients WHERE id=$radarr_nzbget_id")
+    # Change movieCategory to lowercase
+    debug "Setting movieCategory to: movies"
+    radarr_nzbget_settings=$(sed 's/"movieCategory":.*/"movieCategory": "movies",/' <<< $radarr_nzbget_settings)
+    debug "Updating DB"
+    sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE DownloadClients SET Settings='$radarr_nzbget_settings' WHERE id=$radarr_nzbget_id"
+
+    info "    SABnzb"
+    local radarr_sabnzb_id
+    radarr_sabnzb_id=$(sqlite3 /root/.config/Radarr/nzbdrone.db "SELECT id FROM DownloadClients WHERE Name='SABnzbd'")
+    local radarr_sabnzb_settings
+    radarr_sabnzb_settings=$(sqlite3 /root/.config/Radarr/nzbdrone.db "SELECT Settings FROM DownloadClients WHERE id=$radarr_sabnzb_id")
+    # Set SABnzb API Key
+    debug "Setting API Key to: ${API_KEYS[sabnzbd]}"
+    radarr_sabnzb_settings=$(sed 's/"apiKey":.*/"apiKey": "'${API_KEYS[sabnzbd]}'",/' <<< $radarr_sabnzb_settings)
+    debug "Updating DB"
+    sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE DownloadClients SET Settings='$radarr_sabnzb_settings' WHERE id=$radarr_sabnzb_id"
 
     if [ "${config[MOVIE_MANAGER]}" == 'radarr' ]; then
         info "- Enabling in OMBI and HTPC"
