@@ -166,7 +166,7 @@ cleanup() {
     if [[ $? = 1 ]]; then
         run_script 'save_config'
         run_script 'load_config'
-        fatal "It appears an has error occurred. Please post on Discord and DM MattyLightCU your setup log:'${LOG_FILE}'"
+        fatal $"It appears an has error occurred. See below for information.\nPlease post on the OpenFLIXR Discord and DM MattyLightCU your setup logs.\nFor information how to do this, visit the troubleshooting section of the OpenFLIXR Setup Script:\nhttps://github.com/openflixr/OpenFLIXR2.SetupScript#troubleshooting"
     fi
     #if [[ ${SCRIPTPATH} == "/opt/OpenFLIXR2.SetupScript" ]]; then
     #    chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "${SCRIPTNAME} must be executable."
