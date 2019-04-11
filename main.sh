@@ -115,7 +115,7 @@ readonly NC='\e[0m'
 readonly LOG_FILE="/var/log/openflixr_setup.log"
 savelog -n -C -l -t "$LOG_FILE" #Save current log if not empty and rotate logs
 sudo chown "${DETECTED_PUID:-$DETECTED_UNAME}":"${DETECTED_PGID:-$DETECTED_UGROUP}" "${LOG_FILE}" > /dev/null 2>&1 || true # This line should always use sudo
-log() { echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" >> "${LOG_FILE}"; }
+log() { echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" | tee -a "${LOG_FILE}" > /dev/null; }
 info() { echo -e "${NC}$(date +"%F %T") ${BLU}[INFO]${NC}       $*${NC}" | tee -a "${LOG_FILE}" >&2; }
 warning() { echo -e "${NC}$(date +"%F %T") ${YLW}[WARNING]${NC}    $*${NC}" | tee -a "${LOG_FILE}" >&2; }
 error() { echo -e "${NC}$(date +"%F %T") ${RED}[ERROR]${NC}      $*${NC}" | tee -a "${LOG_FILE}" >&2; }
@@ -221,5 +221,6 @@ main() {
     run_script 'run_steps'
 
     warning "System reboot needed. Please reboot your system when you are ready."
+    set_config "SETUP_COMPLETED" "Y"
 }
 main
