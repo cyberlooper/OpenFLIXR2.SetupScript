@@ -9,6 +9,24 @@ setup_configure_nzb_downloader()
     info "  Updating API Key"
     warning "  !No code for updating API Key!"
 
+    info "  Updating settings"
+    if [[ "${config[OPENFLIXR_DOMAIN]}" != "" ]]; then
+        local sabnzbd_current_host_whitelist
+        sabnzbd_current_host_whitelist=$(grep -o "host_whitelist = .*" ~/.sabnzbd/sabnzbd.ini | sed 's#host_whitelist = ##')
+        # OpenFLIXR IP
+        if [[ $(grep -c "${config[OPENFLIXR_IP]}" <<<$sabnzbd_current_host_whitelist) = 0 ]]; then
+            info "   - Adding '${LOCAL_IP}' to host_whitelist"
+            sabnzbd_current_host_whitelist=$sabnzbd_current_host_whitelist"${config[OPENFLIXR_DOMAIN]},"
+            sed -i 's#host_whitelist = .*#host_whitelist = '$sabnzbd_current_host_whitelist'#' "/home/openflixr/.sabnzbd/sabnzbd.ini"
+        fi
+        # Domain, if different from OpenFLIXR IP
+        if [[ $(grep -c "${config[OPENFLIXR_DOMAIN]}" <<<$sabnzbd_current_host_whitelist) = 0 ]]; then
+            info "   - Adding '${config[OPENFLIXR_DOMAIN]}' to host_whitelist"
+            sabnzbd_current_host_whitelist=$sabnzbd_current_host_whitelist"${config[OPENFLIXR_DOMAIN]},"
+            sed -i 's#host_whitelist = .*#host_whitelist = '$sabnzbd_current_host_whitelist'#' "/home/openflixr/.sabnzbd/sabnzbd.ini"
+        fi
+    fi
+
     info "  Connecting to Sickrage"
     crudini --set /opt/sickrage/config.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
 
