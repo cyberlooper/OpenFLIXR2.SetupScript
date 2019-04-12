@@ -221,6 +221,7 @@ main() {
     run_script 'run_steps'
 
     warning "System reboot needed. Please reboot your system when you are ready."
+    info "Setup complete!"
     set_config "SETUP_COMPLETED" "Y"
 }
 main
