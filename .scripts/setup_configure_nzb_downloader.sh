@@ -12,7 +12,7 @@ setup_configure_nzb_downloader()
     info "  Updating settings"
     if [[ "${config[OPENFLIXR_DOMAIN]}" != "" ]]; then
         local sabnzbd_current_host_whitelist
-        sabnzbd_current_host_whitelist=$(grep -o "host_whitelist = .*" ~/.sabnzbd/sabnzbd.ini | sed 's#host_whitelist = ##')
+        sabnzbd_current_host_whitelist=$(grep -o "host_whitelist = .*" /home/openflixr/.sabnzbd/sabnzbd.ini | sed 's#host_whitelist = ##')
         # OpenFLIXR IP
         if [[ $(grep -c "${config[OPENFLIXR_IP]}" <<<$sabnzbd_current_host_whitelist) = 0 ]]; then
             info "   - Adding '${LOCAL_IP}' to host_whitelist"
