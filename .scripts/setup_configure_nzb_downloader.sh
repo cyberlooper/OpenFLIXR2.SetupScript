@@ -10,7 +10,7 @@ setup_configure_nzb_downloader()
     warning "  !No code for updating API Key!"
 
     info "  Updating settings"
-    if [[ "${config[OPENFLIXR_DOMAIN]}" != "" ]]; then
+    if [[ $(grep -c "host_whitelist" "/home/openflixr/.sabnzbd/sabnzbd.ini") != 0 ]]; then
         local sabnzbd_current_host_whitelist
         sabnzbd_current_host_whitelist=$(grep -o "host_whitelist = .*" /home/openflixr/.sabnzbd/sabnzbd.ini | sed 's#host_whitelist = ##')
         # OpenFLIXR IP
