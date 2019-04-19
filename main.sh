@@ -91,6 +91,8 @@ config=(
     [OPENFLIXR_TIMEZONE]=""
     [OPENFLIXR_TIMEZONE_SHORT]=""
     [OPENFLIXR_READY]=""
+    [ALWAYS_SUBMIT_LOGS]=""
+    [DISCORD_USERNAME]=""
 )
 for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
     config[MOUNT_TYPE_$FOLDER]=""
@@ -113,7 +115,6 @@ readonly NC='\e[0m'
 
 # Log Functions
 readonly LOG_FILE="/var/log/openflixr_setup.log"
-savelog -n -C -l -t "$LOG_FILE" #Save current log if not empty and rotate logs
 sudo chown "${DETECTED_PUID:-$DETECTED_UNAME}":"${DETECTED_PGID:-$DETECTED_UGROUP}" "${LOG_FILE}" > /dev/null 2>&1 || true # This line should always use sudo
 log() { echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" | tee -a "${LOG_FILE}" > /dev/null; }
 info() { echo -e "${NC}$(date +"%F %T") ${BLU}[INFO]${NC}       $*${NC}" | tee -a "${LOG_FILE}" >&2; }
@@ -166,7 +167,8 @@ cleanup() {
     if [[ $? = 1 ]]; then
         run_script 'save_config'
         run_script 'load_config'
-        fatal $"It appears an has error occurred. See below for information.\nPlease post on the OpenFLIXR Discord and DM MattyLightCU your setup logs.\nFor information how to do this, visit the troubleshooting section of the OpenFLIXR Setup Script:\nhttps://github.com/openflixr/OpenFLIXR2.SetupScript#troubleshooting"
+        SUBMIT_MESSAGE="It appears and error has occurred.\nDo you want to submit the logs now?"
+        run_script 'submit_logs'
     fi
     #if [[ ${SCRIPTPATH} == "/opt/OpenFLIXR2.SetupScript" ]]; then
     #    chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "${SCRIPTNAME} must be executable."
@@ -207,6 +209,7 @@ main() {
     # shellcheck source=/dev/null
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"
+    savelog -n -C -l -t "$LOG_FILE" >> ${LOG_FILE} #Save current log if not empty and rotate logs
 
     info "${OF_BACKTITLE}"
     debug "DETECTED_HOMEDIR=$DETECTED_HOMEDIR"

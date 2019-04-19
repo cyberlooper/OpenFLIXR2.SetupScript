@@ -18,8 +18,15 @@ sudo setupopenflixr
 ```
 
 ## Troubleshooting
-If there are any issues with the script that cause it to error, it will let you know and direct you to this section.
-To provide logs for troubleshooting run the following, then send `/tmp/setup_logs.tar.gz` to MattyLightCU so that he can look into the issue.
+If there are any issues with the script that cause it to error, it will let you know and attempt to submit the logs for you (if you want) or direct you to this section.
+
+You can submit logs at any point by running
+```bash
+sudo setupopenflixr -l
+```
+
+If the automatic submission doesn't work, you will need to manually provide logs for troubleshooting.
+To do this, run the following then send `/tmp/setup_logs.tar.gz` to MattyLightCU on Discord so that he can look into the issue.
 ```bash
 tar -czvf /tmp/setup_logs.tar.gz /var/log/openflixr_setup.*
 ```

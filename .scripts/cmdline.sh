@@ -29,7 +29,7 @@ cmdline() {
     #Reset the positional parameters to the short options
     eval set -- "${LOCAL_ARGS:-}"
 
-    while getopts ":d:hit:u:vx" OPTION; do
+    while getopts ":d:hilt:u:vx" OPTION; do
         case ${OPTION} in
             d)
                 readonly DEVMODE=${OPTARG}
@@ -40,6 +40,12 @@ cmdline() {
                 ;;
             i)
                 run_script 'run_install'
+                exit
+                ;;
+            l)
+                run_script 'load_config'
+                SUBMIT_MESSAGE="Do you want to submit the logs now?"
+                run_script 'submit_logs'
                 exit
                 ;;
             t)
