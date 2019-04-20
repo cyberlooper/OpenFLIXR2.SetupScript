@@ -35,21 +35,28 @@ step_wait() {
 
     debug "OPENFLIXR_READY='${config[OPENFLIXR_READY]}'"
     if [[ "${config[OPENFLIXR_READY]}" != "YES" ]]; then
+        info "Waiting for OpenFLIXR to be ready..."
         while true; do
             elapsed=$(($(date +%s)-$start))
             duration=$(date -ud @$elapsed +'%M minutes %S seconds')
             percent=$(($elapsed/10))
 
+            log "Checking updateof"
             UPDATEOF_LOG_LINE=$(tail -1 $UPDATEOF_LOGFILE)
+            log "Checking onlineupdate"
             ONLINEUPDATE_LOG_LINE=$(tail -1 $ONLINEUPDATE_LOGFILE)
+            log "Getting OpenFLIXR version"
             OF_VERSION_FULL=$(grep -o "^[0-9]\.[0-9]\.[0-9]" /opt/openflixr/version)
             OF_VERSION_MAJOR=$(cut -d'.' -f1 <<< $OF_VERSION_FULL)
             OF_VERSION_MINOR=$(cut -d'.' -f2 <<< $OF_VERSION_FULL)
+            log "Getting OpenFLIXR web version"
             OF_VERSION_WEB=$(crudini --get /usr/share/nginx/html/setup/config.ini custom custom1)
             OF_VERSION_WEB_MAJOR=$(cut -d'.' -f1 <<< $OF_VERSION_FULL)
             OF_VERSION_WEB_MINOR=$(cut -d'.' -f2 <<< $OF_VERSION_FULL)
+            log "Getting any running 'update' proceses"
             OF_UPDATE_PS=$(echo $(ps -ef | grep -i update | grep -v grep | grep -v shellinabox | grep -v tail | cut -c1-5))
             OF_UPDATE_PS_FULL=$(echo $(ps -ef | grep -i update | grep -v grep | grep -v shellinabox | grep -v tail))
+            log "Performing checks"
             if [[ -f "/opt/OpenFLIXR2.SetupScript/stop_wait" ]]; then
                 echo -e "XXX\n100\Skipping wait!\nXXX"
                 WAIT_STATUS=1
@@ -72,6 +79,7 @@ step_wait() {
             fi
 
             elapsed_minutes=$(date -ud @$elapsed +%M)
+            log "Elapsed: ${elapsed_minutes}"
             if [[ ${elapsed_minutes#0} -ge ${WAIT_TIME} ]]; then
                 echo -e "XXX\n100\Failure!\nXXX"
                 WAIT_STATUS=0
