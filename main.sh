@@ -93,6 +93,8 @@ config=(
     [OPENFLIXR_READY]=""
     [ALWAYS_SUBMIT_LOGS]=""
     [DISCORD_USERNAME]=""
+    [SUBMITTED_LOGS]=""
+    [SUBMITTED_LOGS_VERSION]=""
 )
 for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
     config[MOUNT_TYPE_$FOLDER]=""
