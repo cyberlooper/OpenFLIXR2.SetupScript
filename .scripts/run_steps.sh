@@ -8,7 +8,6 @@ steps=(
     "Network Configuration"
     "Access"
     "Folder Creation"
-    "Folder Mounting"
     "Wait"
     "Timezone"
     "Setup"
