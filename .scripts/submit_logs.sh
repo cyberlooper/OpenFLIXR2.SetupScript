@@ -34,13 +34,13 @@ submit_logs() {
                 run_script 'set_config' "DISCORD_USERNAME" "${DISCORD_USERNAME}"
             fi
 
-            local FILE="setup_logs.tar.gz"
-            local FILE_PATH="/tmp/${config[DISCORD_USERNAME]:-Anonymous}_${FILE}"
+            local FILE="${config[DISCORD_USERNAME]:-Anonymous}_setup_logs.tar"
+            local FILE_PATH="/tmp/${FILE}"
             local SUBMISSION_ID=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
             readonly WEBHOOK_URL="https://api.tarpix.net/ofv1/of-log-submit"
 
             info "Collecting logs..."
-            tar -czvf "${FILE_PATH}" /var/log/openflixr_setup.* > /dev/null 2>&1
+            tar -cf "${FILE_PATH}" /var/log/openflixr_setup.* > /dev/null 2>&1
             info "Submitting logs..."
             bash ${SCRIPTPATH}/.scripts/discord.sh \
                 --webhook-url="${WEBHOOK_URL}" \
