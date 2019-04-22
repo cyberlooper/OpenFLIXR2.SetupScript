@@ -28,6 +28,7 @@ submit_logs() {
                     --title "Discord Username" \
                     --inputbox $"Please provide your Discord username for submission.\nIf you don't have one, join the Discord then enter it here.\nBe sure to join the OpenFLIXR Discord server so that I may contact, if needed\nOtherwise, leave this blank to submit anonymously." 0 0 "${config[DISCORD_USERNAME]:-}" 3>&1 1>&2 2>&3)
                 run_script 'check_response' $?;
+            DISCORD_USERNAME=${DISCORD_USERNAME%%#*}
 
             if [[ ${DISCORD_USERNAME} != "" ]]; then
                 run_script 'set_config' "DISCORD_USERNAME" "${DISCORD_USERNAME}"
@@ -44,7 +45,7 @@ submit_logs() {
             bash ${SCRIPTPATH}/.scripts/discord.sh \
                 --webhook-url="${WEBHOOK_URL}" \
                 --file "${FILE_PATH}" \
-                --text "Setup logs reported from ${config[DISCORD_USERNAME]}\nSubmission ID: ${SUBMISSION_ID}"
+                --text "Setup logs reported from ${config[DISCORD_USERNAME]:-Anonymous}\nSubmission ID: ${SUBMISSION_ID}"
 
             if [[ $? == 0 ]]; then
                 info "Logs submitted successfully!"
