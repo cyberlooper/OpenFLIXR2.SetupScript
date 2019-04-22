@@ -226,9 +226,9 @@ main() {
     run_script 'run_steps'
 
     warning "System reboot needed. Please reboot your system when you are ready."
-    warning "Be sure to head over to the Post-setup steps found here for waht to do next - https://github.com/openflixr/Docs/wiki/Setup#post-setup-steps"
+    warning "Be sure to head over to the Post-setup steps found here for what to do next:"
+    warning "https://github.com/openflixr/Docs/wiki/Setup#post-setup-steps"
     info "Setup complete!"
     set_config "SETUP_COMPLETED" "Y"
 }
 main
-ls -longerls
