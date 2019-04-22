@@ -7,17 +7,10 @@ NOTE: While this will help you get started, it doesn't get you to a fully functi
 
 ## Usage
 As of OpenFLIXR 2.9, the setup script is included!
-
-
-To run the setup, you now can simply go to `/setup` in your browser!
-
-An alternative is to run the following after connecting to OpenFLIXR via SSH
-```bash
-sudo setupopenflixr
-```
+[Visit the wiki for setup information](https://github.com/openflixr/Docs/wiki/Setup#general)
 
 ## Troubleshooting
-Visit the [Docs repo](https://github.com/openflixr/Docs/wiki/Setup) for troubleshooting issues with Setup
+[Visit the wiki for information on troubleshooting issues with Setup](https://github.com/openflixr/Docs/wiki/Setup#issues--troubleshooting)
 
 ## Testing
 Want to help with testing new development work and features of the setup? We'd really appreciate it!
