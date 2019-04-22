@@ -6,7 +6,7 @@ A script to help with OpenFLIXR setup.
 NOTE: While this will help you get started, it doesn't get you to a fully functioning box, you will still need to do some configuring of the various applications once complete.
 
 ## Usage
-As of OpenFLIXR 2.9, the setup script is included!
+As of OpenFLIXR 2.9, the setup script is included!  
 [Visit the wiki for setup information](https://github.com/openflixr/Docs/wiki/Setup#general)
 
 ## Troubleshooting
