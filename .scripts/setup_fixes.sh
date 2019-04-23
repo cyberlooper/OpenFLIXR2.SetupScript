@@ -13,11 +13,11 @@ setup_fixes()
     echo "deb http://apt.sonarr.tv/ master main" | tee /etc/apt/sources.list.d/sonarr.list > /dev/null
     apt update > /dev/null
 
-    info "  Folder permissions fixes"
+    info "  Permissions fixes"
     # Add root to openflixr group
     usermod -a -G openflixr root
     # Make /mnt group be openflixr
-    chown :openflixr -R /mnt
+    chown openflixr:openflixr -R /mnt
     # Add group write permissions to /mnt
     chmod g+w -R /mnt
 }

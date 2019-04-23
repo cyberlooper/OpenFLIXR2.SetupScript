@@ -6,7 +6,6 @@ step_folder_creation() {
     {
         for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
             mkdir -p /mnt/${FOLDER}/ > /dev/null
-            #TODO: chown openflixr
         done
         echo -e "XXX\n100\nFolders created!\nXXX"
         sleep 2s
@@ -16,4 +15,7 @@ step_folder_creation() {
         info "Created /mnt/${FOLDER}/"
     done
     info "Folders created!"
+    info "Updating folder permissions..."
+    chown openflixr:openflixr -R /mnt
+    chmod g+w -R /mnt
 }
