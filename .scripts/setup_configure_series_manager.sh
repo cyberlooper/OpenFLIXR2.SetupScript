@@ -74,6 +74,11 @@ setup_configure_series_manager()
     debug "Setting tvCategory to: tv"
     sonarr_nzbget_settings=$(sed 's/"movieCategory":.*/"tvCategory": "tv",/' <<< $sonarr_nzbget_settings)
     debug "Updating DB"
+    if [[ ${config[NZB_DOWNLOADER]} == 'nzbget' ]];
+        sqlite3 /root/.config/NzbDrone/nzbdrone.db "UPDATE DownloadClients SET Enable=1 WHERE id=$sonarr_nzbget_id"
+    else
+        sqlite3 /root/.config/NzbDrone/nzbdrone.db "UPDATE DownloadClients SET Enable=0 WHERE id=$sonarr_nzbget_id"
+    fi
     sqlite3 /root/.config/NzbDrone/nzbdrone.db "UPDATE DownloadClients SET Settings='$sonarr_nzbget_settings' WHERE id=$sonarr_nzbget_id"
 
     info "    SABnzb"
@@ -85,6 +90,11 @@ setup_configure_series_manager()
     debug "Setting API Key to: ${API_KEYS[sabnzbd]}"
     sonarr_sabnzb_settings=$(sed 's/"apiKey":.*/"apiKey": "'${API_KEYS[sabnzbd]}'",/' <<< $sonarr_sabnzb_settings)
     debug "Updating DB"
+    if [[ ${config[NZB_DOWNLOADER]} == 'sabnzbd' ]];
+        sqlite3 /root/.config/NzbDrone/nzbdrone.db "UPDATE DownloadClients SET Enable=1 WHERE id=$sonarr_sabnzb_id"
+    else
+        sqlite3 /root/.config/NzbDrone/nzbdrone.db "UPDATE DownloadClients SET Enable=0 WHERE id=$sonarr_sabnzb_id"
+    fi
     sqlite3 /root/.config/NzbDrone/nzbdrone.db "UPDATE DownloadClients SET Settings='$sonarr_sabnzb_settings' WHERE id=$sonarr_sabnzb_id"
 
     if [ "${config[SERIES_MANAGER]}" == 'sonarr' ]; then
