@@ -140,6 +140,11 @@ setup_configure_movie_manager()
         debug "Setting movieCategory to: movies"
         radarr_nzbget_settings=$(sed 's/"movieCategory":.*/"movieCategory": "movies",/' <<< $radarr_nzbget_settings)
         debug "Updating DB"
+        if [[ ${config[NZB_DOWNLOADER]} == 'nzbget' ]]; then
+            sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE DownloadClients SET Enable=1 WHERE id=$radarr_nzbget_id"
+        else
+            sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE DownloadClients SET Enable=0 WHERE id=$radarr_nzbget_id"
+        fi
         sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE DownloadClients SET Settings='$radarr_nzbget_settings' WHERE id=$radarr_nzbget_id"
 
         info "    SABnzb"
@@ -178,6 +183,11 @@ setup_configure_movie_manager()
         debug "Setting API Key to: ${API_KEYS[sabnzbd]}"
         radarr_sabnzb_settings=$(sed 's/"apiKey":.*/"apiKey": "'${API_KEYS[sabnzbd]}'",/' <<< $radarr_sabnzb_settings)
         debug "Updating DB"
+        if [[ ${config[NZB_DOWNLOADER]} == 'sabnzbd' ]]; then
+            sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE DownloadClients SET Enable=1 WHERE id=$radarr_sabnzb_id"
+        else
+            sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE DownloadClients SET Enable=0 WHERE id=$radarr_sabnzb_id"
+        fi
         sqlite3 /root/.config/Radarr/nzbdrone.db "UPDATE DownloadClients SET Settings='$radarr_sabnzb_settings' WHERE id=$radarr_sabnzb_id"
     else
         warning "Unable to find '/root/.config/Radarr/nzbdrone.db'. Can't update any other Radarr settings"
