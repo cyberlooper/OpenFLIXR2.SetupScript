@@ -31,6 +31,7 @@ run_setup()
     run_script 'setup_prechecks'
     run_script 'setup_stop_services'
     run_script 'setup_generate_api_keys'
+    run_script 'setup_change_password'
     run_script 'setup_configure_ombi'
     run_script 'setup_configure_htpc_manager'
     run_script 'setup_configure_movie_manager'
