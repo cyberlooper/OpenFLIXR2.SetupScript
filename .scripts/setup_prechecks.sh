@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 setup_prechecks()
 {
-    debug "Setup Pre-check"
+    log "Setup Pre-check"
     debug "config[CHANGE_PASS]=${config[CHANGE_PASS]}"
     debug "OPENFLIXIR_PASSWORD=${OPENFLIXIR_PASSWORD:-}"
     if [[ ${config[SETUP_COMPLETED]} != "Y" && ${config[CHANGE_PASS]} == "Y" && ${OPENFLIXIR_PASSWORD:-} == "" ]]; then
