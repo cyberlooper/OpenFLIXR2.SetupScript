@@ -5,12 +5,7 @@ IFS=$'\n\t'
 setup_configure_nginx()
 {
     info "Configuring Nginx"
-    if [[ ! $password = "" ]]; then
-    info "- Updating Password"
-        echo openflixr:"$password" | sudo chpasswd
-        htpasswd -b /etc/nginx/.htpasswd openflixr "$password"
-        crudini --set /usr/share/nginx/html/setup/config.ini password oldpassword $password
-    fi
+    run_script 'setup_configure_nginx_password'
 
     info "- Updating Settings"
     crudini --set /usr/share/nginx/html/setup/config.ini network networkconfig ${config[NETWORK]}

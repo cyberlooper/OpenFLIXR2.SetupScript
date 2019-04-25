@@ -7,9 +7,9 @@ steps=(
     "Change Password"
     "Network Configuration"
     "Access"
-    "Folder Creation"
     "Wait"
     "Timezone"
+    "Folder Creation"
     "Setup"
 )
 

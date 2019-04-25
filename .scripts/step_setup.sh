@@ -5,15 +5,6 @@ IFS=$'\n\t'
 step_setup() {
     info 'Preparing for setup...'
     # Set setup variables
-    # TODO: Move/rename these at some point
-    password="${OPENFLIXIR_PASSWORD:-}"
-    oldpassword=""
-    if [[ -f "/usr/share/nginx/html/setup/config.ini" ]]; then
-        oldpassword=$(crudini --get /usr/share/nginx/html/setup/config.ini password oldpassword)
-    fi
-    if [[ "$oldpassword" == "" ]]; then
-        oldpassword='openflixr'
-    fi
     # TODO: Add these later
     usenetdescription=''
     usenetservername=''
