@@ -29,8 +29,9 @@ declare -A API_KEYS
 run_setup()
 {
     run_script 'setup_prechecks'
+    run_script 'setup_folder_creation'
     run_script 'setup_stop_services'
-    run_script 'setup_password'
+    run_script 'setup_retrieve_password'
     run_script 'setup_generate_api_keys'
     run_script 'setup_configure_ombi'
     run_script 'setup_configure_htpc_manager'

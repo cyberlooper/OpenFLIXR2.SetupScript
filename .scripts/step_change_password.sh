@@ -34,7 +34,7 @@ step_change_password() {
 
                 if [[ $pass == $cpass ]]; then
                     # DO NOT save the password to the config
-                    OPENFLIXIR_PASSWORD=$pass
+                    OPENFLIXR_PASSWORD_NEW=$pass
                     valid=1
                     done=1
                 else
@@ -47,8 +47,9 @@ step_change_password() {
                 set_config "CHANGE_PASS" "Y"
             done
         else
-            info "Keeping default password."
+            info "Keeping password."
             set_config "CHANGE_PASS" "N"
+            OPENFLIXR_PASSWORD_NEW=""
             done=1
         fi
     done

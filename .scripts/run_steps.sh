@@ -9,7 +9,6 @@ steps=(
     "Access"
     "Wait"
     "Timezone"
-    "Folder Creation"
     "Setup"
 )
 
