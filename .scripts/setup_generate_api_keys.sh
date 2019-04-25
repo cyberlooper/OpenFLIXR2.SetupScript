@@ -30,4 +30,22 @@ setup_generate_api_keys()
     OMBI_TOKEN=$(curl -s -X POST "http://localhost:3579/api/v1/Token" -H "accept: application/json" -H "Content-Type: application/json" -d "{ \"username\": \"openflixr\", \"password\": \"$oldpassword\"}" | jq -r '.access_token' | tr -d '[:space:]')
     API_KEYS[ombi]=$(curl -s -X GET --header 'Accept: application/json' --header 'Content-Type: application/json' --header 'Authorization: Bearer '$OMBI_TOKEN'' 'http://localhost:3579/request/api/v1/Settings/Ombi/' | jq -r '.apiKey' | tr -d '[:space:]')
     info "   Retrieved: ${API_KEYS[ombi]}"
+
+    info "Double-checking API Keys"
+    for service in "${!API_KEYS[@]}"; do
+        if [[ "${service}" != "monit"
+            && "${service}" != "htpcmanager"
+            && "${service}" != "lidarr"
+            && "${service}" != "lazylibrarian"
+            && "${service}" != "mopidy"
+            && "${service}" != "nzbhydra2"
+        ]]; then
+            info "-- ${service}"
+            if [[ "${API_KEYS[$service]}" == "" ]]; then
+                fatal "API Key not properly set/retrieved. Aborting setup."
+            else
+                info "   Good!"
+            fi
+        fi
+    done
 }
