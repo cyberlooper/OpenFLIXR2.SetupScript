@@ -225,6 +225,10 @@ main() {
     run_script 'load_config'
     run_script 'save_config'
 
-    run_script 'run_steps'
+    if [[ ${config[SETUP_COMPLETED]} == "Y" ]]; then
+        run_script 'menu_main'
+    else
+        run_script 'run_steps'
+    fi
 }
 main
