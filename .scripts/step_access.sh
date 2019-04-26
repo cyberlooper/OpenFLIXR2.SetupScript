@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 step_access() {
-    local STEP_TITLE=${1:-"a${STEP_TITLE}"}
+    local STEP_TITLE=${1:-"Step ${step_number}: ${step_name}"}
     access=$(whiptail \
                 --backtitle ${OF_BACKTITLE} \
                 --title "${STEP_TITLE}" \
