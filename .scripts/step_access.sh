@@ -23,12 +23,13 @@ step_access() {
 
     case "${CONFIGCHOICE}" in
         "Local ")
+            log "Local selected"
             info "OpenFLIXR access set to Local"
             set_config "ACCESS" "LOCAL"
             set_config "LETSENCRYPT" "off"
             ;;
         "Remote ")
-            info "OpenFLIXR access set to Remote"
+            log "Remote selected"
             domain=$(whiptail \
                     --backtitle ${OF_BACKTITLE} \
                     --title "${STEP_TITLE} - Remote" \
@@ -73,6 +74,7 @@ step_access() {
                 --msgbox "Forward ports 80 and 443 on your router to your local IP (${LOCAL_IP})" 0 0
             run_script 'check_response' $?
 
+            info "OpenFLIXR access set to Remote"
             set_config "ACCESS" "REMOTE"
             set_config "LETSENCRYPT" "on"
             ;;
@@ -81,7 +83,7 @@ step_access() {
             exit 0
             ;;
         *)
-            warning "Unknown option"
+            error "Unknown option"
             run_script 'step_access'
             ;;
     esac
