@@ -63,6 +63,7 @@ else
 fi
 readonly NIC=$(ip -o -4 route show to default | awk '{print $5}')
 readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
+readonly ROUTER_IP=$(ip route show | grep -i 'default via'| awk '{print $3 }')
 readonly CONFIG_FILE="/home/openflixr/openflixr_setup.config"
 readonly CONFIG_FILE_OLD="/opt/OpenFLIXR2.SetupScript/openflixr_setup.config"
 readonly OPENFLIXR_FOLDERS=(downloads movies series music comics books)
@@ -73,7 +74,7 @@ config=(
     [CHANGE_PASS]=""
     [NETWORK]=""
     [OPENFLIXR_IP]=${LOCAL_IP}
-    [OPENFLIXR_SUBNET]=""
+    [OPENFLIXR_SUBNET]="255.255.255.0"
     [OPENFLIXR_GATEWAY]=""
     [OPENFLIXR_DNS]="127.0.0.1"
     [ACCESS]=""
@@ -225,13 +226,5 @@ main() {
     run_script 'save_config'
 
     run_script 'run_steps'
-
-    warning "System reboot needed. Please reboot your system when you are ready."
-    info "#############################"
-    info "#      Setup complete!      #"
-    info "#############################"
-    info "Be sure to head over to the Post-setup steps found here for what to do next:"
-    info "https://github.com/openflixr/Docs/wiki/Setup#post-setup-steps"
-    set_config "SETUP_COMPLETED" "Y"
 }
 main
