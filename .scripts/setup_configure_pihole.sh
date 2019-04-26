@@ -4,14 +4,19 @@ IFS=$'\n\t'
 
 setup_configure_pihole()
 {
+    local PIHOLE_DNS_3
     info "Updating PiHole settings"
-    local ROUTER_IP=$(ip route show | grep -i 'default via'| awk '{print $3 }')
+    if [[ "${config[NETWORK]}" == "static" ]]; then
+        PIHOLE_DNS_3=${config[OPENFLIXR_GATEWAY]}
+    else
+        PIHOLE_DNS_3=${ROUTER_IP}
+    fi
     if [[ $(grep -c "PIHOLE_DNS_3" "/etc/pihole/setupVars.conf") == 0 ]]; then
         info "- Adding Pi-hole DNS 'Custom 1'"
-        echo "PIHOLE_DNS_3=${config[OPENFLIXR_IP]}" >> "/etc/pihole/setupVars.conf"
+        echo "PIHOLE_DNS_3=${PIHOLE_DNS_3}" >> "/etc/pihole/setupVars.conf"
     else
         info "- Updating Pi-hole DNS 'Custom 1'"
-        sed -i 's/PIHOLE_DNS_3.*/PIHOLE_DNS_3='${config[OPENFLIXR_IP]}'/' /etc/pihole/setupVars.conf
+        sed -i 's/PIHOLE_DNS_3.*/PIHOLE_DNS_3='${PIHOLE_DNS_3}'/' /etc/pihole/setupVars.conf
     fi
     info "- Setting Pi-hole IPV4_ADDRESS"
     sed -i 's/IPV4_ADDRESS.*/IPV4_ADDRESS='${config[OPENFLIXR_IP]}'/' /etc/pihole/setupVars.conf
