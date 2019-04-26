@@ -63,6 +63,7 @@ step_network_configuration() {
 
         if [[ $networkconfig = 'dhcp' ]]; then
             info "Configuring for DHCP"
+            set_config "OPENFLIXR_IP" ${LOCAL_IP}
             done=1
         fi
 
