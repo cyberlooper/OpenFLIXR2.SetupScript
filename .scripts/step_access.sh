@@ -3,9 +3,10 @@ set -euo pipefail
 IFS=$'\n\t'
 
 step_access() {
+    local STEP_TITLE=${1:-"a${STEP_TITLE}"}
     access=$(whiptail \
                 --backtitle ${OF_BACKTITLE} \
-                --title "Step ${step_number}: ${step_name}" \
+                --title "${STEP_TITLE}" \
                 --clear \
                 --radiolist "How do you want to access OpenFLIXR?" \
                 0 0 2 \
@@ -19,16 +20,14 @@ step_access() {
         # Local access selected. Nothing else to do.
         info "OpenFLIXR access set to Local"
         set_config "LETSENCRYPT" "off"
-        set_config "OPENFLIXR_DOMAIN" $LOCAL_IP
     fi
 
     if [[ $access -eq 2 ]]; then
         # Configuring for Remote access.
         info "OpenFLIXR access set to Remote"
-        set_config "LETSENCRYPT" "on"
         domain=$(whiptail \
                 --backtitle ${OF_BACKTITLE} \
-                --title "Step ${step_number}: ${step_name} - Remote" \
+                --title "${STEP_TITLE} - Remote" \
                 --clear \
                 --ok-button "Next" \
                 --inputbox "Enter your domain (required to obtain certificate). If you don't have one, register one and then enter it here." \
@@ -39,7 +38,7 @@ step_access() {
 
         email=$(whiptail \
                 --backtitle ${OF_BACKTITLE} \
-                --title "Step ${step_number}: ${step_name} - Remote" \
+                --title "${STEP_TITLE} - Remote" \
                 --clear \
                 --ok-button "Next" \
                 --inputbox "Enter your e-mail address (required for lost key recovery)." \
@@ -56,7 +55,7 @@ step_access() {
 
         whiptail \
             --backtitle ${OF_BACKTITLE} \
-            --title "Step ${step_number}: ${step_name} - Remote" \
+            --title "${STEP_TITLE} - Remote" \
             --clear \
             --ok-button "Next" \
             --msgbox "${remote_message}" 0 0
@@ -64,10 +63,12 @@ step_access() {
 
         whiptail \
             --backtitle ${OF_BACKTITLE} \
-            --title "Step ${step_number}: ${step_name} - Remote" \
+            --title "${STEP_TITLE} - Remote" \
             --clear \
             --ok-button "Next" \
             --msgbox "Forward ports 80 and 443 on your router to your local IP (${LOCAL_IP})" 0 0
         run_script 'check_response' $?
+
+        set_config "LETSENCRYPT" "on"
     fi
 }
