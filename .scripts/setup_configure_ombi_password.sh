@@ -6,8 +6,6 @@ setup_configure_ombi_password()
 {
     if [[ ${config[CHANGE_PASS]} == "Y" && ${OPENFLIXR_PASSWORD_NEW} != "" ]]; then
         info "- Updating Password"
-    fi
-        OPENFLIXR_PASSWORD_OLD="notMyPassword"
         local result
         local password_old=${OPENFLIXR_PASSWORD_OLD}
         while true; do
@@ -36,4 +34,5 @@ setup_configure_ombi_password()
                 break
             fi
         done
+    fi
 }
