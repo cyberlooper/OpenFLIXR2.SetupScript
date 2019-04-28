@@ -13,7 +13,7 @@ setup_configure_ombi()
     ombi_settings=$(sed 's/"ApiKey":".*","IgnoreCertificateErrors"/"ApiKey":"'${API_KEYS[ombi]}'","IgnoreCertificateErrors"/' <<< $ombi_settings)
     debug "  Updating DB"
     sqlite3 /opt/Ombi/OmbiSettings.db "UPDATE GlobalSettings SET Content='$ombi_settings' WHERE SettingsName='OmbiSettings'"
-    info "Restarting Ombi"
+    info "- Restarting Ombi"
     service ombi restart
     sleep 10s
     run_script 'setup_configure_ombi_password'
