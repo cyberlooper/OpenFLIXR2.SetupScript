@@ -9,6 +9,7 @@ menu_config() {
     CONFIGOPTS+=("Configure Networking " "")
     CONFIGOPTS+=("Configure Access " "")
     CONFIGOPTS+=("Configure Pi-hole " "")
+    CONFIGOPTS+=("Configure Folders " "")
 
     local CONFIGCHOICE
     if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]]; then
@@ -50,6 +51,11 @@ menu_config() {
         "Configure Pi-hole ")
             info "Configuring Pi-hole only"
             run_script 'setup_configure_pihole' "${CONFIGCHOICE}"
+            CONFIG_COMPLETED="Y"
+            ;;
+        "Configure Folders ")
+            info "Configuring Folders only"
+            run_script 'setup_folder_creation'
             CONFIG_COMPLETED="Y"
             ;;
         "Cancel")
