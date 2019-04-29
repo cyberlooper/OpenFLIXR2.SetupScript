@@ -23,14 +23,19 @@ setup_configure_series_manager()
     fi
 
     log "  - Ombi"
-    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-    "ApiKey": "'${API_KEYS[sickrage]}'",
-    "qualityProfile": "default",
-    "Enabled": '$ENABLED_OMBI',
-    "Ip": "localhost",
-    "Port": 8081,
-    "SubDir": "sickrage"
-    }' 'http://localhost:3579/request/api/v1/settings/sickrage?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+    curl -s \
+        -X POST \
+        -H 'Content-Type: application/json' \
+        -H 'Accept: application/json' \
+        -H "ApiKey: ${API_KEYS[ombi]}" \
+        -d '{
+                "ApiKey": "'${API_KEYS[sickrage]}'",
+                "qualityProfile": "default",
+                "Enabled": '$ENABLED_OMBI',
+                "Ip": "localhost",
+                "Port": 8081,
+                "SubDir": "sickrage"
+            }' 'http://localhost:3579/request/api/v1/settings/sickrage' >> $LOG_FILE
 
     log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='sickrage_enable';"
@@ -111,14 +116,19 @@ setup_configure_series_manager()
     fi
 
     log "  - Ombi"
-    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-    "ApiKey": "'${API_KEYS[sickrage]}'",
-    "qualityProfile": "default",
-    "Enabled": '$ENABLED_OMBI',
-    "Ip": "localhost",
-    "Port": 8081,
-    "SubDir": "sonarr"
-    }' 'http://localhost:3579/request/api/v1/settings/sonarr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+    curl -s \
+        -X POST \
+        -H 'Content-Type: application/json' \
+        -H 'Accept: application/json' \
+        -H "ApiKey: ${API_KEYS[ombi]}" \
+        -d '{
+            "ApiKey": "'${API_KEYS[sickrage]}'",
+            "qualityProfile": "default",
+            "Enabled": '$ENABLED_OMBI',
+            "Ip": "localhost",
+            "Port": 8081,
+            "SubDir": "sonarr"
+        }' 'http://localhost:3579/request/api/v1/settings/sonarr' >> $LOG_FILE
 
     log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='sonarr_enable';"

@@ -23,13 +23,18 @@ setup_configure_movie_manager()
         ENABLED_OMBI="false"
     fi
     log "  - Ombi"
-    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-    "ApiKey": "'${API_KEYS[couchpotato]}'",
-    "Enabled": '$ENABLED_OMBI',
-    "Ip": "localhost",
-    "Port": 5050,
-    "SubDir": "couchpotato"
-    }' 'http://localhost:3579/request/api/v1/settings/couchpotato?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+    curl -s \
+        -X POST \
+        -H 'Content-Type: application/json' \
+        -H 'Accept: application/json' \
+        -H "ApiKey: ${API_KEYS[ombi]}" \
+        -d '{
+                "ApiKey": "'${API_KEYS[couchpotato]}'",
+                "Enabled": '$ENABLED_OMBI',
+                "Ip": "localhost",
+                "Port": 5050,
+                "SubDir": "couchpotato"
+            }' 'http://localhost:3579/request/api/v1/settings/couchpotato' >> $LOG_FILE 2>&1
 
     log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
@@ -205,13 +210,18 @@ setup_configure_movie_manager()
     fi
 
     log "  - Ombi"
-    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-    "ApiKey": "'${API_KEYS[radarr]}'",
-    "Enabled": '$ENABLED_OMBI',
-    "Ip": "localhost",
-    "Port": 5050,
-    "SubDir": "radarr"
-    }' 'http://localhost:3579/request/api/v1/settings/radarr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
+    curl -s \
+        -X POST \
+        -H 'Content-Type: application/json' \
+        -H 'Accept: application/json' \
+        -H "ApiKey: ${API_KEYS[ombi]}" \
+        -d '{
+                "ApiKey": "'${API_KEYS[radarr]}'",
+                "Enabled": '$ENABLED_OMBI',
+                "Ip": "localhost",
+                "Port": 5050,
+                "SubDir": "radarr"
+            }' 'http://localhost:3579/request/api/v1/settings/radarr' >> $LOG_FILE
 
     log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
