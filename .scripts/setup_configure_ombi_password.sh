@@ -19,10 +19,11 @@ setup_configure_ombi_password()
                                 \"username\":\"openflixr\",
                                 \"confirmNewPassword\":\"${OPENFLIXR_PASSWORD_NEW}\",
                                 \"currentPassword\":\"${password_old}\",
-                                \"password\":\"${OPENFLIXR_PASSWORD_NEW}\"}" \
-                    | jq '.successful' || echo 'error')
-
-            if [[ "${result}" == "true" ]]; then
+                                \"password\":\"${OPENFLIXR_PASSWORD_NEW}\"}" || echo 'error')
+            debug "  result=${result}"
+            result_successful=$(jq '.successful' <<< $result)
+            debug "  result_errors=${result}"
+            if [[ "${result_successful}" == "true" ]]; then
                 info "  Password updated successfully!"
                 break
             elif [[ ${password_old} != "openflixr" ]]; then
@@ -30,6 +31,7 @@ setup_configure_ombi_password()
             else
                 error "  Password did not update successfully =("
                 warning "  You will need to update it manually after the setup completes."
+                log "  result=${result}"
                 sleep 5s
                 break
             fi
