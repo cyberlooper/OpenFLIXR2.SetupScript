@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 update_self() {
     local BRANCH
-    BRANCH=${1:-origin/master}
+    BRANCH="${1:-${config[BRANCH]}}"
     if run_script 'question_prompt' Y "Would you like to update OpenFLIXR2 Setup Script to ${BRANCH} now?"; then
         info "Updating OpenFLIXR2 Setup Script to ${BRANCH}."
     else
@@ -18,4 +18,5 @@ update_self() {
     git for-each-ref --format '%(refname:short)' refs/heads | grep -v master | xargs git branch -D > /dev/null 2>&1 || true
     chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "OpenFLIXR2 Setup Script must be executable."
     info "OpenFLIXR2 Setup Script has been updated"
+    run_script 'set_config' "BRANCH" "${BRANCH}"
 }

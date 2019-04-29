@@ -97,6 +97,7 @@ config=(
     [SUBMITTED_LOGS]=""
     [SUBMITTED_LOGS_VERSION]=""
     [SETUP_COMPLETED]=""
+    [BRANCH]="master"
 )
 for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
     config[MOUNT_TYPE_$FOLDER]=""
@@ -122,7 +123,6 @@ readonly NC='\e[0m'
 # Log Functions
 readonly LOG_FILE="/var/log/openflixr_setup.log"
 sudo chown "${DETECTED_PUID:-$DETECTED_UNAME}":"${DETECTED_PGID:-$DETECTED_UGROUP}" "${LOG_FILE}" > /dev/null 2>&1 || true # This line should always use sudo
-#exec 2> ${LOG_FILE}
 log() {
     if [[ -v DEBUG && $DEBUG == 1 ]] || [[ -v VERBOSE && $VERBOSE == 1 ]] || [[ -v DEVMODE && $DEVMODE == 1 ]]; then
         echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" | tee -a "${LOG_FILE}" >&2;
@@ -220,6 +220,8 @@ main() {
     readonly LOCAL_COMMIT=$(git rev-parse --short master)
     readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
     readonly PROMPT="GUI"
+    run_script 'load_config'
+    run_script 'save_config'
 
     run_script 'symlink_setupopenflixr'
     # shellcheck source=/dev/null
@@ -234,8 +236,6 @@ main() {
     debug "PROMPT='${PROMPT:-}'"
 
     run_script 'check_version'
-    run_script 'load_config'
-    run_script 'save_config'
 
     if [[ ${config[SETUP_COMPLETED]} == "Y" ]]; then
         run_script 'menu_main'

@@ -42,11 +42,25 @@ step_wait() {
             percent=$(($elapsed/10))
 
             log "Checking updateof"
-            UPDATEOF_LOG_LINE=$(tail -1 $UPDATEOF_LOGFILE)
+            UPDATEOF_LOG_LINE=$(tail -1 $UPDATEOF_LOGFILE 2>> $LOG_FILE || echo "FAIL")
             log "Checking onlineupdate"
-            ONLINEUPDATE_LOG_LINE=$(tail -1 $ONLINEUPDATE_LOGFILE)
+            ONLINEUPDATE_LOG_LINE=$(tail -1 $ONLINEUPDATE_LOGFILE 2>> $LOG_FILE || echo "FAIL")
             log "Getting OpenFLIXR version"
-            OF_VERSION_FULL=$(grep -o "^[0-9]\.[0-9]\.[0-9]" /opt/openflixr/version)
+            if [[ -f "/opt/openflixr/version" ]]; then
+                OF_VERSION_FULL=$(grep -o "^[0-9]\.[0-9]\.[0-9]" "/opt/openflixr/version" 2>> $LOG_FILE || echo "FAIL")
+                if [[ ${OF_VERSION_FULL} == "FAIL" ]]; then
+                    ERROR_MSG="Could not get OpenFLIXR version from system file"
+                    echo -e "XXX\n100\Failure!\nXXX"
+                    WAIT_STATUS=666
+                    break
+                fi
+            else
+                OF_VERSION_FULL="FAIL"
+                ERROR_MSG="OpenFLIXR version file could not be found"
+                echo -e "XXX\n100\Failure!\nXXX"
+                WAIT_STATUS=666
+                break
+            fi
             OF_VERSION_MAJOR=$(cut -d'.' -f1 <<< $OF_VERSION_FULL)
             OF_VERSION_MINOR=$(cut -d'.' -f2 <<< $OF_VERSION_FULL)
             log "Getting OpenFLIXR web version"

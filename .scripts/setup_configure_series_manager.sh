@@ -21,15 +21,29 @@ setup_configure_series_manager()
         ENABLED_HTPC="0"
         ENABLED_OMBI="false"
     fi
-    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-    "ApiKey": "'${API_KEYS[sickrage]}'",
-    "qualityProfile": "default",
-    "Enabled": '$ENABLED_OMBI',
-    "Ip": "localhost",
-    "Port": 8081,
-    "SubDir": "sickrage"
-    }' 'http://localhost:3579/request/api/v1/settings/sickrage?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
+    log "  - Ombi"
+    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "    ") == "200" ]]; then
+        curl -s \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            -H "ApiKey: ${API_KEYS[ombi]}" \
+            -d '{
+                    "ApiKey": "'${API_KEYS[sickrage]}'",
+                    "qualityProfile": "default",
+                    "Enabled": '$ENABLED_OMBI',
+                    "Ip": "localhost",
+                    "Port": 8081,
+                    "SubDir": "sickrage"
+                }' 'http://localhost:3579/request/api/v1/settings/sickrage' >> $LOG_FILE
+    else
+        error "    Ombi was not ready to receive requests after 30s..."
+        warning "    You will need to manually configure Sickchill (Sickrage) in Ombi after setup completes."
+        sleep 5s
+    fi
+
+    log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='sickrage_enable';"
 
     ## anidb
@@ -106,15 +120,29 @@ setup_configure_series_manager()
         ENABLED_HTPC="0"
         ENABLED_OMBI="false"
     fi
-    curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
-    "ApiKey": "'${API_KEYS[sickrage]}'",
-    "qualityProfile": "default",
-    "Enabled": '$ENABLED_OMBI',
-    "Ip": "localhost",
-    "Port": 8081,
-    "SubDir": "sonarr"
-    }' 'http://localhost:3579/request/api/v1/settings/sonarr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
+    log "  - Ombi"
+    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "    ") == "200" ]]; then
+        curl -s \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            -H "ApiKey: ${API_KEYS[ombi]}" \
+            -d '{
+                "ApiKey": "'${API_KEYS[sickrage]}'",
+                "qualityProfile": "default",
+                "Enabled": '$ENABLED_OMBI',
+                "Ip": "localhost",
+                "Port": 8081,
+                "SubDir": "sonarr"
+            }' 'http://localhost:3579/request/api/v1/settings/sonarr' >> $LOG_FILE
+    else
+        error "    Ombi was not ready to receive requests after 30s..."
+        warning "    You will need to manually configure Sonarr in Ombi after setup completes."
+        sleep 5s
+    fi
+
+    log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='sonarr_enable';"
 
 }
