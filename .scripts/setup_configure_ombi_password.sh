@@ -20,7 +20,7 @@ setup_configure_ombi_password()
                                 \"confirmNewPassword\":\"${OPENFLIXR_PASSWORD_NEW}\",
                                 \"currentPassword\":\"${password_old}\",
                                 \"password\":\"${OPENFLIXR_PASSWORD_NEW}\"}" || echo 'error')
-            debug "  result=${result}"
+            log "  result=${result}"
             result_successful=$(jq '.successful' <<< $result)
             debug "  result_errors=${result}"
             if [[ "${result_successful}" == "true" ]]; then
