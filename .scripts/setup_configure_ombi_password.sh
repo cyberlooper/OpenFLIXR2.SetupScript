@@ -8,6 +8,7 @@ setup_configure_ombi_password()
         info "- Updating Password"
         local result
         local password_old=${OPENFLIXR_PASSWORD_OLD}
+        local openflixr_ombi_id=$(sqlite3 /opt/Ombi/Ombi.db "SELECT Id FROM AspNetUsers WHERE NormalizedUserName='OPENFLIXR';")
         while true; do
             debug "  password_old=${password_old}"
             result=$(curl -s -X PUT "http://localhost:3579/api/v1/Identity/local" \
@@ -15,11 +16,12 @@ setup_configure_ombi_password()
                         -H "ApiKey: ${API_KEYS[ombi]}" \
                         -H "Content-Type: application/json-patch+json" \
                         -d "{
-                                \"id\":\"3fcf1b4e-743a-4a00-a75c-a9675f7cea6a\",
+                                \"id\":\"${openflixr_ombi_id}\",
                                 \"username\":\"openflixr\",
                                 \"confirmNewPassword\":\"${OPENFLIXR_PASSWORD_NEW}\",
                                 \"currentPassword\":\"${password_old}\",
-                                \"password\":\"${OPENFLIXR_PASSWORD_NEW}\"}" || echo 'error')
+                                \"password\":\"${OPENFLIXR_PASSWORD_NEW}\"
+                            }" || echo 'error')
             log "  result=${result}"
             result_successful=$(jq '.successful?' <<< $result)
             log "  result_successful=${result_successful}"
