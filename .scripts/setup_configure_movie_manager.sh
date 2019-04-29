@@ -23,19 +23,26 @@ setup_configure_movie_manager()
         ENABLED_OMBI="false"
     fi
     log "  - Ombi"
-    curl -s \
-        -X POST \
-        -H 'Content-Type: application/json' \
-        -H 'Accept: application/json' \
-        -H "ApiKey: ${API_KEYS[ombi]}" \
-        -d '{
-                "ApiKey": "'${API_KEYS[couchpotato]}'",
-                "Enabled": '$ENABLED_OMBI',
-                "Ip": "localhost",
-                "Port": 5050,
-                "SubDir": "couchpotato"
-            }' 'http://localhost:3579/request/api/v1/settings/couchpotato' >> $LOG_FILE 2>&1
-
+    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request") == "200" ]]; then
+        curl -s \
+            -X POST \
+            "http://localhost:3579/api/v1/Settings/CouchPotato" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -H "ApiKey: ${API_KEYS[ombi]}" \
+            -d "{
+                    \"ApiKey\": \"${API_KEYS[couchpotato]}\",
+                    \"Enabled\": $ENABLED_OMBI,
+                    \"Ip\": \"localhost\",
+                    \"Port\": 5050,
+                    \"SubDir\": \"couchpotato\"
+                }" >> $LOG_FILE 2>&1
+    else
+        error "    Ombi was not ready to receive requests after 30s..."
+        warning "    You will need to manually configure couchpotato after setup completes."
+        sleep 5s
+    fi
+fatal "DEV"
     log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 
