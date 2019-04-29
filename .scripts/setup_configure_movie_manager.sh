@@ -31,7 +31,7 @@ setup_configure_movie_manager()
     "SubDir": "couchpotato"
     }' 'http://localhost:3579/request/api/v1/settings/couchpotato?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
-    #sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
+    sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 
     if [ "$imdb" != '' ]; then
         info "  Connecting to IMDB"
@@ -211,5 +211,5 @@ setup_configure_movie_manager()
     "SubDir": "radarr"
     }' 'http://localhost:3579/request/api/v1/settings/radarr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
-    #sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
+    sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 }
