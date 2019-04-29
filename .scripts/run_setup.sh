@@ -58,5 +58,5 @@ run_setup()
     info "#############################"
     info "Be sure to head over to the Post-setup steps found here for what to do next:"
     info "https://github.com/openflixr/Docs/wiki/Setup#post-setup-steps"
-    set_config "SETUP_COMPLETED" "Y"
+    run_script 'set_config' "SETUP_COMPLETED" "Y"
 }
