@@ -19,51 +19,22 @@ setup_configure_ombi()
         info "  Found!"
     else
         info "  Not found... Adding openflixr user"
-        curl -X POST "http://localhost:3579/api/v1/Identity" \
-            -H "accept: application/json" \
-            -H "ApiKey: ${API_KEYS[ombi]}" \
-            -H "Content-Type: application/json-patch+json" \
-            -d "{
-                    \"alias\":\"\",
-                    \"claims\":[
-                        {\"value\":\"ReceivesNewsletter\",\"enabled\":false},
-                        {\"value\":\"RequestMusic\",\"enabled\":false},
-                        {\"value\":\"AutoApproveMusic\",\"enabled\":false},
-                        {\"value\":\"ManageOwnRequests\",\"enabled\":false},
-                        {\"value\":\"EditCustomPage\",\"enabled\":false},
-                        {\"value\":\"AutoApproveMovie\",\"enabled\":false},
-                        {\"value\":\"Admin\",\"enabled\":true},
-                        {\"value\":\"AutoApproveTv\",\"enabled\":false},
-                        {\"value\":\"PowerUser\",\"enabled\":false},
-                        {\"value\":\"RequestMovie\",\"enabled\":false},
-                        {\"value\":\"RequestTv\",\"enabled\":false},
-                        {\"value\":\"Disabled\",\"enabled\":false}
-                    ],
-                    \"emailAddress\":\"\",
-                    \"id\":\"\",
-                    \"password\":\"openflixr\",
-                    \"userName\":\"openflixr\",
-                    \"userType\":1,
-                    \"checked\":false,
-                    \"hasLoggedIn\":false,
-                    \"lastLoggedIn\":\"2019-04-29T18:07:24.250Z\",
-                    \"episodeRequestLimit\":0,
-                    \"movieRequestLimit\":0,
-                    \"userAccessToken\":\"\",
-                    \"musicRequestLimit\":0,
-                    \"episodeRequestQuota\":null,
-                    \"movieRequestQuota\":null,
-                    \"userQualityProfiles\":{
-                        \"radarrQualityProfile\":0,
-                        \"radarrRootPath\":0,
-                        \"sonarrQualityProfile\":0,
-                        \"sonarrQualityProfileAnime\":0,
-                        \"sonarrRootPath\":0,
-                        \"sonarrRootPathAnime\":0
-                    },
-                    \"musicRequestQuota\":null
-                }"
-        info "  Added!"
+        local result
+        result=$(curl -kL \
+            -X POST \
+            -H "Content-Type: application/json" \
+            --data "{ \"Username\": \"openflixr\", \"Password\": \"openflixr\", usePlexAdminAccount: false}" \
+            "http://localhost:3579/request/api/v1/Identity/Wizard/")
+        log "  result=${result}"
+        local result_successful
+        result_successful=$(jq '.result?' <<< $result)
+        result_successful=$(jq '.successful?' <<< $result)
+        if [[ $result_successful == "true" ]]
+            info "  Added!"
+        else
+            error "  Unable to add openflixr user to Ombi"
+            warning "  You will need to update it manually after the setup completes."
+        fi
     fi
     info "- Restarting Ombi"
     service ombi restart
