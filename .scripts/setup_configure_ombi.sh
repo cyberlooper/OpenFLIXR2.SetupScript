@@ -29,7 +29,7 @@ setup_configure_ombi()
         local result_successful
         result_successful=$(jq '.result?' <<< $result)
         result_successful=$(jq '.successful?' <<< $result)
-        if [[ $result_successful == "true" ]]
+        if [[ $result_successful == "true" ]]; then
             info "  Added!"
         else
             error "  Unable to add openflixr user to Ombi"
