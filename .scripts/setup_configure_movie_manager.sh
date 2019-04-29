@@ -23,7 +23,7 @@ setup_configure_movie_manager()
         ENABLED_OMBI="false"
     fi
     log "  - Ombi"
-    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request") == "200" ]]; then
+    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "    ") == "200" ]]; then
         curl -s \
             -X POST \
             "http://localhost:3579/api/v1/Settings/CouchPotato" \
@@ -39,10 +39,10 @@ setup_configure_movie_manager()
                 }" >> $LOG_FILE 2>&1
     else
         error "    Ombi was not ready to receive requests after 30s..."
-        warning "    You will need to manually configure couchpotato after setup completes."
+        warning "    You will need to manually configure Couchpotato in Ombi after setup completes."
         sleep 5s
     fi
-fatal "DEV"
+
     log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 
@@ -217,18 +217,24 @@ fatal "DEV"
     fi
 
     log "  - Ombi"
-    curl -s \
-        -X POST \
-        -H 'Content-Type: application/json' \
-        -H 'Accept: application/json' \
-        -H "ApiKey: ${API_KEYS[ombi]}" \
-        -d '{
-                "ApiKey": "'${API_KEYS[radarr]}'",
-                "Enabled": '$ENABLED_OMBI',
-                "Ip": "localhost",
-                "Port": 5050,
-                "SubDir": "radarr"
-            }' 'http://localhost:3579/request/api/v1/settings/radarr' >> $LOG_FILE
+    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "    ") == "200" ]]; then
+        curl -s \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            -H "ApiKey: ${API_KEYS[ombi]}" \
+            -d '{
+                    "ApiKey": "'${API_KEYS[radarr]}'",
+                    "Enabled": '$ENABLED_OMBI',
+                    "Ip": "localhost",
+                    "Port": 5050,
+                    "SubDir": "radarr"
+                }' 'http://localhost:3579/request/api/v1/settings/radarr' >> $LOG_FILE
+    else
+        error "    Ombi was not ready to receive requests after 30s..."
+        warning "    You will need to manually configure Radarr in Ombi after setup completes."
+        sleep 5s
+    fi
 
     log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
