@@ -21,8 +21,8 @@ setup_configure_ombi_password()
                                 \"currentPassword\":\"${password_old}\",
                                 \"password\":\"${OPENFLIXR_PASSWORD_NEW}\"}" || echo 'error')
             log "  result=${result}"
-            result_successful=$(jq '.successful' <<< $result)
-            debug "  result_errors=${result}"
+            result_successful=$(jq '.successful?' <<< $result)
+            log "  result_successful=${result_successful}"
             if [[ "${result_successful}" == "true" ]]; then
                 info "  Password updated successfully!"
                 break
