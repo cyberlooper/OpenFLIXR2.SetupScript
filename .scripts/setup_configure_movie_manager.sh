@@ -22,7 +22,7 @@ setup_configure_movie_manager()
         ENABLED_HTPC="0"
         ENABLED_OMBI="false"
     fi
-
+    log "  - Ombi"
     curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
     "ApiKey": "'${API_KEYS[couchpotato]}'",
     "Enabled": '$ENABLED_OMBI',
@@ -31,6 +31,7 @@ setup_configure_movie_manager()
     "SubDir": "couchpotato"
     }' 'http://localhost:3579/request/api/v1/settings/couchpotato?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
+    log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 
     if [ "$imdb" != '' ]; then
@@ -203,6 +204,7 @@ setup_configure_movie_manager()
         ENABLED_OMBI="false"
     fi
 
+    log "  - Ombi"
     curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
     "ApiKey": "'${API_KEYS[radarr]}'",
     "Enabled": '$ENABLED_OMBI',
@@ -211,5 +213,6 @@ setup_configure_movie_manager()
     "SubDir": "radarr"
     }' 'http://localhost:3579/request/api/v1/settings/radarr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
+    log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 }

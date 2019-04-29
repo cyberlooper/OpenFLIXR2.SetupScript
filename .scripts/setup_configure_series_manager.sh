@@ -21,6 +21,8 @@ setup_configure_series_manager()
         ENABLED_HTPC="0"
         ENABLED_OMBI="false"
     fi
+
+    log "  - Ombi"
     curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
     "ApiKey": "'${API_KEYS[sickrage]}'",
     "qualityProfile": "default",
@@ -30,6 +32,7 @@ setup_configure_series_manager()
     "SubDir": "sickrage"
     }' 'http://localhost:3579/request/api/v1/settings/sickrage?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
+    log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='sickrage_enable';"
 
     ## anidb
@@ -106,6 +109,8 @@ setup_configure_series_manager()
         ENABLED_HTPC="0"
         ENABLED_OMBI="false"
     fi
+
+    log "  - Ombi"
     curl -s -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' -d '{
     "ApiKey": "'${API_KEYS[sickrage]}'",
     "qualityProfile": "default",
@@ -115,6 +120,7 @@ setup_configure_series_manager()
     "SubDir": "sonarr"
     }' 'http://localhost:3579/request/api/v1/settings/sonarr?apikey='${API_KEYS[ombi]}'' >> $LOG_FILE
 
+    log "  - HTPC"
     sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='sonarr_enable';"
 
 }
