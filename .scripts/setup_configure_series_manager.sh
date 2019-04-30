@@ -133,7 +133,7 @@ setup_configure_series_manager()
                 "qualityProfile": "default",
                 "Enabled": '$ENABLED_OMBI',
                 "Ip": "localhost",
-                "Port": 8081,
+                "Port": 7979,
                 "SubDir": "sonarr"
             }' 'http://localhost:3579/request/api/v1/settings/sonarr' >> $LOG_FILE
     else
