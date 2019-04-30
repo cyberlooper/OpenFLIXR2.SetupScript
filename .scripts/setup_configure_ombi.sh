@@ -28,7 +28,6 @@ setup_configure_ombi()
         log "  result=${result}"
         local result_successful
         result_successful=$(jq '.result?' <<< $result)
-        result_successful=$(jq '.successful?' <<< $result)
         if [[ $result_successful == "true" ]]; then
             info "  Added!"
         else
