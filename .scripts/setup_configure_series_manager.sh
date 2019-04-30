@@ -129,11 +129,11 @@ setup_configure_series_manager()
             -H 'Accept: application/json' \
             -H "ApiKey: ${API_KEYS[ombi]}" \
             -d '{
-                "ApiKey": "'${API_KEYS[sickrage]}'",
+                "ApiKey": "'${API_KEYS[sonarr]}'",
                 "qualityProfile": "default",
                 "Enabled": '$ENABLED_OMBI',
                 "Ip": "localhost",
-                "Port": 8081,
+                "Port": 7979,
                 "SubDir": "sonarr"
             }' 'http://localhost:3579/request/api/v1/settings/sonarr' >> $LOG_FILE
     else

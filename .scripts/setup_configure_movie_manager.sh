@@ -227,7 +227,7 @@ setup_configure_movie_manager()
                     "ApiKey": "'${API_KEYS[radarr]}'",
                     "Enabled": '$ENABLED_OMBI',
                     "Ip": "localhost",
-                    "Port": 5050,
+                    "Port": 7878,
                     "SubDir": "radarr"
                 }' 'http://localhost:3579/request/api/v1/settings/radarr' >> $LOG_FILE
     else
