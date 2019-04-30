@@ -10,6 +10,7 @@ menu_config() {
     CONFIGOPTS+=("Configure Access " "")
     CONFIGOPTS+=("Configure Pi-hole " "")
     CONFIGOPTS+=("Configure Folders " "")
+    CONFIGOPTS+=("Various fixes " "")
 
     local CONFIGCHOICE
     if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]]; then
@@ -57,6 +58,13 @@ menu_config() {
             info "Configuring Folders only"
             run_script 'setup_folder_creation'
             CONFIG_COMPLETED="Y"
+            ;;
+        "Various fixes ")
+            info "Running fixes only"
+            run_script 'setup_fixes_sonarr'
+            run_script 'setup_fixes_permissions'
+            run_script 'setup_fixes_nginx'
+            run_script 'setup_fixes_updater'
             ;;
         "Cancel")
             info "Returning to Main Menu."
