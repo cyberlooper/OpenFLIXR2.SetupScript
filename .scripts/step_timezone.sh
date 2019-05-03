@@ -17,10 +17,10 @@ step_timezone() {
     if [[ "$CHANGE_TZ" == "Y" ]]; then
         # Add domains that tzupdate uses for timezone lookup to pi-hole
         info "Adding some domains to pi-hole for timezone detection"
-        pihole -w ip-api.com > /dev/null
-        pihole -w freegeoip.app > /dev/null
-        pihole -w geoip.nekudo.com > /dev/null
-        pihole -w timezoneapi.io > /dev/null
+        pihole -w ip-api.com 2>&1 >> $LOG_FILE
+        pihole -w freegeoip.app 2>&1 >> $LOG_FILE
+        pihole -w geoip.nekudo.com 2>&1 >> $LOG_FILE
+        pihole -w timezoneapi.io 2>&1 >> $LOG_FILE
 
         # Run timezone selector
         run_script 'tzSelectionMenu' ${OF_BACKTITLE}
@@ -37,10 +37,10 @@ step_timezone() {
 
         # Remove domains that tzupdate uses for timezone lookup to pihole
         info "Removing some domains to pi-hole for timezone detection"
-        pihole -w -d ip-api.com > /dev/null
-        pihole -w -d freegeoip.app > /dev/null
-        pihole -w -d geoip.nekudo.com > /dev/null
-        pihole -w -d timezoneapi.io > /dev/null
+        pihole -w -d ip-api.com 2>&1 >> $LOG_FILE
+        pihole -w -d freegeoip.app 2>&1 >> $LOG_FILE
+        pihole -w -d geoip.nekudo.com 2>&1 >> $LOG_FILE
+        pihole -w -d timezoneapi.io 2>&1 >> $LOG_FILE
     else
         log "Keeping current timezone setting."
     fi
