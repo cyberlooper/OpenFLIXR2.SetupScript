@@ -14,11 +14,11 @@ setup_configure_movie_manager()
     crudini --set /opt/CouchPotato/settings.conf sabnzbd api_key ${API_KEYS[sabnzbd]}
 
     if [ "${config[MOVIE_MANAGER]}" == 'couchpotato' ]; then
-        info "  Enabling in OMBI and HTPC"
+        info "  Enabling in OMBI"
         ENABLED_HTPC="on"
         ENABLED_OMBI="true"
     else
-        info "  Disabling in OMBI and HTPC"
+        info "  Disabling in OMBI"
         ENABLED_HTPC="0"
         ENABLED_OMBI="false"
     fi
@@ -42,9 +42,6 @@ setup_configure_movie_manager()
         warning "    You will need to manually configure Couchpotato in Ombi after setup completes."
         sleep 5s
     fi
-
-    log "  - HTPC"
-    sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 
     if [ "$imdb" != '' ]; then
         info "  Connecting to IMDB"
@@ -207,12 +204,10 @@ setup_configure_movie_manager()
     fi
 
     if [ "${config[MOVIE_MANAGER]}" == 'radarr' ]; then
-        info "- Enabling in OMBI and HTPC"
-        ENABLED_HTPC="on"
+        info "- Enabling in OMBI"
         ENABLED_OMBI="true"
     else
-        info "- Disabling in OMBI and HTPC"
-        ENABLED_HTPC="0"
+        info "- Disabling in OMBI"
         ENABLED_OMBI="false"
     fi
 
@@ -235,7 +230,4 @@ setup_configure_movie_manager()
         warning "    You will need to manually configure Radarr in Ombi after setup completes."
         sleep 5s
     fi
-
-    log "  - HTPC"
-    sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 }

@@ -40,43 +40,4 @@ setup_configure_ombi()
     sleep 10s
 
     run_script 'setup_configure_ombi_password'
-
-    log "- Enabling OMBI in HTPC"
-    sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
-                                                    VALUES (  (SELECT id FROM setting WHERE key='ombi_enable'),
-                                                            'ombi_enable',
-                                                            'on'
-                                                        );"
-    sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
-                                                    VALUES (  (SELECT id FROM setting WHERE key='ombi_name'),
-                                                            'ombi_name',
-                                                            'Ombi'
-                                                        );"
-    sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
-                                                    VALUES (  (SELECT id FROM setting WHERE key='ombi_host'),
-                                                            'ombi_host',
-                                                            'localhost'
-                                                        );"
-    sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
-                                                    VALUES (  (SELECT id FROM setting WHERE key='ombi_port'),
-                                                            'ombi_port',
-                                                            '3579'
-                                                        );"
-    sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
-                                                    VALUES (  (SELECT id FROM setting WHERE key='ombi_username'),
-                                                            'ombi_username',
-                                                            'openflixr'
-                                                        );"
-    local OMBI_PASSWORD
-    if [[ ${config[CHANGE_PASS]} == "Y" && ${OPENFLIXR_PASSWORD_NEW} != "" ]]; then
-        OMBI_PASSWORD=${OPENFLIXR_PASSWORD_NEW}
-    else
-        OMBI_PASSWORD=${OPENFLIXR_PASSWORD_OLD}
-    fi
-
-    sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
-                                                    VALUES (  (SELECT id FROM setting WHERE key='ombi_password'),
-                                                            'ombi_password',
-                                                            '${OMBI_PASSWORD}'
-                                                        );"
 }
