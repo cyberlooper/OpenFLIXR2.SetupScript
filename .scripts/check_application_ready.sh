@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 check_application_ready() {
     for (( i=1; i<=30; i++ )); do
-        status=$(curl -sL -w "%{http_code}\\n" "http://localhost:3579/request" -o /dev/null)
+        status=$(curl -sL -w "%{http_code}\\n" "${1}" -o /dev/null)
         if [[ $status = "200" ]]; then
             log "${2:-}Received ${status} from ${1}"
             echo "${status}"
