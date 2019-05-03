@@ -12,36 +12,6 @@ setup_configure_series_manager()
     info "  Updating API Key"
     crudini --set /opt/sickrage/config.ini General api_key ${API_KEYS[sickrage]}
 
-    if [ "${config[SERIES_MANAGER]}" == 'sickrage' ]; then
-        info "  Enabling in OMBI"
-        ENABLED_HTPC="on"
-        ENABLED_OMBI="true"
-    else
-        info "  Disabling in OMBI"
-        ENABLED_OMBI="false"
-    fi
-
-    log "  - Ombi"
-    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "    ") == "200" ]]; then
-        curl -s \
-            -X POST \
-            -H 'Content-Type: application/json' \
-            -H 'Accept: application/json' \
-            -H "ApiKey: ${API_KEYS[ombi]}" \
-            -d '{
-                    "ApiKey": "'${API_KEYS[sickrage]}'",
-                    "qualityProfile": "default",
-                    "Enabled": '$ENABLED_OMBI',
-                    "Ip": "localhost",
-                    "Port": 8081,
-                    "SubDir": "sickrage"
-                }' 'http://localhost:3579/request/api/v1/settings/sickrage' >> $LOG_FILE
-    else
-        error "    Ombi was not ready to receive requests after 30s..."
-        warning "    You will need to manually configure Sickchill (Sickrage) in Ombi after setup completes."
-        sleep 5s
-    fi
-
     ## anidb
     if [ "$anidbpass" != '' ]; then
         info "  Connecting to AniDB"
@@ -119,34 +89,5 @@ setup_configure_series_manager()
     else
         error "    SABnzb could not be found in Sonarr"
         warning "    You will need to manually configure NZBget in Sonarr after setup completes."
-    fi
-
-    if [ "${config[SERIES_MANAGER]}" == 'sonarr' ]; then
-        info "  Enabling in OMBI"
-        ENABLED_OMBI="true"
-    else
-        info "  Disabling in OMBI"
-        ENABLED_OMBI="false"
-    fi
-
-    log "  - Ombi"
-    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "    ") == "200" ]]; then
-        curl -s \
-            -X POST \
-            -H 'Content-Type: application/json' \
-            -H 'Accept: application/json' \
-            -H "ApiKey: ${API_KEYS[ombi]}" \
-            -d '{
-                "ApiKey": "'${API_KEYS[sonarr]}'",
-                "qualityProfile": "default",
-                "Enabled": '$ENABLED_OMBI',
-                "Ip": "localhost",
-                "Port": 7979,
-                "SubDir": "sonarr"
-            }' 'http://localhost:3579/request/api/v1/settings/sonarr' >> $LOG_FILE
-    else
-        error "    Ombi was not ready to receive requests after 30s..."
-        warning "    You will need to manually configure Sonarr in Ombi after setup completes."
-        sleep 5s
     fi
 }
