@@ -8,21 +8,21 @@ step_network_configuration() {
     NETWORKOPTS+=("DHCP " "")
     NETWORKOPTS+=("Static " "")
 
-    local CONFIGCHOICE
-    if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]]; then
-        CONFIGCHOICE="Cancel"
-    else
-        CONFIGCHOICE=$(whiptail \
-                        --backtitle ${OF_BACKTITLE} \
-                        --title "${STEP_TITLE}" \
-                        --menu "Choose network configuration type" \
-                        0 0 0 "${NETWORKOPTS[@]}" \
-                        3>&1 1>&2 2>&3 || echo "Cancel")
-    fi
-    run_script 'check_response' $?
-
     done=0
     while [[ ! $done = 1 ]]; do
+        local CONFIGCHOICE
+        if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]]; then
+            CONFIGCHOICE="Cancel"
+        else
+            CONFIGCHOICE=$(whiptail \
+                            --backtitle ${OF_BACKTITLE} \
+                            --title "${STEP_TITLE}" \
+                            --menu "Choose network configuration type" \
+                            0 0 0 "${NETWORKOPTS[@]}" \
+                            3>&1 1>&2 2>&3 || echo "Cancel")
+        fi
+        run_script 'check_response' $?
+
         case "${CONFIGCHOICE}" in
             "Static ")
                 set_config "NETWORK" "static"

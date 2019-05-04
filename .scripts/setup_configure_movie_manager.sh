@@ -13,47 +13,15 @@ setup_configure_movie_manager()
     crudini --set /opt/CouchPotato/settings.conf core api_key ${API_KEYS[couchpotato]}
     crudini --set /opt/CouchPotato/settings.conf sabnzbd api_key ${API_KEYS[sabnzbd]}
 
-    if [ "${config[MOVIE_MANAGER]}" == 'couchpotato' ]; then
-        info "  Enabling in OMBI and HTPC"
-        ENABLED_HTPC="on"
-        ENABLED_OMBI="true"
-    else
-        info "  Disabling in OMBI and HTPC"
-        ENABLED_HTPC="0"
-        ENABLED_OMBI="false"
-    fi
-    log "  - Ombi"
-    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "    ") == "200" ]]; then
-        curl -s \
-            -X POST \
-            "http://localhost:3579/api/v1/Settings/CouchPotato" \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/json" \
-            -H "ApiKey: ${API_KEYS[ombi]}" \
-            -d "{
-                    \"ApiKey\": \"${API_KEYS[couchpotato]}\",
-                    \"Enabled\": $ENABLED_OMBI,
-                    \"Ip\": \"localhost\",
-                    \"Port\": 5050,
-                    \"SubDir\": \"couchpotato\"
-                }" >> $LOG_FILE 2>&1
-    else
-        error "    Ombi was not ready to receive requests after 30s..."
-        warning "    You will need to manually configure Couchpotato in Ombi after setup completes."
-        sleep 5s
-    fi
-
-    log "  - HTPC"
-    sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
-
-    if [ "$imdb" != '' ]; then
-        info "  Connecting to IMDB"
-        crudini --set /opt/CouchPotato/settings.conf imdb automation_urls $imdb
-        crudini --set /opt/CouchPotato/settings.conf imdb automation_urls_use 1
-    else
-        crudini --set /opt/CouchPotato/settings.conf imdb automation_urls
-        crudini --set /opt/CouchPotato/settings.conf imdb automation_urls_use 0
-    fi
+    # TODO: Revisit
+    # if [ "$imdb" != '' ]; then
+    #     info "  Connecting to IMDB"
+    #     crudini --set /opt/CouchPotato/settings.conf imdb automation_urls $imdb
+    #     crudini --set /opt/CouchPotato/settings.conf imdb automation_urls_use 1
+    # else
+    #     crudini --set /opt/CouchPotato/settings.conf imdb automation_urls
+    #     crudini --set /opt/CouchPotato/settings.conf imdb automation_urls_use 0
+    # fi
 
     info "- Radarr"
     info "  Updating API Key"
@@ -205,37 +173,4 @@ setup_configure_movie_manager()
     else
         warning "Unable to find '/root/.config/Radarr/nzbdrone.db'. Can't update any other Radarr settings"
     fi
-
-    if [ "${config[MOVIE_MANAGER]}" == 'radarr' ]; then
-        info "- Enabling in OMBI and HTPC"
-        ENABLED_HTPC="on"
-        ENABLED_OMBI="true"
-    else
-        info "- Disabling in OMBI and HTPC"
-        ENABLED_HTPC="0"
-        ENABLED_OMBI="false"
-    fi
-
-    log "  - Ombi"
-    if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "    ") == "200" ]]; then
-        curl -s \
-            -X POST \
-            -H 'Content-Type: application/json' \
-            -H 'Accept: application/json' \
-            -H "ApiKey: ${API_KEYS[ombi]}" \
-            -d '{
-                    "ApiKey": "'${API_KEYS[radarr]}'",
-                    "Enabled": '$ENABLED_OMBI',
-                    "Ip": "localhost",
-                    "Port": 7878,
-                    "SubDir": "radarr"
-                }' 'http://localhost:3579/request/api/v1/settings/radarr' >> $LOG_FILE
-    else
-        error "    Ombi was not ready to receive requests after 30s..."
-        warning "    You will need to manually configure Radarr in Ombi after setup completes."
-        sleep 5s
-    fi
-
-    log "  - HTPC"
-    sqlite3 /opt/HTPCManager/userdata/database.db "UPDATE setting SET val='${ENABLED_HTPC}' where key='couchpotato_enable';"
 }

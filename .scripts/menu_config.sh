@@ -8,6 +8,9 @@ menu_config() {
     CONFIGOPTS+=("Change Password " "")
     CONFIGOPTS+=("Configure Networking " "")
     CONFIGOPTS+=("Configure Access " "")
+    CONFIGOPTS+=("Configure Movie Manager " "")
+    CONFIGOPTS+=("Configure Series Manager " "")
+    CONFIGOPTS+=("Configure NZB Downloader " "")
     CONFIGOPTS+=("Configure Pi-hole " "")
     CONFIGOPTS+=("Configure Folders " "")
     CONFIGOPTS+=("Various fixes " "")
@@ -49,6 +52,48 @@ menu_config() {
             run_script 'setup_configure_letsencrypt'
             CONFIG_COMPLETED="Y"
             ;;
+        "Configure Movie Manager ")
+            info "Configuring Movie Manager only"
+            run_script 'step_movie_manager' "${CONFIGCHOICE}"
+            # TODO: Refactor API Key retrieval for specific service
+            declare -A API_KEYS
+            info "- Retrieving API Key for Couchpotato..."
+            API_KEYS[couchpotato]=$(grep "^couchpotato" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            info "- Retrieving API Key for Radarr..."
+            API_KEYS[radarr]=$(grep "^radarr" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            info "- Retrieving API Key for SabNZB..."
+            API_KEYS[sabnzbd]=$(grep "^sabnzbd" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            info "- Retrieving API Key for NZBHydra..."
+            API_KEYS[nzbhydra2]=$(grep "^nzbhydra2" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            run_script 'setup_configure_movie_manager'
+            CONFIG_COMPLETED="Y"
+            ;;
+        "Configure Series Manager ")
+            info "Configuring Series Manager only"
+            run_script 'step_series_manager' "${CONFIGCHOICE}"
+            # TODO: Refactor API Key retrieval for specific service
+            declare -A API_KEYS
+            info "- Retrieving API Key for Sickrage..."
+            API_KEYS[sickrage]=$(grep "^sickrage" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            info "- Retrieving API Key for Sonarr..."
+            API_KEYS[sonarr]=$(grep "^sonarr" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            info "- Retrieving API Key for SabNZB..."
+            API_KEYS[sabnzbd]=$(grep "^sabnzbd" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            info "- Retrieving API Key for NZBHydra..."
+            API_KEYS[nzbhydra2]=$(grep "^nzbhydra2" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            run_script 'setup_configure_series_manager'
+            CONFIG_COMPLETED="Y"
+            ;;
+        "Configure NZB Downloader ")
+            info "Configuring NZB Downloader only"
+            run_script 'step_nzb_downloader' "${CONFIGCHOICE}"
+            # TODO: Refactor API Key retrieval for specific service
+            declare -A API_KEYS
+            info "- Retrieving API Key for SabNZB..."
+            API_KEYS[sabnzbd]=$(grep "^sabnzbd" "/opt/openflixr/api.keys" | cut -d " " -f 2)
+            run_script 'setup_configure_nzb_downloader'
+            CONFIG_COMPLETED="Y"
+            ;;
         "Configure Pi-hole ")
             info "Configuring Pi-hole only"
             run_script 'setup_configure_pihole' "${CONFIGCHOICE}"
@@ -65,6 +110,7 @@ menu_config() {
             run_script 'setup_fixes_permissions'
             run_script 'setup_fixes_nginx'
             run_script 'setup_fixes_updater'
+            CONFIG_COMPLETED="Y"
             ;;
         "Cancel")
             info "Returning to Main Menu."
@@ -79,7 +125,7 @@ menu_config() {
         info "${CONFIGCHOICE}completed"
         whiptail \
             --backtitle ${OF_BACKTITLE} \
-            --title "Configuration Complete!" \
+            --title "Complete!" \
             --clear \
             --ok-button "Great!" \
             --msgbox "${CONFIGCHOICE}completed. Returning to the main menu." 0 0

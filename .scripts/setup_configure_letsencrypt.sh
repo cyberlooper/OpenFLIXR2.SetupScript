@@ -19,7 +19,7 @@ setup_configure_letsencrypt()
             info "Checking nginx conf"
             if [[ $(sudo nginx -t 2>&1 | grep -c "failed") != 0 ]]; then
                 warning "nginx conf test failed"
-                nginx -t >> $LOG_FILE
+                nginx -t 2>&1 >> $LOG_FILE
                 warning "nginx cannot run =("
             else
                 info "- nginx can still run!"
