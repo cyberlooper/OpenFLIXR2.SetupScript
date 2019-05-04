@@ -12,17 +12,18 @@ setup_configure_series_manager()
     info "  Updating API Key"
     crudini --set /opt/sickrage/config.ini General api_key ${API_KEYS[sickrage]}
 
+    # TODO: Revisit
     ## anidb
-    if [ "$anidbpass" != '' ]; then
-        info "  Connecting to AniDB"
-        crudini --set /opt/sickrage/config.ini ANIDB use_anidb 1
-        crudini --set /opt/sickrage/config.ini ANIDB anidb_password $anidbuser
-        crudini --set /opt/sickrage/config.ini ANIDB anidb_username $anidbpass
-    else
-        crudini --set /opt/sickrage/config.ini ANIDB use_anidb 0
-        crudini --set /opt/sickrage/config.ini ANIDB anidb_password
-        crudini --set /opt/sickrage/config.ini ANIDB anidb_username
-    fi
+    # if [ "$anidbpass" != '' ]; then
+    #     info "  Connecting to AniDB"
+    #     crudini --set /opt/sickrage/config.ini ANIDB use_anidb 1
+    #     crudini --set /opt/sickrage/config.ini ANIDB anidb_password $anidbuser
+    #     crudini --set /opt/sickrage/config.ini ANIDB anidb_username $anidbpass
+    # else
+    #     crudini --set /opt/sickrage/config.ini ANIDB use_anidb 0
+    #     crudini --set /opt/sickrage/config.ini ANIDB anidb_password
+    #     crudini --set /opt/sickrage/config.ini ANIDB anidb_username
+    # fi
 
     info "- Sonarr"
     info "  Updating API Key"
