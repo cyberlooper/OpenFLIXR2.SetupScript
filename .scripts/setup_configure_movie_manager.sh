@@ -13,14 +13,15 @@ setup_configure_movie_manager()
     crudini --set /opt/CouchPotato/settings.conf core api_key ${API_KEYS[couchpotato]}
     crudini --set /opt/CouchPotato/settings.conf sabnzbd api_key ${API_KEYS[sabnzbd]}
 
-    if [ "$imdb" != '' ]; then
-        info "  Connecting to IMDB"
-        crudini --set /opt/CouchPotato/settings.conf imdb automation_urls $imdb
-        crudini --set /opt/CouchPotato/settings.conf imdb automation_urls_use 1
-    else
-        crudini --set /opt/CouchPotato/settings.conf imdb automation_urls
-        crudini --set /opt/CouchPotato/settings.conf imdb automation_urls_use 0
-    fi
+    # TODO: Revisit
+    # if [ "$imdb" != '' ]; then
+    #     info "  Connecting to IMDB"
+    #     crudini --set /opt/CouchPotato/settings.conf imdb automation_urls $imdb
+    #     crudini --set /opt/CouchPotato/settings.conf imdb automation_urls_use 1
+    # else
+    #     crudini --set /opt/CouchPotato/settings.conf imdb automation_urls
+    #     crudini --set /opt/CouchPotato/settings.conf imdb automation_urls_use 0
+    # fi
 
     info "- Radarr"
     info "  Updating API Key"
