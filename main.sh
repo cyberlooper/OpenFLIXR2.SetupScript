@@ -61,7 +61,7 @@ if [ $? -eq 0 ]; then
 else
     HAS_INTERNET=0
 fi
-readonly NIC=$(ip -o -4 route show to default | awk '{print $5}')
+readonly NIC=$(ip -o -4 route show to default | head -1 | awk '{print $5}')
 readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
 readonly ROUTER_IP=$(ip route show | grep -i 'default via'| awk '{print $3 }')
 readonly CONFIG_FILE="/home/openflixr/openflixr_setup.config"
