@@ -11,6 +11,7 @@ menu_config() {
     CONFIGOPTS+=("Configure Movie Manager " "")
     CONFIGOPTS+=("Configure Series Manager " "")
     CONFIGOPTS+=("Configure NZB Downloader " "")
+    CONFIGOPTS+=("Configure HTPC Manager " "")
     CONFIGOPTS+=("Configure Pi-hole " "")
     CONFIGOPTS+=("Configure Folders " "")
     CONFIGOPTS+=("Various fixes " "")
@@ -88,6 +89,12 @@ menu_config() {
             info "- Retrieving API Key for SabNZB..."
             API_KEYS[sabnzbd]=$(grep "^sabnzbd" "/opt/openflixr/api.keys" | cut -d " " -f 2)
             run_script 'setup_configure_nzb_downloader'
+            CONFIG_COMPLETED="Y"
+            ;;
+        "Configure HTPC Manager ")
+            info "Configuring HTPC Manager only"
+            run_script 'setup_generate_api_keys'
+            run_script 'setup_configure_htpc_manager' "${CONFIGCHOICE}"
             CONFIG_COMPLETED="Y"
             ;;
         "Configure Pi-hole ")
