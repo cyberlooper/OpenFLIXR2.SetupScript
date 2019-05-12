@@ -11,6 +11,7 @@ menu_config() {
     CONFIGOPTS+=("Configure Movie Manager " "")
     CONFIGOPTS+=("Configure Series Manager " "")
     CONFIGOPTS+=("Configure NZB Downloader " "")
+    CONFIGOPTS+=("Configure HTPC Manager " "")
     CONFIGOPTS+=("Configure Pi-hole " "")
     CONFIGOPTS+=("Configure Folders " "")
     CONFIGOPTS+=("Various fixes " "")
@@ -33,7 +34,6 @@ menu_config() {
                 run_script 'setup_configure_nginx_password'
                 info "Configuring Ombi"
                 # TODO: Refactor API Key retrieval for specific service
-                declare -A API_KEYS
                 info "- Retrieving API Key for Ombi..."
                 API_KEYS[ombi]=$(grep "^ombi" "/opt/openflixr/api.keys" | cut -d " " -f 2)
                 run_script 'setup_configure_ombi_password'
@@ -56,7 +56,6 @@ menu_config() {
             info "Configuring Movie Manager only"
             run_script 'step_movie_manager' "${CONFIGCHOICE}"
             # TODO: Refactor API Key retrieval for specific service
-            declare -A API_KEYS
             info "- Retrieving API Key for Couchpotato..."
             API_KEYS[couchpotato]=$(grep "^couchpotato" "/opt/openflixr/api.keys" | cut -d " " -f 2)
             info "- Retrieving API Key for Radarr..."
@@ -72,7 +71,6 @@ menu_config() {
             info "Configuring Series Manager only"
             run_script 'step_series_manager' "${CONFIGCHOICE}"
             # TODO: Refactor API Key retrieval for specific service
-            declare -A API_KEYS
             info "- Retrieving API Key for Sickrage..."
             API_KEYS[sickrage]=$(grep "^sickrage" "/opt/openflixr/api.keys" | cut -d " " -f 2)
             info "- Retrieving API Key for Sonarr..."
@@ -88,10 +86,15 @@ menu_config() {
             info "Configuring NZB Downloader only"
             run_script 'step_nzb_downloader' "${CONFIGCHOICE}"
             # TODO: Refactor API Key retrieval for specific service
-            declare -A API_KEYS
             info "- Retrieving API Key for SabNZB..."
             API_KEYS[sabnzbd]=$(grep "^sabnzbd" "/opt/openflixr/api.keys" | cut -d " " -f 2)
             run_script 'setup_configure_nzb_downloader'
+            CONFIG_COMPLETED="Y"
+            ;;
+        "Configure HTPC Manager ")
+            info "Configuring HTPC Manager only"
+            run_script 'setup_generate_api_keys'
+            run_script 'setup_configure_htpc_manager' "${CONFIGCHOICE}"
             CONFIG_COMPLETED="Y"
             ;;
         "Configure Pi-hole ")
