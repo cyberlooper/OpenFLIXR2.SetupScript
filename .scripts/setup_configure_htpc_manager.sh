@@ -23,7 +23,7 @@ setup_configure_htpc_manager()
                                                         );"
             else
                 sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
-                                                    VALUES (  (SELECT id FROM setting WHERE key='torrents_${service}_apikey'),
+                                                    VALUES (  (SELECT id FROM setting WHERE key='${service}_apikey'),
                                                             '${service}_apikey',
                                                             '${API_KEYS[$service]}'
                                                         );"
