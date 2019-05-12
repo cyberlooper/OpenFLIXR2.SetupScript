@@ -102,6 +102,32 @@ config=(
 for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
     config[MOUNT_TYPE_$FOLDER]=""
 done
+# Init services array
+declare -A SERVICES
+SERVICES=(
+    # System Processes
+    [monit]=monit
+    [htpcmanager]=htpcmanager
+    # Apps
+    [couchpotato]=couchpotato
+    [sickrage]=sickrage
+    [headphones]=headphones
+    [mylar]=mylar
+    [sabnzbd]=sabnzbdplus
+    [jackett]=jackett
+    [sonarr]=sonarr
+    [radarr]=radarr
+    [plexpy]=plexpy
+    # Apps - other
+    [ombi]=ombi
+    [lidarr]=lidarr
+    [lazylibrarian]=lazylibrarian
+    [mopidy]=mopidy
+    [nzbhydra2]=nzbhydra2
+)
+# init API keys array
+declare -A API_KEYS
+# OpenFLIXT password variables
 OPENFLIXR_PASSWORD_NEW=""
 OPENFLIXR_PASSWORD_OLD=""
 
