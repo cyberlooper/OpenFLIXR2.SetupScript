@@ -16,12 +16,20 @@ setup_configure_htpc_manager()
             info "- ${service}"
             info "  Updating API key"
             if [[ "${service}" == "jackett" ]]; then
+                if [[ $(sqlite3 /opt/HTPCManager/userdata/database.db "SELECT COUNT(id) FROM setting WHERE key='torrents_${service}_apikey'") != 1 ]]; then
+                    warning "Multiple entries found for 'torrents_${service}_apikey'. Removing all entries..."
+                    sqlite3 /opt/HTPCManager/userdata/database.db "DELETE FROM setting WHERE key='torrents_${service}_apikey'"
+                fi
                 sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
                                                     VALUES (  (SELECT id FROM setting WHERE key='torrents_${service}_apikey'),
                                                             'torrents_${service}_apikey',
                                                             '${API_KEYS[$service]}'
                                                         );"
             else
+                if [[ $(sqlite3 /opt/HTPCManager/userdata/database.db "SELECT COUNT(id) FROM setting WHERE key='${service}_apikey'") != 1 ]]; then
+                    warning "Multiple entries found for '${service}_apikey'. Removing all entries..."
+                    sqlite3 /opt/HTPCManager/userdata/database.db "DELETE FROM setting WHERE key='${service}_apikey'"
+                fi
                 sqlite3 /opt/HTPCManager/userdata/database.db "INSERT OR REPLACE INTO setting (id, key, val)
                                                     VALUES (  (SELECT id FROM setting WHERE key='${service}_apikey'),
                                                             '${service}_apikey',
