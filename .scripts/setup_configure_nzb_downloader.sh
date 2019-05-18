@@ -27,7 +27,7 @@ setup_configure_nzb_downloader()
         fi
     fi
 
-    info "  Connecting to Sickrage"
+    info "  Connecting to SickChill"
     crudini --set /opt/sickrage/config.ini SABnzbd sab_apikey ${API_KEYS[sabnzbd]}
 
     # TODO: Look into. I think this might have been messing with people's config...

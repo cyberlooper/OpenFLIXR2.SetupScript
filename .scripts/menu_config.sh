@@ -71,7 +71,7 @@ menu_config() {
             info "Configuring Series Manager only"
             run_script 'step_series_manager' "${CONFIGCHOICE}"
             # TODO: Refactor API Key retrieval for specific service
-            info "- Retrieving API Key for Sickrage..."
+            info "- Retrieving API Key for SickChill..."
             API_KEYS[sickrage]=$(grep "^sickrage" "/opt/openflixr/api.keys" | cut -d " " -f 2)
             info "- Retrieving API Key for Sonarr..."
             API_KEYS[sonarr]=$(grep "^sonarr" "/opt/openflixr/api.keys" | cut -d " " -f 2)
