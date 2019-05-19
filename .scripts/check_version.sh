@@ -7,6 +7,8 @@ check_version() {
     if [[ ! -v DEVMODE ]]; then
         readonly GH_COMMIT=$(git rev-parse --short ${config[BRANCH]})
         if [[ "${LOCAL_COMMIT}" != "${GH_COMMIT}" ]]; then
+            info "LOCAL_COMMIT=${LOCAL_COMMIT}"
+            info "GH_COMMIT=${GH_COMMIT}"
             warning "OpenFLIXR Setup Script is not up-to-date."
             if run_script 'question_prompt' Y $"OpenFLIXR Setup Script is not up-to-date..\n\nDo you want to update now?" "Continue?" ${OF_BACKTITLE}; then
                 info "Updating OpenFLIXR Setup Script..."
