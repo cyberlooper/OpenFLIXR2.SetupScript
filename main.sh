@@ -260,7 +260,7 @@ main() {
     debug "SCRIPTPATH=$SCRIPTPATH"
     debug "SCRIPTNAME=${SCRIPTNAME}"
     debug "PROMPT='${PROMPT:-}'"
-log ""
+
     run_script 'check_version'
 
     if [[ ${config[SETUP_COMPLETED]} == "Y" ]]; then
