@@ -243,7 +243,7 @@ main() {
         exit
     fi
     cd "${SCRIPTPATH}" || fatal "Failed to change to ${SCRIPTPATH} directory."
-    readonly LOCAL_COMMIT=$(git rev-parse --short ${config[BRANCH]})
+    readonly LOCAL_COMMIT=$(git rev-parse --short master)
     readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
     readonly PROMPT="GUI"
     run_script 'load_config'
