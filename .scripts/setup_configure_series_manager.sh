@@ -8,22 +8,49 @@ setup_configure_series_manager()
     local ENABLED_OMBI
 
     info "Configuring TV Show Manager"
-    info "- Sickrage"
-    info "  Updating API Key"
-    crudini --set /opt/sickrage/config.ini General api_key ${API_KEYS[sickrage]}
+    info "- SickChill"
 
-    # TODO: Revisit
-    ## anidb
-    # if [ "$anidbpass" != '' ]; then
-    #     info "  Connecting to AniDB"
-    #     crudini --set /opt/sickrage/config.ini ANIDB use_anidb 1
-    #     crudini --set /opt/sickrage/config.ini ANIDB anidb_password $anidbuser
-    #     crudini --set /opt/sickrage/config.ini ANIDB anidb_username $anidbpass
-    # else
-    #     crudini --set /opt/sickrage/config.ini ANIDB use_anidb 0
-    #     crudini --set /opt/sickrage/config.ini ANIDB anidb_password
-    #     crudini --set /opt/sickrage/config.ini ANIDB anidb_username
-    # fi
+    if [[ ! -f "/opt/sickrage/config.ini" ]]; then
+        info "  Config file not found... attempting to get SickChill to generate it."
+        info "  Starting SickChill..."
+        service sickrage start
+        sleep 5s
+        info "  Checking that SickChill is ready..."
+        if [[ $(run_script 'check_application_ready' "http://localhost:8081/sickrage/" "  ") == "200" ]]; then
+            info "  SickChill is accessible by URL!"
+            info "  Checking for SickChill config file..."
+            if [[ $(run_script 'check_file' "/opt/sickrage/config.ini" "  ") == "200" ]]; then
+                info "  SickChill config file found!"
+            else
+                error "  SickChill config file NOT found after 30s..."
+            fi
+        else
+            warning "  SickChill is NOT accessible by URL after 30s..."
+        fi
+        info "  Stopping SickChill..."
+        service sickrage stop
+    fi
+
+    if [[ -f "/opt/sickrage/config.ini" ]]; then
+        info "  Updating API Key"
+        crudini --set /opt/sickrage/config.ini General api_key ${API_KEYS[sickrage]}
+
+        # TODO: Revisit
+        ## anidb
+        # if [ "$anidbpass" != '' ]; then
+        #     info "  Connecting to AniDB"
+        #     crudini --set /opt/sickrage/config.ini ANIDB use_anidb 1
+        #     crudini --set /opt/sickrage/config.ini ANIDB anidb_password $anidbuser
+        #     crudini --set /opt/sickrage/config.ini ANIDB anidb_username $anidbpass
+        # else
+        #     crudini --set /opt/sickrage/config.ini ANIDB use_anidb 0
+        #     crudini --set /opt/sickrage/config.ini ANIDB anidb_password
+        #     crudini --set /opt/sickrage/config.ini ANIDB anidb_username
+        # fi
+    else
+        error "  Config file not found..."
+        warning "  You will need to manually configure Sickchill after setup completes."
+    fi
 
     info "- Sonarr"
     info "  Updating API Key"

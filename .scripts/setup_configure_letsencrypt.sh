@@ -15,12 +15,12 @@ setup_configure_letsencrypt()
             LE_LOGS_END=$(wc -l /var/log/letsencrypt.log | awk '{print $1}')
             TAIL_COUNT=$(($LE_LOGS_END-$LE_LOGS_START))
             debug "TAIL_COUNT=${TAIL_COUNT}"
-            tail -$TAIL_COUNT /var/log/letsencrypt.log >> $LOG_FILE
+            tail -$TAIL_COUNT "/var/log/letsencrypt.log" >> "$LOG_FILE" || error "Could not get Let's Encrypt logs"
             info "Checking nginx conf"
             if [[ $(sudo nginx -t 2>&1 | grep -c "failed") != 0 ]]; then
                 warning "nginx conf test failed"
-                nginx -t 2>&1 >> $LOG_FILE
-                warning "nginx cannot run =("
+                nginx -t 2>&1 >> "$LOG_FILE" || error "Could not get nginx conf test information"
+                error "nginx cannot run =("
             else
                 info "- nginx can still run!"
             fi

@@ -68,7 +68,7 @@ submit_logs() {
             warning "https://github.com/openflixr/OpenFLIXR2.SetupScript#troubleshooting"
         fi
     else
-        warning "You have already submitted logs for this version of the setup script."
+        warning "You have already submitted logs for this version of the OpenFLIXR Setup Script."
         warning "Please wait for an update before trying again. Thanks!"
     fi
 }
