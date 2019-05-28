@@ -34,11 +34,13 @@ submit_logs() {
                 run_script 'set_config' "DISCORD_USERNAME" "${DISCORD_USERNAME}"
             fi
 
-            local FILE="${config[DISCORD_USERNAME]:-Anonymous}_setup_logs.tar"
-            local FILE_PATH="/tmp/${FILE}"
             local SUBMISSION_ID=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
             readonly WEBHOOK_URL="https://api.tarpix.net/ofv1/of-log-submit"
+            local FILE="${config[DISCORD_USERNAME]:-Anonymous}_setup_logs_${SUBMISSION_ID}.tar"
+            local FILE_PATH="/tmp/${FILE}"
 
+            info "Adding Submission ID to logs..."
+            echo "Submission ID: ${SUBMISSION_ID}" >> "$LOG_FILE"
             info "Collecting logs..."
             tar -cf "${FILE_PATH}" /var/log/openflixr_setup.* > /dev/null 2>&1
             info "Submitting logs..."
