@@ -9,54 +9,99 @@ setup_configure_letsencrypt()
         cp "/etc/nginx/sites-enabled/openflixr.conf" "/etc/nginx/sites-enabled/openflixr.conf.bak" || error "Could not back up the nginx configuration..."
         info "Configuring Let's Encrypt"
         bash /opt/openflixr/letsencrypt.sh || LETSENCRYPT_STATUS="FAILED"
+
         if [[ ${LETSENCRYPT_STATUS:-} == "FAILED" ]]; then
-            warning "- Let's Encrypt configuration failed! =("
-            warning "- Usually this can be fixed later, so we won't kill the setup but will collect some information."
-            info "- Adding Let's Encrypt logs to setup logs for troubleshooting"
+            info "- Checking Let's Encrypt configuration..."
+
             if [[ -f "/var/log/letsencrypt.log" ]]; then
-                log "- Found Let's Encrypt log file: '/var/log/letsencrypt.log'"
-                if [[ $(grep -c "Run pre hook" "/var/log/letsencrypt.log") > 0 ]]; then
-                    log "- Found 'Run pre hook' in Let's Encrypt log file!"
-                    LE_LOGS_START=$(($(grep -n "Run pre hook" "/var/log/letsencrypt.log" | tail -1 | awk 'BEGIN{FS=":"}{print $(1)}')-1))
+                log "  Found Let's Encrypt log file: '/var/log/letsencrypt.log'"
+                if [[ $(grep -c "Date:" "/var/log/letsencrypt.log") > 0 ]]; then
+                    log "  Found 'Date:' in Let's Encrypt log file!"
+                    LE_LOGS_START=$(($(grep -n "Date:" "/var/log/letsencrypt.log" | tail -1 | awk 'BEGIN{FS=":"}{print $(1)}')-2))
+                    if [[ ${LE_LOGS_START} < 0 ]]; then
+                        LE_LOGS_START=0
+                    fi
                     LE_LOGS_END=$(wc -l "/var/log/letsencrypt.log" | awk '{print $1}')
                     TAIL_COUNT=$(($LE_LOGS_END-$LE_LOGS_START))
                 else
                     TAIL_COUNT=25
-                    warning "- Could not find 'Run pre hook' in Let's Encrypt log file..."
-                    info "- We will get the last ${TAIL_COUNT} lines of the Let's Encrypt log file"
+                    log "  Could not find 'Date:' in Let's Encrypt log file..."
+                    log "  We will get the last ${TAIL_COUNT} lines of the Let's Encrypt log file"
                 fi
-                debug "TAIL_COUNT=${TAIL_COUNT}"
-                tail -${TAIL_COUNT} "/var/log/letsencrypt.log" >> "$LOG_FILE" || error "- Could not get Let's Encrypt logs"
+                log "  Retrieving last ${TAIL_COUNT} lines of Let's Encrypt log file..."
+                LE_DNC=$(tail -${TAIL_COUNT} "/var/log/letsencrypt.log" | grep -c "Domains not changed")
+                LE_VE_DNS=$(tail -${TAIL_COUNT} "/var/log/letsencrypt.log" | grep -c "Verify error:DNS problem")
+                LE_VE_IP=$(tail -${TAIL_COUNT} "/var/log/letsencrypt.log" | grep -c "Verify error:No valid IP addresses found")
+                LE_VE_CR=$(tail -${TAIL_COUNT} "/var/log/letsencrypt.log" | grep -c "Verify error:Connection refused")
+                debug "  LE_DNC='${LE_DNC}'"
+                debug "  LE_VE_DNS='${LE_VE_DNS}'"
+                debug "  LE_VE_IP='${LE_VE_IP}'"
+                debug "  LE_VE_CR='${LE_VE_CR}'"
+
+                if [[ ${LE_DNC} > 0 ]]; then
+                    info "- Your domains did not change and Let's Encrypt has nothing to do."
+                    info "  All good!"
+                elif [[ ${LE_VE_DNS} > 0 ]]; then
+                    warning "- Your domains couldn't be verified because you are missing a record in your DNS configuration..."
+                    warning "  This is either because DNS has not yet propogated or you didn't follow the steps when configuring for Remote Access"
+                    warning "  You can run just 'Configure Access' step only after setup completes by choosing 'Configuration' at the Setup Main Menu"
+                    sleep 5s
+                elif [[ ${LE_VE_IP} > 0 ]]; then
+                    warning "- Your domains couldn't be verified because your DNS configuration is not setup properly..."
+                    warning "  This is either because DNS has not yet propogated or you didn't follow the steps when configuring for Remote Access"
+                    warning "  You can run just 'Configure Access' step only after setup completes by choosing 'Configuration' at the Setup Main Menu"
+                    sleep 5s
+                elif [[ ${LE_VE_CR} > 0 ]]; then
+                    warning "- Your domains couldn't be verified because your Let's Encrypt couldn't connect to your OpenFLIXR server..."
+                    warning "  This is usually because you didn't follow the steps when configuring for Remote Access and ports 80 and 443 aren't forwarded to you OpenFLIXR server."
+                    warning "  You can run just 'Configure Access' step only after setup completes by choosing 'Configuration' at the Setup Main Menu"
+                    sleep 5s
+                else
+                    log "- And unhandled reason caused Let's Encrypt to fail... =("
+                    LE_FAILED="Y"
+                fi
             else
-                error "- Could not find Let's Encrypt log file: '/var/log/letsencrypt.log'"
+                LE_NO_LOGS="Y"
             fi
-            info "Checking nginx conf"
-            if [[ $(sudo nginx -t 2>&1 | grep -c "failed") != 0 ]]; then
-                warning "- nginx conf test failed. Getting nginx conf test information..."
-                nginx -t 2>&1 >> "$LOG_FILE" || error "- Could not get nginx conf test information"
-                info "- Trying to fix nginx..."
-                if [[ -f "/etc/nginx/sites-enabled/openflixr.conf.bak" ]]; then
-                    info "  Restoring backup configuration file..."
-                    cp "/etc/nginx/sites-enabled/openflixr.conf.bak" "/etc/nginx/sites-enabled/openflixr.conf"
-                else
-                    error "  Could not find backup configuration file to restore =("
-                    info "  Disabling SSL in nginx configuration"
-                    sed -i 's/^.*#ssl_port_config/#listen 443 ssl http2;	#ssl_port_config/' "/etc/nginx/sites-enabled/openflixr.conf"
-                    sed -i 's/^.*#donotremove_certificatepath/#ssl_certificate \/etc\/letsencrypt\/live\/\/fullchain.cer; #donotremove_certificatepath/' "/etc/nginx/sites-enabled/openflixr.conf"
-                    sed -i 's/^.*#donotremove_certificatekeypath/#ssl_certificate_key \/etc\/letsencrypt\/live\/\/'$domainname'.key; #donotremove_certificatekeypath/' "/etc/nginx/sites-enabled/openflixr.conf"
-                    sed -i 's/^.*#donotremove_trustedcertificatepath/#ssl_trusted_certificate \/etc\/letsencrypt\/live\/\/fullchain.cer; #donotremove_trustedcertificatepath/' "/etc/nginx/sites-enabled/openflixr.conf"
-                fi
-                info "  Checking configuration..."
+
+            if [[ "${LE_FAILED:-}" = "Y" ]]; then
+                warning "- Let's Encrypt configuration failed! =("
+                warning "  This can be fixed later, so we won't kill the setup but will collect some information."
+                info "- Adding Let's Encrypt logs to setup logs for troubleshooting"
+                tail -${TAIL_COUNT} "/var/log/letsencrypt.log" >> "$LOG_FILE" || error "- Could not get Let's Encrypt logs"
+            elif [[ "${LE_NO_LOGS:-}" = "Y" ]]; then
+                error "  Could not find Let's Encrypt log file: '/var/log/letsencrypt.log'"
+            fi
+
+            if [[ "${LE_FAILED:-}" = "Y" || "${LE_NO_LOGS:-}" = "Y" ]]; then
+                info "Checking nginx conf"
                 if [[ $(sudo nginx -t 2>&1 | grep -c "failed") != 0 ]]; then
-                    error "  - nginx cannot run =("
-                    NGINX_START=N
+                    warning "- nginx conf test failed. Getting nginx conf test information..."
+                    nginx -t 2>&1 >> "$LOG_FILE" || error "- Could not get nginx conf test information"
+                    info "- Trying to fix nginx..."
+                    if [[ -f "/etc/nginx/sites-enabled/openflixr.conf.bak" ]]; then
+                        info "  Restoring backup configuration file..."
+                        cp "/etc/nginx/sites-enabled/openflixr.conf.bak" "/etc/nginx/sites-enabled/openflixr.conf"
+                    else
+                        error "  Could not find backup configuration file to restore =("
+                        info "  Disabling SSL in nginx configuration"
+                        sed -i 's/^.*#ssl_port_config/#listen 443 ssl http2;	#ssl_port_config/' "/etc/nginx/sites-enabled/openflixr.conf"
+                        sed -i 's/^.*#donotremove_certificatepath/#ssl_certificate \/etc\/letsencrypt\/live\/\/fullchain.cer; #donotremove_certificatepath/' "/etc/nginx/sites-enabled/openflixr.conf"
+                        sed -i 's/^.*#donotremove_certificatekeypath/#ssl_certificate_key \/etc\/letsencrypt\/live\/\/'$domainname'.key; #donotremove_certificatekeypath/' "/etc/nginx/sites-enabled/openflixr.conf"
+                        sed -i 's/^.*#donotremove_trustedcertificatepath/#ssl_trusted_certificate \/etc\/letsencrypt\/live\/\/fullchain.cer; #donotremove_trustedcertificatepath/' "/etc/nginx/sites-enabled/openflixr.conf"
+                    fi
+                    info "  Checking configuration..."
+                    if [[ $(sudo nginx -t 2>&1 | grep -c "failed") != 0 ]]; then
+                        error "  - nginx cannot run =("
+                        NGINX_START=N
+                    else
+                        info "  - nginx configuration fixed!"
+                        NGINX_START=Y
+                    fi
                 else
-                    info "  - nginx configuration fixed!"
+                    info "- nginx can still run!"
                     NGINX_START=Y
                 fi
-            else
-                info "- nginx can still run!"
-                NGINX_START=Y
             fi
         else
             info "- Configured!"
@@ -81,7 +126,7 @@ setup_configure_letsencrypt()
         fi
     fi
 
-    if [[ "${NGINX_START}" == "Y" ]]; then
+    if [[ "${NGINX_START:-}" == "Y" ]]; then
         info "Starting nginx..."
         $(service nginx start) || warning "Unable to start nginx"
     fi
