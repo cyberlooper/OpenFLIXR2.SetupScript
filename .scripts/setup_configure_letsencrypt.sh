@@ -4,39 +4,43 @@ IFS=$'\n\t'
 
 setup_configure_letsencrypt()
 {
+    readonly LE_LOG_FILE="/var/log/letsencrypt.log"
     if [[ "${config[LETSENCRYPT]}" == "on" ]]; then
         info "Backing up nginx configuration"
-        cp "/etc/nginx/sites-enabled/openflixr.conf" "/etc/nginx/sites-enabled/openflixr.conf.bak" || error "Could not back up the nginx configuration..."
+        if [[ -f "/etc/nginx/sites-enabled/openflixr.conf.bak" ]]; then
+            mv "/etc/nginx/sites-enabled/openflixr.conf.bak" "${STORE_PATH}/openflixr.conf.bak"
+        fi
+        cp "/etc/nginx/sites-enabled/openflixr.conf" "${STORE_PATH}/openflixr.conf.bak" || error "Could not back up the nginx configuration..."
         info "Configuring Let's Encrypt"
         bash /opt/openflixr/letsencrypt.sh || LETSENCRYPT_STATUS="FAILED"
 
         if [[ ${LETSENCRYPT_STATUS:-} == "FAILED" ]]; then
             info "- Checking Let's Encrypt configuration..."
 
-            if [[ -f "/var/log/letsencrypt.log" ]]; then
-                log "  Found Let's Encrypt log file: '/var/log/letsencrypt.log'"
-                if [[ $(grep -c "Date:" "/var/log/letsencrypt.log") > 0 ]]; then
+            if [[ -f "${LE_LOG_FILE}" ]]; then
+                log "  Found Let's Encrypt log file: '${LE_LOG_FILE}'"
+                if [[ $(grep -c "Date:" "${LE_LOG_FILE}") > 0 ]]; then
                     log "  Found 'Date:' in Let's Encrypt log file!"
-                    LE_LOGS_START=$(($(grep -n "Date:" "/var/log/letsencrypt.log" | tail -1 | awk 'BEGIN{FS=":"}{print $(1)}')-2))
+                    LE_LOGS_START=$(($(grep -n "Date:" "${LE_LOG_FILE}" | tail -1 | awk 'BEGIN{FS=":"}{print $(1)}')-2))
                     if [[ ${LE_LOGS_START} < 0 ]]; then
                         LE_LOGS_START=0
                     fi
-                    LE_LOGS_END=$(wc -l "/var/log/letsencrypt.log" | awk '{print $1}')
+                    LE_LOGS_END=$(wc -l "${LE_LOG_FILE}" | awk '{print $1}')
                     TAIL_COUNT=$(($LE_LOGS_END-$LE_LOGS_START))
                 else
                     TAIL_COUNT=25
                     log "  Could not find 'Date:' in Let's Encrypt log file..."
                     log "  We will get the last ${TAIL_COUNT} lines of the Let's Encrypt log file"
                 fi
-                log "  Retrieving last ${TAIL_COUNT} lines of Let's Encrypt log file..."
-                LE_DNC=$(tail -${TAIL_COUNT} "/var/log/letsencrypt.log" | grep -c "Domains not changed")
-                LE_VE_DNS=$(tail -${TAIL_COUNT} "/var/log/letsencrypt.log" | grep -c "Verify error:DNS problem")
-                LE_VE_IP=$(tail -${TAIL_COUNT} "/var/log/letsencrypt.log" | grep -c "Verify error:No valid IP addresses found")
-                LE_VE_CR=$(tail -${TAIL_COUNT} "/var/log/letsencrypt.log" | grep -c "Verify error:Connection refused")
-                debug "  LE_DNC='${LE_DNC}'"
-                debug "  LE_VE_DNS='${LE_VE_DNS}'"
-                debug "  LE_VE_IP='${LE_VE_IP}'"
-                debug "  LE_VE_CR='${LE_VE_CR}'"
+                log "  Checking last ${TAIL_COUNT} lines of Let's Encrypt log file for failure indicators..."
+                LE_DNC=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Domains not changed")
+                log "  LE_DNC='${LE_DNC}'"
+                LE_VE_DNS=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:DNS problem")
+                log "  LE_VE_DNS='${LE_VE_DNS}'"
+                LE_VE_IP=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:No valid IP addresses found")
+                log "  LE_VE_IP='${LE_VE_IP}'"
+                LE_VE_CR=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Connection refused")
+                log "  LE_VE_CR='${LE_VE_CR}'"
 
                 if [[ ${LE_DNC} > 0 ]]; then
                     info "- Your domains did not change and Let's Encrypt has nothing to do."
@@ -67,10 +71,8 @@ setup_configure_letsencrypt()
             if [[ "${LE_FAILED:-}" = "Y" ]]; then
                 warning "- Let's Encrypt configuration failed! =("
                 warning "  This can be fixed later, so we won't kill the setup but will collect some information."
-                info "- Adding Let's Encrypt logs to setup logs for troubleshooting"
-                tail -${TAIL_COUNT} "/var/log/letsencrypt.log" >> "$LOG_FILE" || error "- Could not get Let's Encrypt logs"
             elif [[ "${LE_NO_LOGS:-}" = "Y" ]]; then
-                error "  Could not find Let's Encrypt log file: '/var/log/letsencrypt.log'"
+                error "  Could not find Let's Encrypt log file: '${LE_LOG_FILE}'"
             fi
 
             if [[ "${LE_FAILED:-}" = "Y" || "${LE_NO_LOGS:-}" = "Y" ]]; then
