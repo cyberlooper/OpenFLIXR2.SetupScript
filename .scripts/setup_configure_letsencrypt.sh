@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 setup_configure_letsencrypt()
 {
-    readonly LE_LOG_FILE="/var/log/letsencrypt.log"
+    local LE_LOG_FILE="/var/log/letsencrypt.log"
     if [[ "${config[LETSENCRYPT]}" == "on" ]]; then
         info "Backing up nginx configuration"
         if [[ -f "/etc/nginx/sites-enabled/openflixr.conf.bak" ]]; then
