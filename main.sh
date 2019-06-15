@@ -64,8 +64,9 @@ fi
 readonly NIC=$(ip -o -4 route show to default | head -1 | awk '{print $5}')
 readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
 readonly ROUTER_IP=$(ip route show | grep -i 'default via'| awk '{print $3 }')
-readonly CONFIG_FILE="/home/openflixr/openflixr_setup.config"
-readonly CONFIG_FILE_OLD="/opt/OpenFLIXR2.SetupScript/openflixr_setup.config"
+readonly STORE_PATH="/home/openflixr/openflixr_setup"
+readonly CONFIG_FILE="${STORE_PATH}/openflixr_setup.config"
+readonly CONFIG_FILES_OLD=("/opt/OpenFLIXR2.SetupScript/openflixr_setup.config", "/home/openflixr/openflixr_setup.config")
 readonly OPENFLIXR_FOLDERS=(downloads movies series music comics books)
 # Init config array
 typeset -A config

@@ -3,9 +3,15 @@ set -euo pipefail
 IFS=$'\n\t'
 
 load_config() {
-    if [[ -f "${CONFIG_FILE_OLD}" ]]; then
-        mv "${CONFIG_FILE_OLD}" "${CONFIG_FILE}"
+    if [[ ! -d "${STORE_PATH}" ]]; then
+        mkdir -p "${STORE_PATH}"
     fi
+
+    for CONFIG_FILE_OLD in ${CONFIG_FILES_OLD[@]}; do
+        if [[ -f "${CONFIG_FILE_OLD}" ]]; then
+            mv "${CONFIG_FILE_OLD}" "${CONFIG_FILE}"
+        fi
+    done
 
     if [[ ! -f "${CONFIG_FILE}" ]]; then
         touch ${CONFIG_FILE}
