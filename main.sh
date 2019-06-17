@@ -64,8 +64,9 @@ fi
 readonly NIC=$(ip -o -4 route show to default | head -1 | awk '{print $5}')
 readonly LOCAL_IP=$(ifconfig ${NIC} | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*')
 readonly ROUTER_IP=$(ip route show | grep -i 'default via'| awk '{print $3 }')
-readonly CONFIG_FILE="/home/openflixr/openflixr_setup.config"
-readonly CONFIG_FILE_OLD="/opt/OpenFLIXR2.SetupScript/openflixr_setup.config"
+readonly STORE_PATH="/home/openflixr/openflixr_setup"
+readonly CONFIG_FILE="${STORE_PATH}/openflixr_setup.config"
+readonly CONFIG_FILES_OLD=("/opt/OpenFLIXR2.SetupScript/openflixr_setup.config", "/home/openflixr/openflixr_setup.config")
 readonly OPENFLIXR_FOLDERS=(downloads movies series music comics books)
 # Init config array
 typeset -A config
@@ -151,21 +152,21 @@ readonly LOG_FILE="/var/log/openflixr_setup.log"
 sudo chown "${DETECTED_PUID:-$DETECTED_UNAME}":"${DETECTED_PGID:-$DETECTED_UGROUP}" "${LOG_FILE}" > /dev/null 2>&1 || true # This line should always use sudo
 log() {
     if [[ -v DEBUG && $DEBUG == 1 ]] || [[ -v VERBOSE && $VERBOSE == 1 ]] || [[ -v DEVMODE && $DEVMODE == 1 ]]; then
-        echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" | tee -a "${LOG_FILE}" >&2;
+        echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" | tee -a "${LOG_FILE}";
     else
         echo -e "${NC}$(date +"%F %T") ${BLU}[LOG]${NC}        $*${NC}" | tee -a "${LOG_FILE}" > /dev/null;
     fi
 }
-info() { echo -e "${NC}$(date +"%F %T") ${BLU}[INFO]${NC}       $*${NC}" | tee -a "${LOG_FILE}" >&2; }
-warning() { echo -e "${NC}$(date +"%F %T") ${YLW}[WARNING]${NC}    $*${NC}" | tee -a "${LOG_FILE}" >&2; }
-error() { echo -e "${NC}$(date +"%F %T") ${RED}[ERROR]${NC}      $*${NC}" | tee -a "${LOG_FILE}" >&2; }
+info() { echo -e "${NC}$(date +"%F %T") ${BLU}[INFO]${NC}       $*${NC}" | tee -a "${LOG_FILE}"; }
+warning() { echo -e "${NC}$(date +"%F %T") ${YLW}[WARNING]${NC}    $*${NC}" | tee -a "${LOG_FILE}"; }
+error() { echo -e "${NC}$(date +"%F %T") ${RED}[ERROR]${NC}      $*${NC}" | tee -a "${LOG_FILE}"; }
 fatal() {
-    echo -e "${NC}$(date +"%F %T") ${RED}[FATAL]${NC}      $*${NC}" | tee -a "${LOG_FILE}" >&2
+    echo -e "${NC}$(date +"%F %T") ${RED}[FATAL]${NC}      $*${NC}" | tee -a "${LOG_FILE}"
     exit 1
 }
 debug() {
     if [[ -v DEBUG && $DEBUG == 1 ]] || [[ -v VERBOSE && $VERBOSE == 1 ]] || [[ -v DEVMODE && $DEVMODE == 1 ]]; then
-        echo -e "${NC}$(date +"%F %T") ${GRN}[DEBUG]${NC}      $*${NC}" | tee -a "${LOG_FILE}" >&2
+        echo -e "${NC}$(date +"%F %T") ${GRN}[DEBUG]${NC}      $*${NC}" | tee -a "${LOG_FILE}"
     fi
 }
 
@@ -175,7 +176,11 @@ run_script() {
     shift
     if [[ -f "/opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh" ]]; then
         source "/opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh"
-        ${SCRIPTSNAME} "$@"
+        if [[ "${SCRIPTSNAME}" == setup_configure* ]]; then
+            ${SCRIPTSNAME} "$@" 2> >(tee -a "${LOG_FILE}")
+        else
+            ${SCRIPTSNAME} "$@"
+        fi
     else
         fatal "/opt/OpenFLIXR2.SetupScript/.scripts/${SCRIPTSNAME}.sh not found."
     fi
