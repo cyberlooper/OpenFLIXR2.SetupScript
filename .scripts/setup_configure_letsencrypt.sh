@@ -11,6 +11,13 @@ setup_configure_letsencrypt()
             mv "/etc/nginx/sites-enabled/openflixr.conf.bak" "${STORE_PATH}/openflixr.conf.bak"
         fi
         cp "/etc/nginx/sites-enabled/openflixr.conf" "${STORE_PATH}/openflixr.conf.bak" || error "Could not back up the nginx configuration..."
+        log "Making sure settings are set..."
+        if [[ $(crudini --get /usr/share/nginx/html/setup/config.ini access domainname) != ${config[OPENFLIXR_DOMAIN]} ]]; then
+            crudini --set /usr/share/nginx/html/setup/config.ini access domainname ${config[OPENFLIXR_DOMAIN]}
+        fi
+        if [[ $(crudini --get /usr/share/nginx/html/setup/config.ini access letsencrypt) != ${config[LETSENCRYPT]} ]]; then
+            crudini --set /usr/share/nginx/html/setup/config.ini access letsencrypt ${config[LETSENCRYPT]}
+        fi
         info "Configuring Let's Encrypt"
         bash /opt/openflixr/letsencrypt.sh || LETSENCRYPT_STATUS="FAILED"
 
