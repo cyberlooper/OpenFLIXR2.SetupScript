@@ -32,6 +32,10 @@ setup_configure_letsencrypt()
                     log "  Could not find 'Date:' in Let's Encrypt log file..."
                     log "  We will get the last ${TAIL_COUNT} lines of the Let's Encrypt log file"
                 fi
+                info "  Adding Let's Encrypt logs to Setup Logs"
+                log "  ----------------"
+                tail -${TAIL_COUNT} "/var/log/letsencrypt.log" >> "$LOG_FILE" || error "- Could not get Let's Encrypt logs"
+                log "  ----------------"
                 log "  Checking last ${TAIL_COUNT} lines of Let's Encrypt log file for failure indicators..."
                 if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Domains not changed") != 0 ]]; then
                     LE_DNC=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Domains not changed")
