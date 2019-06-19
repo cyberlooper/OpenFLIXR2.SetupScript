@@ -5,6 +5,14 @@ IFS=$'\n\t'
 update_self() {
     local BRANCH
     BRANCH="${1:-${config[BRANCH]}}"
+    if [[ ${BRANCH} != origin/* ]]; then
+        if [[ $(git ls-remote --heads ${GIT_REPO} ${BRANCH} | wc -l) == 1 ]]; then
+            config[BRANCH]="origin/${BRANCH}"
+        else
+            config[BRANCH]="origin/master"
+        fi
+        BRANCH="${config[BRANCH]}"
+    fi
     if run_script 'question_prompt' Y "Would you like to update OpenFLIXR2 Setup Script to ${BRANCH} now?"; then
         info "Updating OpenFLIXR2 Setup Script to ${BRANCH}."
     else
