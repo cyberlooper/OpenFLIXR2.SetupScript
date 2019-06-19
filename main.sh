@@ -100,9 +100,9 @@ config=(
     [SETUP_COMPLETED]=""
     [BRANCH]="master"
 )
-for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
-    config[MOUNT_TYPE_$FOLDER]=""
-done
+#for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
+#    config[MOUNT_TYPE_$FOLDER]=""
+#done
 # Init services array
 declare -A SERVICES
 SERVICES=(
@@ -251,8 +251,6 @@ main() {
     readonly LOCAL_COMMIT=$(git rev-parse --short master)
     readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
     readonly PROMPT="GUI"
-    run_script 'load_config'
-    run_script 'save_config'
 
     run_script 'symlink_setupopenflixr'
     # shellcheck source=/dev/null
@@ -267,6 +265,9 @@ main() {
     debug "PROMPT='${PROMPT:-}'"
 
     run_script 'check_version'
+
+    run_script 'load_config'
+    run_script 'save_config'
 
     if [[ ${config[SETUP_COMPLETED]} == "Y" ]]; then
         run_script 'menu_main'

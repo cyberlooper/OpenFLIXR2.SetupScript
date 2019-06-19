@@ -11,6 +11,13 @@ setup_configure_letsencrypt()
             mv "/etc/nginx/sites-enabled/openflixr.conf.bak" "${STORE_PATH}/openflixr.conf.bak"
         fi
         cp "/etc/nginx/sites-enabled/openflixr.conf" "${STORE_PATH}/openflixr.conf.bak" || error "Could not back up the nginx configuration..."
+        log "Making sure settings are set..."
+        if [[ $(crudini --get /usr/share/nginx/html/setup/config.ini access domainname) != ${config[OPENFLIXR_DOMAIN]} ]]; then
+            crudini --set /usr/share/nginx/html/setup/config.ini access domainname ${config[OPENFLIXR_DOMAIN]}
+        fi
+        if [[ $(crudini --get /usr/share/nginx/html/setup/config.ini access letsencrypt) != ${config[LETSENCRYPT]} ]]; then
+            crudini --set /usr/share/nginx/html/setup/config.ini access letsencrypt ${config[LETSENCRYPT]}
+        fi
         info "Configuring Let's Encrypt"
         bash /opt/openflixr/letsencrypt.sh || LETSENCRYPT_STATUS="FAILED"
 
@@ -32,14 +39,37 @@ setup_configure_letsencrypt()
                     log "  Could not find 'Date:' in Let's Encrypt log file..."
                     log "  We will get the last ${TAIL_COUNT} lines of the Let's Encrypt log file"
                 fi
+                info "  Adding Let's Encrypt logs to Setup Logs"
+                log "  ----------------"
+                tail -${TAIL_COUNT} "/var/log/letsencrypt.log" >> "$LOG_FILE" || error "- Could not get Let's Encrypt logs"
+                log "  ----------------"
                 log "  Checking last ${TAIL_COUNT} lines of Let's Encrypt log file for failure indicators..."
-                LE_DNC=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Domains not changed")
+                if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Domains not changed") != 0 ]]; then
+                    LE_DNC=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Domains not changed")
+                else
+                    LE_DNC=0
+                fi
                 log "  LE_DNC='${LE_DNC}'"
-                LE_VE_DNS=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:DNS problem")
+
+                if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:DNS problem") != 0 ]]; then
+                    LE_VE_DNS=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:DNS problem")
+                else
+                    LE_VE_DNS=0
+                fi
                 log "  LE_VE_DNS='${LE_VE_DNS}'"
-                LE_VE_IP=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:No valid IP addresses found")
+
+                if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:No valid IP addresses found") != 0 ]]; then
+                    LE_VE_IP=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:No valid IP addresses found")
+                else
+                    LE_VE_IP=0
+                fi
                 log "  LE_VE_IP='${LE_VE_IP}'"
-                LE_VE_CR=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Connection refused")
+
+                if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Connection refused") != 0 ]]; then
+                    LE_VE_CR=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Connection refused")
+                else
+                    LE_VE_CR=0
+                fi
                 log "  LE_VE_CR='${LE_VE_CR}'"
 
                 if [[ ${LE_DNC} > 0 ]]; then
