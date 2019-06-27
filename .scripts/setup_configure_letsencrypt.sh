@@ -119,7 +119,7 @@ setup_configure_letsencrypt()
                         info "  Disabling SSL in nginx configuration"
                         sed -i 's/^.*#ssl_port_config/#listen 443 ssl http2;	#ssl_port_config/' "/etc/nginx/sites-enabled/openflixr.conf"
                         sed -i 's/^.*#donotremove_certificatepath/#ssl_certificate \/etc\/letsencrypt\/live\/\/fullchain.cer; #donotremove_certificatepath/' "/etc/nginx/sites-enabled/openflixr.conf"
-                        sed -i 's/^.*#donotremove_certificatekeypath/#ssl_certificate_key \/etc\/letsencrypt\/live\/\/'$domainname'.key; #donotremove_certificatekeypath/' "/etc/nginx/sites-enabled/openflixr.conf"
+                        sed -i 's/^.*#donotremove_certificatekeypath/#ssl_certificate_key \/etc\/letsencrypt\/live\/\/'${domainname:-$config[OPENFLIXR_DOMAIN]}'.key; #donotremove_certificatekeypath/' "/etc/nginx/sites-enabled/openflixr.conf"
                         sed -i 's/^.*#donotremove_trustedcertificatepath/#ssl_trusted_certificate \/etc\/letsencrypt\/live\/\/fullchain.cer; #donotremove_trustedcertificatepath/' "/etc/nginx/sites-enabled/openflixr.conf"
                     fi
                     info "  Checking configuration..."
