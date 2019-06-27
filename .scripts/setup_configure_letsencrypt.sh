@@ -51,48 +51,56 @@ setup_configure_letsencrypt()
                 fi
                 log "  LE_DNC='${LE_DNC}'"
 
-                if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:DNS problem") != 0 ]]; then
-                    LE_VE_DNS=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:DNS problem")
-                else
-                    LE_VE_DNS=0
-                fi
-                log "  LE_VE_DNS='${LE_VE_DNS}'"
-
-                if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:No valid IP addresses found") != 0 ]]; then
-                    LE_VE_IP=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:No valid IP addresses found")
-                else
-                    LE_VE_IP=0
-                fi
-                log "  LE_VE_IP='${LE_VE_IP}'"
-
-                if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Connection refused") != 0 ]]; then
-                    LE_VE_CR=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Connection refused")
-                else
-                    LE_VE_CR=0
-                fi
-                log "  LE_VE_CR='${LE_VE_CR}'"
-
                 if [[ ${LE_DNC} > 0 ]]; then
                     info "- Your domains did not change and Let's Encrypt has nothing to do."
                     info "  All good!"
-                elif [[ ${LE_VE_DNS} > 0 ]]; then
-                    warning "- Your domains couldn't be verified because you are missing a record in your DNS configuration..."
-                    warning "  This is either because DNS has not yet propogated or you didn't follow the steps when configuring for Remote Access"
-                    warning "  You can run just 'Configure Access' step only after setup completes by choosing 'Configuration' at the Setup Main Menu"
-                    sleep 5s
-                elif [[ ${LE_VE_IP} > 0 ]]; then
-                    warning "- Your domains couldn't be verified because your DNS configuration is not setup properly..."
-                    warning "  This is either because DNS has not yet propogated or you didn't follow the steps when configuring for Remote Access"
-                    warning "  You can run just 'Configure Access' step only after setup completes by choosing 'Configuration' at the Setup Main Menu"
-                    sleep 5s
-                elif [[ ${LE_VE_CR} > 0 ]]; then
-                    warning "- Your domains couldn't be verified because your Let's Encrypt couldn't connect to your OpenFLIXR server..."
-                    warning "  This is usually because you didn't follow the steps when configuring for Remote Access and ports 80 and 443 aren't forwarded to you OpenFLIXR server."
-                    warning "  You can run just 'Configure Access' step only after setup completes by choosing 'Configuration' at the Setup Main Menu"
-                    sleep 5s
                 else
-                    log "- And unhandled reason caused Let's Encrypt to fail... =("
-                    LE_FAILED="Y"
+                    if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:DNS problem") != 0 ]]; then
+                        LE_VE_DNS=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:DNS problem")
+                    else
+                        LE_VE_DNS=0
+                    fi
+                    log "  LE_VE_DNS='${LE_VE_DNS}'"
+
+                    if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:No valid IP addresses found") != 0 ]]; then
+                        LE_VE_IP=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:No valid IP addresses found")
+                    else
+                        LE_VE_IP=0
+                    fi
+                    log "  LE_VE_IP='${LE_VE_IP}'"
+
+                    if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Connection refused") != 0 ]]; then
+                        LE_VE_CR=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Connection refused")
+                    else
+                        LE_VE_CR=0
+                    fi
+                    log "  LE_VE_CR='${LE_VE_CR}'"
+
+                    if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Timeout during connect") != 0 ]]; then
+                        LE_VE_TDC=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:Timeout during connect")
+                    else
+                        LE_VE_TDC=0
+                    fi
+                    log "  LE_VE_CR='${LE_VE_CR}'"
+                    warning "- Your domains couldn't be verified because:"
+                    if [[ ${LE_VE_DNS} > 0 ]]; then
+                        warning "  You are missing a record in your DNS configuration"
+                        warning "  This is either because DNS has not yet propogated or you didn't follow the steps when configuring for Remote Access"
+                    elif [[ ${LE_VE_IP} > 0 ]]; then
+                        warning "  Your DNS configuration is not setup properly"
+                        warning "  This is either because DNS has not yet propogated or you didn't follow the steps when configuring for Remote Access"
+                    elif [[ ${LE_VE_CR} > 0 ]]; then
+                        warning "  Let's Encrypt couldn't connect to your OpenFLIXR server"
+                        warning "  This is usually because you didn't follow the steps when configuring for Remote Access and ports 80 and 443 aren't forwarded to you OpenFLIXR server."
+                    elif [[ ${LE_VE_TDC} > 0 ]]; then
+                        warning "  Let's Encrypt couldn't connect to your OpenFLIXR server"
+                        warning "  This is usually because your ISP is blocking port 80 and/or 443."
+                    else
+                        warning "  An unhandled reason caused Let's Encrypt to fail... =("
+                        LE_FAILED="Y"
+                    fi
+                    warning "  You can run just 'Configure Access' step only after setup completes by choosing 'Configuration' at the Setup Main Menu"
+                    sleep 5s
                 fi
             else
                 LE_NO_LOGS="Y"
@@ -119,7 +127,7 @@ setup_configure_letsencrypt()
                         info "  Disabling SSL in nginx configuration"
                         sed -i 's/^.*#ssl_port_config/#listen 443 ssl http2;	#ssl_port_config/' "/etc/nginx/sites-enabled/openflixr.conf"
                         sed -i 's/^.*#donotremove_certificatepath/#ssl_certificate \/etc\/letsencrypt\/live\/\/fullchain.cer; #donotremove_certificatepath/' "/etc/nginx/sites-enabled/openflixr.conf"
-                        sed -i 's/^.*#donotremove_certificatekeypath/#ssl_certificate_key \/etc\/letsencrypt\/live\/\/'${domainname:-$config[OPENFLIXR_DOMAIN]}'.key; #donotremove_certificatekeypath/' "/etc/nginx/sites-enabled/openflixr.conf"
+                        sed -i 's/^.*#donotremove_certificatekeypath/#ssl_certificate_key \/etc\/letsencrypt\/live\/\/'${domainname:-${config[OPENFLIXR_DOMAIN]}}'.key; #donotremove_certificatekeypath/' "/etc/nginx/sites-enabled/openflixr.conf"
                         sed -i 's/^.*#donotremove_trustedcertificatepath/#ssl_trusted_certificate \/etc\/letsencrypt\/live\/\/fullchain.cer; #donotremove_trustedcertificatepath/' "/etc/nginx/sites-enabled/openflixr.conf"
                     fi
                     info "  Checking configuration..."
