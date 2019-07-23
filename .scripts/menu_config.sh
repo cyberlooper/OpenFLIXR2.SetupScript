@@ -28,7 +28,6 @@ menu_config() {
             info "Changing password only"
             run_script 'step_change_password' "${CONFIGCHOICE}"
             if [[ ${config[CHANGE_PASS]} == "Y" ]]; then
-                run_script 'step_change_password'
                 run_script 'setup_retrieve_password'
                 info "Configuring Nginx"
                 run_script 'setup_configure_nginx_password'
