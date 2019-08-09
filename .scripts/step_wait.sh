@@ -32,6 +32,9 @@ step_wait() {
     local OF_VERSION_WEB_MINOR
     local OF_UPDATE_PS
     local OF_UPDATE_PS_FULL
+    local WAIT_STATUS
+    local WAIT_STATUS_HOLD
+    local ERROR_MSG
 
     debug "OPENFLIXR_READY='${config[OPENFLIXR_READY]}'"
     if [[ "${config[OPENFLIXR_READY]}" != "YES" ]]; then
@@ -49,16 +52,16 @@ step_wait() {
             if [[ -f "/opt/openflixr/version" ]]; then
                 OF_VERSION_FULL=$(grep -o "^[0-9]\.[0-9]\.[0-9]" "/opt/openflixr/version" 2>> $LOG_FILE || echo "FAIL")
                 if [[ ${OF_VERSION_FULL} == "FAIL" ]]; then
-                    ERROR_MSG="Could not get OpenFLIXR version from system file"
+                    ERROR_MSG+=( "Could not get OpenFLIXR version from system file" )
                     echo -e "XXX\n100\Failure!\nXXX"
-                    WAIT_STATUS=666
+                    WAIT_STATUS_HOLD=666
                     break
                 fi
             else
                 OF_VERSION_FULL="FAIL"
-                ERROR_MSG="OpenFLIXR version file could not be found"
+                ERROR_MSG+=( "OpenFLIXR version file could not be found" )
                 echo -e "XXX\n100\Failure!\nXXX"
-                WAIT_STATUS=666
+                WAIT_STATUS_HOLD=666
                 break
             fi
             OF_VERSION_MAJOR=$(cut -d'.' -f1 <<< $OF_VERSION_FULL)
@@ -67,16 +70,16 @@ step_wait() {
             if [[ -f "/usr/share/nginx/html/setup/config.ini" ]]; then
                 OF_VERSION_WEB=$(crudini --get /usr/share/nginx/html/setup/config.ini custom custom1 2>> $LOG_FILE || echo "FAIL")
                 if [[ ${OF_VERSION_WEB} == "FAIL" ]]; then
-                    ERROR_MSG="Could not get OpenFLIXR version from nginx config.ini"
+                    ERROR_MSG+=( "Could not get OpenFLIXR version from nginx config.ini" )
                     echo -e "XXX\n100\Failure!\nXXX"
-                    WAIT_STATUS=666
+                    WAIT_STATUS_HOLD=666
                     break
                 fi
             else
                 OF_VERSION_WEB="FAIL"
-                ERROR_MSG="nginx config.ini could not be found"
+                ERROR_MSG+=( "nginx config.ini could not be found" )
                 echo -e "XXX\n100\Failure!\nXXX"
-                WAIT_STATUS=666
+                WAIT_STATUS_HOLD=666
                 break
             fi
             OF_VERSION_WEB_MAJOR=$(cut -d'.' -f1 <<< $OF_VERSION_FULL)
@@ -110,7 +113,11 @@ step_wait() {
             log "Elapsed: ${elapsed_minutes}"
             if [[ ${elapsed_minutes#0} -ge ${WAIT_TIME} ]]; then
                 echo -e "XXX\n100\Failure!\nXXX"
-                WAIT_STATUS=0
+                if [[ -n ${WAIT_STATUS_HOLD:-} ]]; then
+                    WAIT_STATUS="${WAIT_STATUS_HOLD}"
+                else
+                    WAIT_STATUS=0
+                fi
                 break
             else
                 echo -e "XXX\n$percent\nDuration: $duration\nXXX"
@@ -135,22 +142,45 @@ step_wait() {
                 info "OpenFLIXR versions match and no update process is running!"
                 ;;
             *)
-                warning "Failed to find ready flags after ${duration} or WAIT_STATUS not properly set..."
+                error "Failed to find ready flags after ${duration}..."
+                error "This means that you haven't updated or your update wasn't successful."
                 info "Saving debug information to log..."
-                if [[ ${ERROR_MSG:-} != "" ]]; then
-                    warning ${ERROR_MSG}
+                if [[ ${#ERROR_MSG[@]} -gt 0 ]]; then
+                    for ERROR in ${ERROR_MSG[@]} do
+                        warning ${ERROR}
+                    done
                 fi
+                log "WAIT_STATUS: ${WAIT_STATUS}"
                 log "OpenFLIXR version: ${OF_VERSION_FULL:-}"
                 log "OpenFLIXR Web version: ${OF_VERSION_WEB:-}"
-                log "WAIT_STATUS: ${WAIT_STATUS}"
                 log "OpenFLIXR updateof log file (last 5 lines)"
                 tail -5 $UPDATEOF_LOGFILE >> $LOG_FILE
                 log "OpenFLIXR onlineupdate log file (last 5 lines)"
                 tail -5 $ONLINEUPDATE_LOGFILE >> $LOG_FILE
                 log "OpenFLIXR update processes"
                 echo ${OF_UPDATE_PS_FULL:-} >> $LOG_FILE
-                fatal "Aborting OpenFLIXR Setup"
-                exit 1
+                error "Aborting OpenFLIXR Setup"
+                exit 0
+                ;;
+            *)
+                error "WAIT_STATUS not properly set..."
+                info "Saving debug information to log..."
+                if [[ ${#ERROR_MSG[@]} -gt 0 ]]; then
+                    for ERROR in ${ERROR_MSG[@]} do
+                        warning ${ERROR}
+                    done
+                fi
+                log "WAIT_STATUS: ${WAIT_STATUS}"
+                log "OpenFLIXR version: ${OF_VERSION_FULL:-}"
+                log "OpenFLIXR Web version: ${OF_VERSION_WEB:-}"
+                log "OpenFLIXR updateof log file (last 5 lines)"
+                tail -5 $UPDATEOF_LOGFILE >> $LOG_FILE
+                log "OpenFLIXR onlineupdate log file (last 5 lines)"
+                tail -5 $ONLINEUPDATE_LOGFILE >> $LOG_FILE
+                log "OpenFLIXR update processes"
+                echo ${OF_UPDATE_PS_FULL:-} >> $LOG_FILE
+                error "Aborting OpenFLIXR Setup"
+                exit 0
                 ;;
         esac
 
