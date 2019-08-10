@@ -266,6 +266,7 @@ main() {
     debug "PROMPT='${PROMPT:-}'"
 
     run_script 'check_version'
+    run_script 'check_dependencies'
 
     run_script 'load_config'
     run_script 'save_config'
