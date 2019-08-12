@@ -141,13 +141,13 @@ step_wait() {
             8)
                 info "OpenFLIXR versions match and no update process is running!"
                 ;;
-            *)
+            666)
                 error "Failed to find ready flags after ${duration}..."
                 error "This means that you haven't updated or your update wasn't successful."
                 info "Saving debug information to log..."
                 if [[ ${#ERROR_MSG[@]} -gt 0 ]]; then
-                    for ERROR in ${ERROR_MSG[@]} do
-                        warning ${ERROR}
+                    for ERROR in "${ERROR_MSG[@]}"; do
+                        warning "${ERROR}"
                     done
                 fi
                 log "WAIT_STATUS: ${WAIT_STATUS}"
@@ -166,8 +166,8 @@ step_wait() {
                 error "WAIT_STATUS not properly set..."
                 info "Saving debug information to log..."
                 if [[ ${#ERROR_MSG[@]} -gt 0 ]]; then
-                    for ERROR in ${ERROR_MSG[@]} do
-                        warning ${ERROR}
+                    for ERROR in "${ERROR_MSG[@]}"; do
+                        warning "${ERROR}"
                     done
                 fi
                 log "WAIT_STATUS: ${WAIT_STATUS}"
