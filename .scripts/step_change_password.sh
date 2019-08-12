@@ -6,7 +6,8 @@ step_change_password() {
     local PASS_CHANGE
     local STEP_TITLE=${1:-"Step ${step_number}: ${step_name}"}
     local ASK_QUESTION=${2:-}
-    done=0
+    local done=0
+    local valid=0
     if [[ ${ASK_QUESTION} == "" ]]; then
         if run_script 'question_prompt' N "Do you want to change the default password for OpenFLIXR?" "${STEP_TITLE}"; then
             PASS_CHANGE="Y"
@@ -33,18 +34,20 @@ step_change_password() {
                 run_script 'check_response'  $?
 
                 if [[ $pass == $cpass ]]; then
+                    log "Passwords match"
                     # DO NOT save the password to the config
                     OPENFLIXR_PASSWORD_NEW=$pass
                     valid=1
                     done=1
+                set_config "CHANGE_PASS" "Y"
                 else
+                    log "Passwords don't match"
                     whiptail \
                         --backtitle ${OF_BACKTITLE} \
                         --title "${STEP_TITLE}" \
                         --ok-button "Try Again" \
                         --msgbox "Passwords do not match =( Try again." 0 0
                 fi
-                set_config "CHANGE_PASS" "Y"
             done
         else
             info "Keeping password."
