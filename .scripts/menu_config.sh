@@ -108,10 +108,7 @@ menu_config() {
             ;;
         "Various fixes ")
             info "Running fixes only"
-            run_script 'setup_fixes_sonarr'
-            run_script 'setup_fixes_permissions'
-            run_script 'setup_fixes_nginx'
-            run_script 'setup_fixes_updater'
+            run_script 'setup_fixes'
             CONFIG_COMPLETED="Y"
             ;;
         "Cancel")
