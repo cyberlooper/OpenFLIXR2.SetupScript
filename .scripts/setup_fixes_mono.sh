@@ -10,7 +10,7 @@ setup_fixes_mono()
     fi
     if [[ -f "/etc/mono/config.dpkg-new" ]]; then
         info "- Updating mono config"
-        sudo cp "/etc/mono/config.dpkg-new" "/etc/mono/config"
+        sudo mv "/etc/mono/config.dpkg-new" "/etc/mono/config"
     fi
     info "- Done"
 }

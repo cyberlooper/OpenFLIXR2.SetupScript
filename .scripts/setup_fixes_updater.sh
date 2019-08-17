@@ -15,6 +15,6 @@ setup_fixes_updater()
         echo "" >> "/opt/openflixr/userscript.sh"
         info "- Done"
     else
-        info "- Nothing to do! All good! =)"
+        info "- Setup permissions fixes already included! =)"
     fi
 }
