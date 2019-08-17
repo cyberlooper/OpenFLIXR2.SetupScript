@@ -254,6 +254,7 @@ main() {
     readonly PROMPT="GUI"
 
     run_script 'symlink_setupopenflixr'
+    run_script 'create_config'
     # shellcheck source=/dev/null
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"

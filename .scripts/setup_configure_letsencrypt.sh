@@ -81,6 +81,7 @@ setup_configure_letsencrypt()
                     else
                         LE_VE_TDC=0
                     fi
+
                     log "  LE_VE_CR='${LE_VE_CR}'"
                     warning "- Your domains couldn't be verified because:"
                     if [[ ${LE_VE_DNS} > 0 ]]; then
@@ -97,6 +98,10 @@ setup_configure_letsencrypt()
                         warning "  This is usually because your ISP is blocking port 80 and/or 443."
                     else
                         warning "  An unhandled reason caused Let's Encrypt to fail... =("
+                        if [[ $(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:") != 0 ]]; then
+                            LE_VE_UN=$(tail -${TAIL_COUNT} "${LE_LOG_FILE}" | grep -c "Verify error:")
+                            warning "  ${LE_VE_UN}"
+                        fi
                         LE_FAILED="Y"
                     fi
                     warning "  You can run just 'Configure Access' step only after setup completes by choosing 'Configuration' at the Setup Main Menu"
