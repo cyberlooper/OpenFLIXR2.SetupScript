@@ -230,14 +230,6 @@ main() {
     if [[ ${ARCH} != "aarch64" ]] && [[ ${ARCH} != "armv7l" ]] && [[ ${ARCH} != "x86_64" ]]; then
         fatal "Unsupported architecture."
     fi
-    # Ubuntu Version Check
-    readonly UBU_VER=$(lsb_release -rs)
-    if [[ ${UBU_VER} != "18.04" ]]; then
-        error "Unsupported Ubuntu Version. This setup can only be run for OpenFLIXR running Ubuntu 18.04"
-        error "Make sure you have completed the steps found here: https://github.com/openflixr/Docs/wiki/Setup#getting-set-up"
-        error "If you have, check the 'Issues & Troubleshooting' section on that same page."
-        exit 1
-    fi
     # Terminal Check
     if [[ -n ${PS1:-} ]] || [[ ${-} == *"i"* ]]; then
         root_check
@@ -259,6 +251,15 @@ main() {
     source "${SCRIPTPATH}/.scripts/cmdline.sh"
     cmdline "${ARGS[@]:-}"
     savelog -n -C -l -t "$LOG_FILE" >> ${LOG_FILE} #Save current log if not empty and rotate logs
+
+    # Ubuntu Version Check
+    readonly UBU_VER=$(lsb_release -rs)
+    if [[ ${UBU_VER} != "18.04" ]]; then
+        error "Unsupported Ubuntu Version. This setup can only be run for OpenFLIXR running Ubuntu 18.04"
+        error "Make sure you have completed the steps found here: https://github.com/openflixr/Docs/wiki/Setup#getting-set-up"
+        error "If you have, check the 'Issues & Troubleshooting' section on that same page."
+        exit 1
+    fi
 
     info "${OF_BACKTITLE}"
     debug "DETECTED_HOMEDIR=$DETECTED_HOMEDIR"
