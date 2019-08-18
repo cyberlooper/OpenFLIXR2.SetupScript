@@ -13,4 +13,5 @@ setup_fixes()
     run_script 'setup_fixes_redis'
     run_script 'setup_fixes_sonarr'
     run_script 'setup_fixes_pihole'
+    run_script 'setup_fixes_kernel'
 }
