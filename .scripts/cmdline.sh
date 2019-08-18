@@ -85,6 +85,7 @@ cmdline() {
             s)
                 run_script 'symlink_setupopenflixr'
                 exit
+                ;;
             t)
                 run_test "${OPTARG}"
                 exit
