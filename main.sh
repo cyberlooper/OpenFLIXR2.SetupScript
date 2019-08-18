@@ -65,6 +65,7 @@ readonly SCRIPTNAME="$(get_scriptname)"
 readonly SCRIPTPATH="$(cd -P "$(dirname "${SCRIPTNAME}")" > /dev/null && pwd)"
 
 # Other variables
+readonly UBU_VER=$(lsb_release -rs)
 readonly PUBLIC_IP=$(dig @ns1-1.akamaitech.net ANY whoami.akamai.net +short)
 if [ $? -eq 0 ]; then
     HAS_INTERNET=1
@@ -263,7 +264,6 @@ main() {
     savelog -n -C -l -t "$LOG_FILE" >> ${LOG_FILE} #Save current log if not empty and rotate logs
 
     # Ubuntu Version Check
-    readonly UBU_VER=$(lsb_release -rs)
     if [[ ${UBU_VER} != "18.04" ]]; then
         error "Unsupported Ubuntu Version. This setup can only be run for OpenFLIXR running Ubuntu 18.04"
         error "Make sure you have completed the steps found here: https://github.com/openflixr/Docs/wiki/Setup#getting-set-up"
