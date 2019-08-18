@@ -29,13 +29,43 @@ cmdline() {
     #Reset the positional parameters to the short options
     eval set -- "${LOCAL_ARGS:-}"
 
-    while getopts ":d:fhilt:u:vx" OPTION; do
+    while getopts ":d:f:hilt:u:vx" OPTION; do
         case ${OPTION} in
             d)
                 readonly DEVMODE=${OPTARG}
                 ;;
             f)
-                run_script 'setup_fixes'
+                case ${OPTARG} in
+                    permissions)
+                        run_script 'setup_fixes_permissions'
+                        ;;
+                    updater)
+                        run_script 'setup_fixes_updater'
+                        ;;
+                    mono)
+                        run_script 'setup_fixes_mono'
+                        ;;
+                    nginx)
+                        run_script 'setup_fixes_nginx'
+                        ;;
+                    php)
+                        run_script 'setup_fixes_php'
+                        ;;
+                    redis)
+                        run_script 'setup_fixes_redis'
+                        ;;
+                    sonarr)
+                        run_script 'setup_fixes_sonarr'
+                        ;;
+                    pihole)
+                        run_script 'setup_fixes_pihole'
+                        ;;
+                    kernel)
+                        run_script 'setup_fixes_kernel'
+                        ;;
+                    *)
+                        error "${OPTARG} not supported"
+                esac
                 exit
                 ;;
             h)
@@ -52,6 +82,9 @@ cmdline() {
                 run_script 'submit_logs'
                 exit
                 ;;
+            s)
+                run_script 'symlink_setupopenflixr'
+                exit
             t)
                 run_test "${OPTARG}"
                 exit
@@ -71,6 +104,9 @@ cmdline() {
                 case ${OPTARG} in
                     d)
                         readonly DEVMODE=1
+                        ;;
+                    f)
+                        run_script 'setup_fixes'
                         ;;
                     u)
                         run_script 'update_self'
