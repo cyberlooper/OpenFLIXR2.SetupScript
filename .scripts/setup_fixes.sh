@@ -8,6 +8,7 @@ setup_fixes()
     run_script 'setup_fixes_permissions'
     run_script 'setup_fixes_updater'
     run_script 'setup_fixes_mono'
+    run_script 'setup_fixes_mopidy'
     run_script 'setup_fixes_nginx'
     run_script 'setup_fixes_php'
     run_script 'setup_fixes_redis'

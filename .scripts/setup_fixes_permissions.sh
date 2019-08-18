@@ -13,5 +13,7 @@ setup_fixes_permissions()
     chown openflixr:openflixr -R /mnt || warning "  Unable to change ownership of /mnt"
     info "- Making '/mnt' writeable by the 'openflixr' group"
     chmod g+w -R /mnt >> ${LOG_FILE} || warning "  Unable to change permissions of /mnt"
+    info "- Fixing nano search_history file permissions"
+    chown openflixr:openflixr /home/openflixr/.nano/search_history
     info "- Done"
 }
