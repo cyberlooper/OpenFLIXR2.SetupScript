@@ -7,13 +7,23 @@ IFS=$'\n\t'
 #/
 #/ This is the main OpenFLIXR2 Setup Script script.
 #/
-#/ Usage: vms [OPTION]
-#/ NOTE: vms shortcut is only available after the first run
+#/ Usage: setupopenflixr [OPTION]
+#/ NOTE: setupopenflixr shortcut is only available after the first run
 #/
 #/ For regular usage you can run without providing any options.
 #/
 #/  -d --devmode <dev_level>
 #/      run in devmode. <dev_level> defaults to 1 if no level is provided
+#/  -f
+#/      run all fixes
+#/  -f <fix_name>
+#/      run specified fix
+#/  -i
+#/      run install
+#/  -l
+#/      submit logs
+#/  -s
+#/      symlink setupopenflixr
 #/  -t --test <test_name>
 #/      run tests to check the program
 #/  -u --update
