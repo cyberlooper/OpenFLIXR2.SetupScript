@@ -45,6 +45,9 @@ cmdline() {
                     mono)
                         run_script 'setup_fixes_mono'
                         ;;
+                    mopidy)
+                        run_script 'setup_fixes_mopidy'
+                        ;;
                     nginx)
                         run_script 'setup_fixes_nginx'
                         ;;
