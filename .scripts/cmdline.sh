@@ -14,6 +14,9 @@ cmdline() {
             --devmode) LOCAL_ARGS="${LOCAL_ARGS:-}-d " ;;
             --help) LOCAL_ARGS="${LOCAL_ARGS:-}-h " ;;
             --install) LOCAL_ARGS="${LOCAL_ARGS:-}-i " ;;
+            --no-log-submission)
+                LOG_SUBMISSION="DISABLED"
+                ;;
             --test) LOCAL_ARGS="${LOCAL_ARGS:-}-t " ;;
             --update) LOCAL_ARGS="${LOCAL_ARGS:-}-u " ;;
             --verbose) LOCAL_ARGS="${LOCAL_ARGS:-}-v " ;;

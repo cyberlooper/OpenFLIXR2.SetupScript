@@ -226,8 +226,10 @@ cleanup() {
     if [[ $? = 1 ]]; then
         run_script 'save_config'
         run_script 'load_config'
-        SUBMIT_MESSAGE="It appears and error has occurred.\nDo you want to submit the logs now?"
-        run_script 'submit_logs'
+        if [[ ${LOG_SUBMISSION:-} != "DISABLED" ]]; then
+            SUBMIT_MESSAGE="It appears and error has occurred.\nDo you want to submit the logs now?"
+            run_script 'submit_logs'
+        fi
     fi
     #if [[ ${SCRIPTPATH} == "/opt/OpenFLIXR2.SetupScript" ]]; then
     #    chmod +x "${SCRIPTNAME}" > /dev/null 2>&1 || fatal "${SCRIPTNAME} must be executable."
