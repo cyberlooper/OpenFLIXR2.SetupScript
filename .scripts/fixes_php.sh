@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_php()
+fixes_php()
 {
     info "PHP fixes"
     if [[ $(dpkg -l | grep -c php7.3-fpm) == 0 ]]; then

@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_updater()
+fixes_updater()
 {
     info "Checking post update script..."
     if [[ $(grep -c "### Setup permissions fixes" "/opt/openflixr/userscript.sh") == 0 ]]; then

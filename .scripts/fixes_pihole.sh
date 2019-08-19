@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_pihole()
+fixes_pihole()
 {
     info "Pi-hole fixes"
     info "- Checking files"

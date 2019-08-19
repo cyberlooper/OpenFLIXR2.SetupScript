@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_redis()
+fixes_redis()
 {
     info "Redis fixes"
     info "- Removing IPv6 binding"

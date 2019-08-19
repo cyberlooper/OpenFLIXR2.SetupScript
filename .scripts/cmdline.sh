@@ -37,37 +37,41 @@ cmdline() {
             f)
                 case ${OPTARG} in
                     permissions)
-                        run_script 'setup_fixes_permissions'
+                        run_script 'fixes_permissions'
                         ;;
                     updater)
-                        run_script 'setup_fixes_updater'
+                        run_script 'fixes_updater'
                         ;;
                     mono)
-                        run_script 'setup_fixes_mono'
+                        run_script 'fixes_mono'
                         ;;
                     mopidy)
-                        run_script 'setup_fixes_mopidy'
+                        run_script 'fixes_mopidy'
                         ;;
                     nginx)
-                        run_script 'setup_fixes_nginx'
+                        run_script 'fixes_nginx'
                         ;;
                     php)
-                        run_script 'setup_fixes_php'
+                        run_script 'fixes_php'
                         ;;
                     redis)
-                        run_script 'setup_fixes_redis'
+                        run_script 'fixes_redis'
                         ;;
                     sonarr)
-                        run_script 'setup_fixes_sonarr'
+                        run_script 'fixes_sonarr'
+                        ;;
+                    sources)
+                        run_script 'fixes_sources'
                         ;;
                     pihole)
-                        run_script 'setup_fixes_pihole'
+                        run_script 'fixes_pihole'
                         ;;
                     kernel)
-                        run_script 'setup_fixes_kernel'
+                        run_script 'fixes_kernel'
                         ;;
                     *)
                         error "${OPTARG} not supported"
+                        ;;
                 esac
                 exit
                 ;;

@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_mono()
+fixes_mono()
 {
     info "Mono fixes"
     if [[ ! -f "/etc/mono/config.openflixr" ]]; then
