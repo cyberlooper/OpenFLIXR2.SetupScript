@@ -29,45 +29,15 @@ cmdline() {
     #Reset the positional parameters to the short options
     eval set -- "${LOCAL_ARGS:-}"
 
-    while getopts ":d:f:hilst:u:vx" OPTION; do
+    while getopts ":d:f:hilp:st:u:vx" OPTION; do
         case ${OPTION} in
             d)
                 readonly DEVMODE=${OPTARG}
                 ;;
             f)
                 case ${OPTARG} in
-                    permissions)
-                        run_script 'fixes_permissions'
-                        ;;
-                    updater)
-                        run_script 'fixes_updater'
-                        ;;
-                    mono)
-                        run_script 'fixes_mono'
-                        ;;
-                    mopidy)
-                        run_script 'fixes_mopidy'
-                        ;;
-                    nginx)
-                        run_script 'fixes_nginx'
-                        ;;
-                    php)
-                        run_script 'fixes_php'
-                        ;;
-                    redis)
-                        run_script 'fixes_redis'
-                        ;;
-                    sonarr)
-                        run_script 'fixes_sonarr'
-                        ;;
-                    sources)
-                        run_script 'fixes_sources'
-                        ;;
-                    pihole)
-                        run_script 'fixes_pihole'
-                        ;;
-                    kernel)
-                        run_script 'fixes_kernel'
+                    kernel | mono | mopidy | nginx | permissions | php | redis | sonarr | sources | pihole | updater)
+                        run_script "fixes_${OPTARG}"
                         ;;
                     *)
                         error "${OPTARG} not supported"
@@ -87,6 +57,17 @@ cmdline() {
                 run_script 'load_config'
                 SUBMIT_MESSAGE="Do you want to submit the logs now?"
                 run_script 'submit_logs'
+                exit
+                ;;
+            p)
+                case ${OPTARG} in
+                    dns_check | fixes | process_check | uptime)
+                        run_script "precheck_${OPTARG}"
+                        ;;
+                    *)
+                        error "${OPTARG} not supported"
+                        ;;
+                esac
                 exit
                 ;;
             s)

@@ -110,6 +110,10 @@ config=(
     [SUBMITTED_LOGS_VERSION]=""
     [SETUP_COMPLETED]=""
     [BRANCH]="origin/master"
+    [PRECHECK_UPTIME]=""
+    [PRECHECK_PROCESSCHECK]=""
+    [PRECHECK_DNSCHECK]=""
+    [PRECHECK_FIXES]=""
 )
 #for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
 #    config[MOUNT_TYPE_$FOLDER]=""
