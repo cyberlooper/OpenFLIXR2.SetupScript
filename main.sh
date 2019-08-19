@@ -268,7 +268,7 @@ main() {
         error "Unsupported Ubuntu Version. This setup can only be run for OpenFLIXR running Ubuntu 18.04"
         error "Make sure you have completed the steps found here: https://github.com/openflixr/Docs/wiki/Setup#getting-set-up"
         error "If you have, check the 'Issues & Troubleshooting' section on that same page."
-        exit 1
+        exit 0
     fi
 
     info "${OF_BACKTITLE}"
