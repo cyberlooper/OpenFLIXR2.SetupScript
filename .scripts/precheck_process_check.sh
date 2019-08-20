@@ -27,7 +27,7 @@ precheck_process_check()
             echo "Started: ${start_display}"
             echo "Now:     $(date)"
             echo "Elapsed: ${duration}"
-            APT_COUNT=$(ps -ef | grep apt | grep -v tail | grep -v grep | wc -l)
+            APT_COUNT=$(ps -ef | grep apt | grep -v tail | grep -v grep | wc -l || true)
             echo " - Apt processes remaining: ${APT_COUNT}"
             if [[ ${APT_COUNT} != 0 && ${APT_COUNT_LAST_ELAPSED:-} != "" ]]; then
                 echo "   Last changed: $(date -ud @${APT_COUNT_LAST_ELAPSED} +'%M minutes %S seconds')"
@@ -35,7 +35,7 @@ precheck_process_check()
                 echo ""
             fi
 
-            UPDATE_COUNT=$(ps -ef | grep update | grep -v "no-update" | grep -v tail | grep -v shellinabox | grep -v grep | wc -l)
+            UPDATE_COUNT=$(ps -ef | grep update | grep -v "no-update" | grep -v tail | grep -v shellinabox | grep -v grep | wc -l || true)
             echo " - Update processes remaining: ${UPDATE_COUNT}"
             if [[ ${UPDATE_COUNT} != 0 && ${UPDATE_COUNT_LAST_ELAPSED:-} != "" ]]; then
                 echo "   Last changed: $(date -ud @${UPDATE_COUNT_LAST_ELAPSED} +'%M minutes %S seconds')"
@@ -43,7 +43,7 @@ precheck_process_check()
                 echo ""
             fi
 
-            UPGRADE_COUNT=$(ps -ef | grep upgrade | grep -v tail | grep -v shellinabox | grep -v unattended-upgrade | grep -v grep | wc -l)
+            UPGRADE_COUNT=$(ps -ef | grep upgrade | grep -v tail | grep -v shellinabox | grep -v unattended-upgrade | grep -v grep | wc -l || true)
             echo " - Upgrade processes remaining: ${UPGRADE_COUNT}"
             if [[ ${UPGRADE_COUNT} != 0 && ${UPGRADE_COUNT_LAST_ELAPSED:-} != "" ]]; then
                 echo "   Last changed: $(date -ud @${UPGRADE_COUNT_LAST_ELAPSED} +'%M minutes %S seconds')"
@@ -56,21 +56,11 @@ precheck_process_check()
                 info "- Completed!"
                 log "  Elapsed: ${duration}"
                 break
-            elif [[ ${APT_COUNT_LAST_ELAPSED_MINUTES#0} -ge ${WAIT_TIME} || ${UPDATE_COUNT} -eq 0 || ${UPGRADE_COUNT} -eq 0 ]]; then
+            elif [[ ${APT_COUNT_LAST_ELAPSED_MINUTES#0} -ge ${WAIT_TIME} && ${UPDATE_COUNT} -eq 0 && ${UPGRADE_COUNT} -eq 0 ]]; then
                 echo "> It has been more than ${WAIT_TIME} minutes since APT has changed and no updates or upgrades are running."
                 echo "> You might want to consider rebooting but you can wait, it just might take a while."
                 echo "> Press Ctrl+C or Cmd+C to exit this script at any time."
                 echo "> 'sudo reboot' can be used to reboot the machine and this script will run again automatically when you log in again."
-                if [[ $(grep -c "precheck.sh" ".bashrc") == 0 ]]; then
-                    log "- Adding precheck script to .bashrc"
-                    echo "" >> .bashrc
-                    echo 'echo "Running precheck script"' >> .bashrc
-                    if [[ -f "$precheck.sh" ]]; then
-                        echo 'bash precheck.sh' >> .bashrc
-                    else
-                        echo 'bash -c "$(curl -fsSL https://raw.githubusercontent.com/openflixr/Docs/'${PRECHECK_BRANCH:-master}'/precheck.sh)"' >> .bashrc
-                    fi
-                fi
             else
                 echo "> Keep waiting..."
             fi

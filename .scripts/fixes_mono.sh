@@ -35,17 +35,26 @@ fixes_mono()
     else
         info "  - Nothing to do!"
     fi
+    info "- Checking if mono is installed"
+    MONO_VERSION=$(apt-cache policy mono-devel | grep "Installed:" | cut -d ':' -f 2 | cut -d '-' -f 1 | cut -d ' ' -f 2)
+    if [[ ${MONO_VERSION} == "(none)" ]]; then
+        apt-get -y install mono-devel
+    else
+        info "  Installed! Version: ${MONO_VERSION}"
+    fi
     info "- Checking if ca-certificates-mono can be installed..."
     MONO_VERSION=$(apt-cache policy mono-runtime-common | grep "Installed:" | cut -d ':' -f 2 | cut -d '-' -f 1 | cut -d ' ' -f 2)
-    MONO_VERSION_MAJOR=$(cut -d '.' -f 1 <<< $MONO_VERSION)
-    MONO_VERSION_MINOR=$(cut -d '.' -f 2 <<< $MONO_VERSION)
-    if [[ (${MONO_VERSION_MAJOR} -ge 6) || (${MONO_VERSION_MAJOR} -eq 5 && ${MONO_VERSION_MINOR} -ge 20) ]]; then
-        info "  - Installing ca-certificates-mono"
-        apt-get -y install ca-certificates-mono
-    elif [[ ${MONO_VERSION_MAJOR} -le 5 && ${MONO_VERSION_MINOR} -le 20 ]]; then
-        warning "  - Mono needs to be updated before these can be installed."
-    else
-        info "  - Nothing to do!"
+    if [[ ${MONO_VERSION} == "(none)" ]]; then
+        MONO_VERSION_MAJOR=$(cut -d '.' -f 1 <<< $MONO_VERSION)
+        MONO_VERSION_MINOR=$(cut -d '.' -f 2 <<< $MONO_VERSION)
+        if [[ (${MONO_VERSION_MAJOR} -ge 6) || (${MONO_VERSION_MAJOR} -eq 5 && ${MONO_VERSION_MINOR} -ge 20) ]]; then
+            info "  - Installing ca-certificates-mono"
+            apt-get -y install ca-certificates-mono
+        elif [[ ${MONO_VERSION_MAJOR} -le 5 && ${MONO_VERSION_MINOR} -le 20 ]]; then
+            warning "  - Mono needs to be updated before these can be installed."
+        else
+            info "  Installed! Version: ${MONO_VERSION}"
+        fi
     fi
     info "- Done"
 }
