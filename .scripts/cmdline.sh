@@ -64,7 +64,7 @@ cmdline() {
                 ;;
             p)
                 case ${OPTARG} in
-                    dns_check | prepare_upgrade | process_check | ready_check | uptime)
+                    dns_check | prepare_upgrade | process_check | ready_check | upgrade | uptime)
                         run_script "precheck_${OPTARG}"
                         ;;
                     *)
