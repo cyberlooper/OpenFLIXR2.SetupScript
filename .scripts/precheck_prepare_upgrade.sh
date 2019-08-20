@@ -20,7 +20,7 @@ precheck_prepare_upgrade()
                 for name in /var/cache/apt/archives/msbuild_1%3a16.*_all.deb; do
                     if [[ -f ${name} ]]; then
                         info "- '${name}'"
-                        dpkg -i --force-overwrite "${name}"
+                        dpkg -i --force-overwrite "${name}" || warning " - An error ocurred fixing msbuild"
                     fi
                 done
                 info "Installing msbuild"
