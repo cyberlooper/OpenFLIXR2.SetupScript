@@ -9,7 +9,7 @@ precheck_ready_check()
         if [[ ${config[PRECHECK_UPTIME]:-} == "COMPLETED" && ${config[PRECHECK_PROCESSCHECK]:-} == "COMPLETED" && ${config[PRECHECK_DNSCHECK]:-} == "COMPLETED" ]]; then
             run_script 'set_config' "PRECHECK_FIXES" "COMPLETED"
             info "|------------------------------------------------|"
-            info "| OpenFLIXR is PROBABLY ready for the next step! |"
+            info "| OpenFLIXR is PROBABLY ready for upgrade!       |"
             info "|------------------------------------------------|"
             echo ""
         else
@@ -20,7 +20,7 @@ precheck_ready_check()
         fi
     else
         info "|------------------------------------------------|"
-        info "| OpenFLIXR is PROBABLY ready for the next step! |"
+        info "| OpenFLIXR is PROBABLY ready for for upgrade!   |"
         info "|------------------------------------------------|"
     fi
 }

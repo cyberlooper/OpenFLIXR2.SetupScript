@@ -23,7 +23,8 @@ precheck_prepare_upgrade()
                         dpkg -i --force-overwrite "${name}"
                     fi
                 done
-                apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install msbuild
+                info "Installing msbuild"
+                DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install msbuild
                 if [[ ${RUN_COUNT} -ge 5 ]]; then
                     error "Breaking the loop"
                     exit
@@ -34,7 +35,7 @@ precheck_prepare_upgrade()
             sleep 5s
             DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" dist-upgrade || fatal "Failed to upgrade packages from apt."
             info "Removing uneeded packages"
-            apt-get -y remove ca-certificates-mono libgdiplus libmono-2.0-dev libmono-corlib4.5-cil libmono-i18n4.0-cil libmono-posix4.0-cil libmono-system-configuration4.0-cil libmono-system-core4.0-cil libmono-system-drawing4.0-cil libmono-system-web4.0-cil libmono-system-windows-forms4.0-cil libmono-system4.0-cil libmonoboehm-2.0-1 libmonoboehm-2.0-dev libmonosgen-2.0-1 libmonosgen-2.0-dev mono-4.0-gac mono-gac mono-runtime mono-runtime-common mono-runtime-sgen
+            apt-get -y remove ca-certificates-mono libgdiplus libmono-2.0-dev libmono-corlib4.5-cil libmono-i18n4.0-cil libmono-posix4.0-cil libmono-system-configuration4.0-cil libmono-system-core4.0-cil libmono-system-drawing4.0-cil libmono-system-web4.0-cil libmono-system-windows-forms4.0-cil libmono-system4.0-cil libmonoboehm-2.0-1 libmonoboehm-2.0-dev libmonosgen-2.0-1 libmonosgen-2.0-dev mono-4.0-gac mono-gac mono-runtime mono-runtime-common mono-runtime-sgen || warning "Failed to remove one or more packages."
             apt-get -y autoremove
             info "Installing update manager"
             apt-get -y install update-manager-core
