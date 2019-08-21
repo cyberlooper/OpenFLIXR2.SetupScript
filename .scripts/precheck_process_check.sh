@@ -58,9 +58,7 @@ precheck_process_check()
                 break
             elif [[ ${APT_COUNT_LAST_ELAPSED_MINUTES#0} -ge ${WAIT_TIME} && ${UPDATE_COUNT} -eq 0 && ${UPGRADE_COUNT} -eq 0 ]]; then
                 echo "> It has been more than ${WAIT_TIME} minutes since APT has changed and no updates or upgrades are running."
-                echo "> You might want to consider rebooting but you can wait, it just might take a while."
-                echo "> Press Ctrl+C or Cmd+C to exit this script at any time."
-                echo "> 'sudo reboot' can be used to reboot the machine and this script will run again automatically when you log in again."
+                echo "> This is okay. Just. Keep. Waiting."
             else
                 echo "> Keep waiting..."
             fi
