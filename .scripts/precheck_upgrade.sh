@@ -20,6 +20,7 @@ precheck_upgrade()
         sed -i 's#echo "Running precheck script"##g' "${DETECTED_HOMEDIR}/.bashrc"
         sed -i 's#bash precheck.sh##g' "${DETECTED_HOMEDIR}/.bashrc"
         sed -i 's#bash -c "$(curl -fsSL https://raw.githubusercontent.com/openflixr/Docs/.*/precheck.sh)"##g' "${DETECTED_HOMEDIR}/.bashrc"
+        sed -i 's/.*#firstrun-startup//g' "${DETECTED_HOMEDIR}/.bashrc"
         run_script 'set_config' "PRECHECK_CLEANUP" "COMPLETED"
         info "|------------------------------------------------|"
         info "| OpenFLIXR should now be ready for use!!        |"
