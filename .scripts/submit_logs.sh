@@ -47,9 +47,9 @@ submit_logs() {
             bash ${SCRIPTPATH}/.scripts/discord.sh \
                 --webhook-url="${WEBHOOK_URL}" \
                 --file "${FILE_PATH}" \
-                --text "Setup logs reported from ${config[DISCORD_USERNAME]:-Anonymous}\nSubmission ID: ${SUBMISSION_ID}"
+                --text "Setup logs reported from ${config[DISCORD_USERNAME]:-Anonymous}\nSubmission ID: ${SUBMISSION_ID}" || RETURN_CODE=$?; error "Error submitting logs..."
 
-            if [[ $? == 0 ]]; then
+            if [[ ${RETURN_CODE} == 0 ]]; then
                 info "Logs submitted successfully!"
                 info "Your submission ID is: ${SUBMISSION_ID}"
                 info "Keep an eye out for a message on the OpenFLIXR Discord for updates."
