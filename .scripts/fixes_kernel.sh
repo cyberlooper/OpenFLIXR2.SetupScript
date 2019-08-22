@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_kernel()
+fixes_kernel()
 {
     info "Kernel fixes"
     if [[ $(dpkg -l | grep -c linux-generic-hwe-18.04) == 0 ]]; then

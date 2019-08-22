@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_sonarr()
+fixes_sonarr()
 {
     info "Sonarr fixes"
     if [[ ! -f "/etc/apt/sources.list.d/sonarr.list"

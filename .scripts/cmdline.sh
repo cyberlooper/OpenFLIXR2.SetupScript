@@ -14,6 +14,9 @@ cmdline() {
             --devmode) LOCAL_ARGS="${LOCAL_ARGS:-}-d " ;;
             --help) LOCAL_ARGS="${LOCAL_ARGS:-}-h " ;;
             --install) LOCAL_ARGS="${LOCAL_ARGS:-}-i " ;;
+            --no-log-submission)
+                LOG_SUBMISSION="DISABLED"
+                ;;
             --test) LOCAL_ARGS="${LOCAL_ARGS:-}-t " ;;
             --update) LOCAL_ARGS="${LOCAL_ARGS:-}-u " ;;
             --verbose) LOCAL_ARGS="${LOCAL_ARGS:-}-v " ;;
@@ -29,45 +32,19 @@ cmdline() {
     #Reset the positional parameters to the short options
     eval set -- "${LOCAL_ARGS:-}"
 
-    while getopts ":d:f:hilst:u:vx" OPTION; do
+    while getopts ":d:f:hilp:st:u:vx" OPTION; do
         case ${OPTION} in
             d)
                 readonly DEVMODE=${OPTARG}
                 ;;
             f)
                 case ${OPTARG} in
-                    permissions)
-                        run_script 'setup_fixes_permissions'
-                        ;;
-                    updater)
-                        run_script 'setup_fixes_updater'
-                        ;;
-                    mono)
-                        run_script 'setup_fixes_mono'
-                        ;;
-                    mopidy)
-                        run_script 'setup_fixes_mopidy'
-                        ;;
-                    nginx)
-                        run_script 'setup_fixes_nginx'
-                        ;;
-                    php)
-                        run_script 'setup_fixes_php'
-                        ;;
-                    redis)
-                        run_script 'setup_fixes_redis'
-                        ;;
-                    sonarr)
-                        run_script 'setup_fixes_sonarr'
-                        ;;
-                    pihole)
-                        run_script 'setup_fixes_pihole'
-                        ;;
-                    kernel)
-                        run_script 'setup_fixes_kernel'
+                    kernel | mono | mopidy | nginx | permissions | php | redis | sonarr | sources | pihole | updater)
+                        run_script "fixes_${OPTARG}"
                         ;;
                     *)
                         error "${OPTARG} not supported"
+                        ;;
                 esac
                 exit
                 ;;
@@ -83,6 +60,17 @@ cmdline() {
                 run_script 'load_config'
                 SUBMIT_MESSAGE="Do you want to submit the logs now?"
                 run_script 'submit_logs'
+                exit
+                ;;
+            p)
+                case ${OPTARG} in
+                    dns_check | prepare_upgrade | process_check | ready_check | upgrade | uptime)
+                        run_script "precheck_${OPTARG}"
+                        ;;
+                    *)
+                        error "${OPTARG} not supported"
+                        ;;
+                esac
                 exit
                 ;;
             s)

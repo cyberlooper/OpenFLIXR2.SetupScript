@@ -10,7 +10,6 @@ steps=(
     "Series Manager"
     "Movie Manager"
     "NZB Downloader"
-    "Wait"
     "Timezone"
     "Setup"
 )

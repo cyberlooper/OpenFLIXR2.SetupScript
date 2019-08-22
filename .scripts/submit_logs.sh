@@ -34,9 +34,12 @@ submit_logs() {
                 run_script 'set_config' "DISCORD_USERNAME" "${DISCORD_USERNAME}"
             fi
 
+            local DISCORD_USERNAME=${config[DISCORD_USERNAME]:-Anonymous}
+            DISCORD_USERNAME=${DISCORD_USERNAME// /_}
+            DISCORD_USERNAME=${DISCORD_USERNAME//,/[comma]}
             local SUBMISSION_ID=$(uuidgen | tr -d - | tr -d '' | tr '[:upper:]' '[:lower:]')
             readonly WEBHOOK_URL="https://api.tarpix.net/ofv1/of-log-submit"
-            local FILE="${config[DISCORD_USERNAME]:-Anonymous}_setup_logs_${SUBMISSION_ID}.tar"
+            local FILE="${DISCORD_USERNAME}_setup_logs_${SUBMISSION_ID}.tar"
             local FILE_PATH="/tmp/${FILE}"
 
             info "Adding Submission ID to logs..."
@@ -47,9 +50,9 @@ submit_logs() {
             bash ${SCRIPTPATH}/.scripts/discord.sh \
                 --webhook-url="${WEBHOOK_URL}" \
                 --file "${FILE_PATH}" \
-                --text "Setup logs reported from ${config[DISCORD_USERNAME]:-Anonymous}\nSubmission ID: ${SUBMISSION_ID}"
+                --text "Setup logs reported from ${DISCORD_USERNAME}\nSubmission ID: ${SUBMISSION_ID}" || RETURN_CODE=$?
 
-            if [[ $? == 0 ]]; then
+            if [[ ${RETURN_CODE:-0} == 0 ]]; then
                 info "Logs submitted successfully!"
                 info "Your submission ID is: ${SUBMISSION_ID}"
                 info "Keep an eye out for a message on the OpenFLIXR Discord for updates."

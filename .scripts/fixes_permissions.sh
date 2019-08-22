@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_permissions()
+fixes_permissions()
 {
     info "Permissions fixes"
     info "- Adding 'root' user to 'openflixr' group"

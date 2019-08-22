@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_nginx()
+fixes_nginx()
 {
     info "Nginx fixes"
     if [[ -f "/etc/nginx/sites-enabled/reverse" ]]; then

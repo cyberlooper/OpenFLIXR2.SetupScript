@@ -344,7 +344,7 @@ send_file() {
         curl -i \
             -F "file=@${file_path}" \
             -F "${_json}" \
-            "localhost:8000" 
+            "localhost:8000"
         exit 0
     fi
 
@@ -358,12 +358,13 @@ send_file() {
         -F "payload_json=${_json}" \
         "${webhook_url}" >/dev/null 2>&1
 
-    # error checking 
+    # error checking
 
     sent_ok=$?
     [[ "${sent_ok}" -eq 0 ]] && exit 0
 
     echo "fatal: curl exited with code ${sent_ok} when sending file \"${file_path}\""
+    exit $sent_ok
 }
 
 

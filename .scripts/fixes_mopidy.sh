@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-setup_fixes_mopidy()
+fixes_mopidy()
 {
     info "Mopidy fixes"
     info "- Updating permissions"
