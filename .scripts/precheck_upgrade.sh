@@ -16,7 +16,7 @@ precheck_upgrade()
     elif [[ ${config[PRECHECK_UPGRADE]:-} == "COMPLETED" && ${config[PRECHECK_CLEANUP]:-} != "COMPLETED" ]]; then
         run_script 'fixes_mono'
         info "Cleaning up some things..."
-        rm "/etc/sudoers.d/precheck"
+        rm "/etc/sudoers.d/firstrun"
         sed -i 's#echo "Running precheck script"##g' "${DETECTED_HOMEDIR}/.bashrc"
         sed -i 's#bash precheck.sh##g' "${DETECTED_HOMEDIR}/.bashrc"
         sed -i 's#bash -c "$(curl -fsSL https://raw.githubusercontent.com/openflixr/Docs/.*/precheck.sh)"##g' "${DETECTED_HOMEDIR}/.bashrc"
@@ -25,10 +25,28 @@ precheck_upgrade()
         info "|------------------------------------------------|"
         info "| OpenFLIXR should now be ready for use!!        |"
         info "|------------------------------------------------|"
+        if [[ $(grep -c "#openflixr-ready" "${DETECTED_HOMEDIR}/.profile") == 0 ]]; then
+            info "Adding OpenFLIXR Ready Banner to .profile"
+            echo "" >> "${DETECTED_HOMEDIR}/.profile"
+            echo "echo '|------------------------------------------------|' #openflixr-ready" >> "${DETECTED_HOMEDIR}/.profile"
+            echo "echo '| OpenFLIXR should now be ready for use!!        |' #openflixr-ready" >> "${DETECTED_HOMEDIR}/.profile"
+            echo "echo '|------------------------------------------------|' #openflixr-ready" >> "${DETECTED_HOMEDIR}/.profile"
+            echo "sed -i 's/.*#openflixr-ready//g' '${DETECTED_HOMEDIR}/.profile' #openflixr-ready" >> "${DETECTED_HOMEDIR}/.profile"
+            info "- Done"
+        fi
     elif [[ ${config[PRECHECK_UPGRADE]:-} == "COMPLETED" && ${config[PRECHECK_CLEANUP]:-} == "COMPLETED" ]]; then
         info "|------------------------------------------------|"
         info "| OpenFLIXR should now be ready for use!!        |"
         info "|------------------------------------------------|"
+        if [[ $(grep -c "#openflixr-ready" "${DETECTED_HOMEDIR}/.profile") == 0 ]]; then
+            info "Adding OpenFLIXR Ready Banner to .profile"
+            echo "" >> "${DETECTED_HOMEDIR}/.profile"
+            echo "echo '|------------------------------------------------|' #openflixr-ready" >> "${DETECTED_HOMEDIR}/.profile"
+            echo "echo '| OpenFLIXR should now be ready for use!!        |' #openflixr-ready" >> "${DETECTED_HOMEDIR}/.profile"
+            echo "echo '|------------------------------------------------|' #openflixr-ready" >> "${DETECTED_HOMEDIR}/.profile"
+            echo "sed -i 's/.*#openflixr-ready//g' '${DETECTED_HOMEDIR}/.profile' #openflixr-ready" >> "${DETECTED_HOMEDIR}/.profile"
+            info "- Done"
+        fi
     else
         error "... Well, this is unexpected..."
     fi
