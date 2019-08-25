@@ -12,9 +12,16 @@ precheck_upgrade()
     if [[ ${config[PRECHECK_UPGRADE]:-} != "COMPLETED" && ${config[PRECHECK_PREPARE_UPGRADE]:-} == "COMPLETED" ]]; then
         info "Upgrading the system. Please be patient, this can take a while..."
         sleep 5s
-        sudo updateopenflixr
-    elif [[ ${config[PRECHECK_UPGRADE]:-} == "COMPLETED" && ${config[PRECHECK_CLEANUP]:-} != "COMPLETED" ]]; then
+        updateopenflixr
+    elif [[ ${config[PRECHECK_UPGRADE]:-} == "COMPLETED" && ${config[PRECHECK_FIXES]:-} != "COMPLETED" ]]; then
+        info "Running some final fixes"
         run_script 'fixes_mono'
+        run_script 'fixes_sonarr'
+        run_script 'fixes_pihole'
+        run_script 'fixes_kernel'
+        run_script 'set_config' "PRECHECK_FIXES" "COMPLETED"
+        reboot
+    elif [[ ${config[PRECHECK_UPGRADE]:-} == "COMPLETED" && ${config[PRECHECK_FIXES]:-} == "COMPLETED" && ${config[PRECHECK_CLEANUP]:-} != "COMPLETED" ]]; then
         info "Cleaning up some things..."
         rm "/etc/sudoers.d/firstrun"
         sed -i 's/.*#firstrun-startup//g' "${DETECTED_HOMEDIR}/.bashrc"
