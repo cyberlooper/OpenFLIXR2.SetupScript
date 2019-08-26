@@ -2,11 +2,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-precheck_prepare_upgrade()
+firstrun_prepare_upgrade()
 {
     run_script 'load_config'
     if [[ ${UBU_VER} != "18.04" ]]; then
-        if [[ ${config[PRECHECK_PREPARE_UPGRADE]:-} != "COMPLETED" ]]; then
+        if [[ ${config[FIRSTRUN_PREPARE_UPGRADE]:-} != "COMPLETED" ]]; then
             info "Preparing for upgrade..."
             apt-get -y update
 
@@ -41,7 +41,7 @@ precheck_prepare_upgrade()
             apt-get -y install update-manager-core
             # Make sure release-upgrades is set to LTS
             sed -i 's/Prompt=*/Prompt=lts/g' /etc/update-manager/release-upgrades
-            run_script 'set_config' "PRECHECK_PREPARE_UPGRADE" "COMPLETED"
+            run_script 'set_config' "FIRSTRUN_PREPARE_UPGRADE" "COMPLETED"
         else
             info "Prepare upgrade already completed!"
         fi

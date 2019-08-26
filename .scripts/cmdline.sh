@@ -65,7 +65,7 @@ cmdline() {
             p)
                 case ${OPTARG} in
                     dns_check | prepare_upgrade | process_check | ready_check | upgrade | uptime)
-                        run_script "precheck_${OPTARG}"
+                        run_script "firstrun_${OPTARG}"
                         ;;
                     *)
                         error "${OPTARG} not supported"

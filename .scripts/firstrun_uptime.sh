@@ -2,11 +2,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-precheck_uptime()
+firstrun_uptime()
 {
     run_script 'load_config'
     local WAIT_UPTIME=10
-    if [[ ${config[PRECHECK_UPTIME]:-} != "COMPLETED" ]]; then
+    if [[ ${config[FIRSTRUN_UPTIME]:-} != "COMPLETED" ]]; then
         echo ""
         info "Waiting for the system to have been running for ${WAIT_UPTIME} minutes"
         while (true); do
@@ -14,7 +14,7 @@ precheck_uptime()
             UPTIME_MINUTES=$(awk '{print int(($1%3600)/60)}' /proc/uptime)
             UPTIME_SECONDS=$(awk '{print int($1%60)}' /proc/uptime)
             if [[ ${UPTIME_HOURS} -gt 0 || ${UPTIME_MINUTES} -ge ${WAIT_UPTIME} ]]; then
-                run_script 'set_config' "PRECHECK_UPTIME" "COMPLETED"
+                run_script 'set_config' "FIRSTRUN_UPTIME" "COMPLETED"
                 info "- Wait complete!"
                 break
             else
