@@ -6,6 +6,7 @@ menu_main() {
     local MAINOPTS=()
     MAINOPTS+=("Re-run setup " "Run Setup again after first completion")
     MAINOPTS+=("Configuration " "Run configuration for a specific part of the setup")
+    MAINOPTS+=("Fixes & Other stuff " "Run fixes or other options")
 
     local MAINCHOICE
     if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]]; then
@@ -20,6 +21,9 @@ menu_main() {
             ;;
         "Configuration ")
             run_script 'menu_config' || run_script 'menu_main'
+            ;;
+        "Fixes & Other stuff ")
+            run_script 'menu_other' || run_script 'menu_main'
             ;;
         "Submit Logs ")
             run_script 'submit_logs'

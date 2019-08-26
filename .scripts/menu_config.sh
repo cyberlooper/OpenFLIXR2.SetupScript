@@ -12,9 +12,6 @@ menu_config() {
     CONFIGOPTS+=("Configure Series Manager " "")
     CONFIGOPTS+=("Configure NZB Downloader " "")
     CONFIGOPTS+=("Configure HTPC Manager " "")
-    CONFIGOPTS+=("Configure Pi-hole " "")
-    CONFIGOPTS+=("Configure Folders " "")
-    CONFIGOPTS+=("Various fixes " "")
 
     local CONFIGCHOICE
     if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]]; then
@@ -104,11 +101,6 @@ menu_config() {
         "Configure Folders ")
             info "Configuring Folders only"
             run_script 'setup_folder_creation'
-            CONFIG_COMPLETED="Y"
-            ;;
-        "Various fixes ")
-            info "Running fixes only"
-            run_script 'setup_fixes'
             CONFIG_COMPLETED="Y"
             ;;
         "Cancel")
