@@ -24,6 +24,7 @@ firstrun_upgrade()
     elif [[ ${config[FIRSTRUN_UPGRADE]:-} == "COMPLETED" && ${config[FIRSTRUN_FIXES]:-} == "COMPLETED" && ${config[FIRSTRUN_CLEANUP]:-} != "COMPLETED" ]]; then
         info "Cleaning up some things..."
         rm "/etc/sudoers.d/firstrun"
+        rm "/etc/systemd/system/getty@tty1.service.d/override.conf"
         sed -i 's/.*#firstrun-startup//g' "${DETECTED_HOMEDIR}/.bashrc"
         run_script 'set_config' "FIRSTRUN_CLEANUP" "COMPLETED"
         info "|------------------------------------------------|"
