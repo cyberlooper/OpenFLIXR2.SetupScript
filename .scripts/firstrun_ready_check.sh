@@ -2,12 +2,12 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-precheck_ready_check()
+firstrun_ready_check()
 {
     run_script 'load_config'
-    if [[ ${config[PRECHECK_FIXES]:-} != "COMPLETED" ]]; then
-        if [[ ${config[PRECHECK_UPTIME]:-} == "COMPLETED" && ${config[PRECHECK_PROCESSCHECK]:-} == "COMPLETED" && ${config[PRECHECK_DNSCHECK]:-} == "COMPLETED" ]]; then
-            run_script 'set_config' "PRECHECK_FIXES" "COMPLETED"
+    if [[ ${config[FIRSTRUN_READY]:-} != "COMPLETED" ]]; then
+        if [[ ${config[FIRSTRUN_UPTIME]:-} == "COMPLETED" && ${config[FIRSTRUN_PROCESSCHECK]:-} == "COMPLETED" && ${config[FIRSTRUN_DNSCHECK]:-} == "COMPLETED" ]]; then
+            run_script 'set_config' "FIRSTRUN_READY" "COMPLETED"
             info "|------------------------------------------------|"
             info "| OpenFLIXR is PROBABLY ready for upgrade!       |"
             info "|------------------------------------------------|"

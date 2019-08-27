@@ -2,11 +2,11 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-precheck_dns_check()
+firstrun_dns_check()
 {
     run_script 'load_config'
     local DNS_PASS=1
-    if [[ ${config[PRECHECK_DNSCHECK]:-} != "COMPLETED" ]]; then
+    if [[ ${config[FIRSTRUN_DNSCHECK]:-} != "COMPLETED" ]]; then
         info "Doing some basic DNS checks..."
         warning "If any of these fail, you might have issues in the next steps."
         dns_servers_ips=("8.8.8.8" "208.67.222.222" "127.0.0.1" "")
@@ -48,7 +48,7 @@ precheck_dns_check()
         done
         info "- DNS Check complete"
         if [[ ${DNS_PASS} == 1 ]]; then
-            run_script 'set_config' "PRECHECK_DNSCHECK" "COMPLETED"
+            run_script 'set_config' "FIRSTRUN_DNSCHECK" "COMPLETED"
         fi
     else
         info "DNS Checks already completed!"

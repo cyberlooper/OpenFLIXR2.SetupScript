@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-precheck_process_check()
+firstrun_process_check()
 {
     run_script 'load_config'
     local start=$(date +%s)
@@ -16,7 +16,7 @@ precheck_process_check()
     local UPGRADE_COUNT_LAST=0
     local UPGRADE_COUNT_LAST_ELAPSED_MINUTES=0
     local WAIT_TIME=5
-    if [[ ${config[PRECHECK_PROCESSCHECK]:-} != "COMPLETED" ]]; then
+    if [[ ${config[FIRSTRUN_PROCESSCHECK]:-} != "COMPLETED" ]]; then
         info "Waiting for the system to finish some processes..."
         while (true); do
             clear
@@ -52,7 +52,7 @@ precheck_process_check()
             fi
 
             if [[ ${APT_COUNT} = 0 && ${UPDATE_COUNT} = 0 && ${UPGRADE_COUNT} = 0 ]]; then
-                run_script 'set_config' "PRECHECK_PROCESSCHECK" "COMPLETED"
+                run_script 'set_config' "FIRSTRUN_PROCESSCHECK" "COMPLETED"
                 info "- Completed!"
                 log "  Elapsed: ${duration}"
                 break

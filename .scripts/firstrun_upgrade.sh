@@ -2,23 +2,31 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-precheck_upgrade()
+firstrun_upgrade()
 {
     run_script 'load_config'
-    if [[ ${UBU_VER} == "18.04" && ${config[PRECHECK_UPGRADE]:-} != "COMPLETED" ]]; then
-        run_script 'set_config' "PRECHECK_UPGRADE" "COMPLETED"
+    if [[ ${UBU_VER} == "18.04" && ${config[FIRSTRUN_UPGRADE]:-} != "COMPLETED" ]]; then
+        run_script 'set_config' "FIRSTRUN_UPGRADE" "COMPLETED"
         info "System upgraded successfully!"
     fi
-    if [[ ${config[PRECHECK_UPGRADE]:-} != "COMPLETED" && ${config[PRECHECK_PREPARE_UPGRADE]:-} == "COMPLETED" ]]; then
+    if [[ ${config[FIRSTRUN_UPGRADE]:-} != "COMPLETED" && ${config[FIRSTRUN_PREPARE_UPGRADE]:-} == "COMPLETED" ]]; then
         info "Upgrading the system. Please be patient, this can take a while..."
         sleep 5s
-        sudo updateopenflixr
-    elif [[ ${config[PRECHECK_UPGRADE]:-} == "COMPLETED" && ${config[PRECHECK_CLEANUP]:-} != "COMPLETED" ]]; then
+        updateopenflixr
+    elif [[ ${config[FIRSTRUN_UPGRADE]:-} == "COMPLETED" && ${config[FIRSTRUN_FIXES]:-} != "COMPLETED" ]]; then
+        info "Running some final fixes"
         run_script 'fixes_mono'
+        run_script 'fixes_sonarr'
+        run_script 'fixes_pihole'
+        run_script 'fixes_kernel'
+        run_script 'set_config' "FIRSTRUN_FIXES" "COMPLETED"
+        reboot
+    elif [[ ${config[FIRSTRUN_UPGRADE]:-} == "COMPLETED" && ${config[FIRSTRUN_FIXES]:-} == "COMPLETED" && ${config[FIRSTRUN_CLEANUP]:-} != "COMPLETED" ]]; then
         info "Cleaning up some things..."
         rm "/etc/sudoers.d/firstrun"
+        rm "/etc/systemd/system/getty@tty1.service.d/override.conf"
         sed -i 's/.*#firstrun-startup//g' "${DETECTED_HOMEDIR}/.bashrc"
-        run_script 'set_config' "PRECHECK_CLEANUP" "COMPLETED"
+        run_script 'set_config' "FIRSTRUN_CLEANUP" "COMPLETED"
         info "|------------------------------------------------|"
         info "| OpenFLIXR should now be ready for use!!        |"
         info "|------------------------------------------------|"
@@ -32,7 +40,7 @@ precheck_upgrade()
             info "- Done"
             reboot
         fi
-    elif [[ ${config[PRECHECK_UPGRADE]:-} == "COMPLETED" && ${config[PRECHECK_CLEANUP]:-} == "COMPLETED" ]]; then
+    elif [[ ${config[FIRSTRUN_UPGRADE]:-} == "COMPLETED" && ${config[FIRSTRUN_CLEANUP]:-} == "COMPLETED" ]]; then
         info "|------------------------------------------------|"
         info "| OpenFLIXR should now be ready for use!!        |"
         info "|------------------------------------------------|"
