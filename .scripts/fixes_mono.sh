@@ -14,11 +14,13 @@ fixes_mono()
     fi
     info "- Checking sources for Mono"
     local SOURCE="/etc/apt/sources.list.d/mono-official-stable.list"
-    if [[ ${UBU_VER} != "16.04" ]]; then
+    log "UBU_VER=${UBU_VER}"
+    if [[ ${UBU_VER} == "16.04" ]]; then
         local REPO="deb https://download.mono-project.com/repo/ubuntu stable-xenial main"
-    elif [[ ${UBU_VER} != "18.04" ]]; then
+    elif [[ ${UBU_VER} == "18.04" ]]; then
         local REPO="deb https://download.mono-project.com/repo/ubuntu stable-bionic main"
     else
+        error "Failed to detect Ubuntu version or Ubuntu version not supported..."
         return 0
     fi
     if [[ ! -f "${SOURCE}"
@@ -38,6 +40,7 @@ fixes_mono()
     info "- Checking if mono is installed"
     MONO_VERSION=$(apt-cache policy mono-devel | grep "Installed:" | cut -d ':' -f 2 | cut -d '-' -f 1 | cut -d ' ' -f 2)
     if [[ ${MONO_VERSION} == "(none)" ]]; then
+        warning "mono not installed... Installing mono"
         apt-get -y install mono-devel
     else
         info "  Installed! Version: ${MONO_VERSION}"
