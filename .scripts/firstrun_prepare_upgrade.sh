@@ -26,7 +26,7 @@ firstrun_prepare_upgrade()
                 info "Installing msbuild"
                 DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install msbuild
                 if [[ ${RUN_COUNT} -ge 5 ]]; then
-                    error "Breaking the loop"
+                    error "msbuild has failed to install 5 times now. Exiting..."
                     exit
                 fi
                 RUN_COUNT=$((RUN_COUNT+1))
