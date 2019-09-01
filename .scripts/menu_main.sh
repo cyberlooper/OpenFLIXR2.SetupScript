@@ -20,10 +20,10 @@ menu_main() {
             run_script 'run_steps'
             ;;
         "Configuration ")
-            run_script 'menu_config' || run_script 'menu_main'
+            run_script 'menu_config' || run_script 'menu_main' && return
             ;;
         "Fixes & Other stuff ")
-            run_script 'menu_other' || run_script 'menu_main'
+            run_script 'menu_other' || run_script 'menu_main' && return
             ;;
         "Submit Logs ")
             run_script 'submit_logs'
