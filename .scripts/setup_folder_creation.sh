@@ -12,11 +12,5 @@ setup_folder_creation() {
             info "- /mnt/${FOLDER}/ already exists!"
         fi
     done
-    info "- Updating folder permissions..."
-    # Add root to openflixr group
-    usermod -a -G openflixr root || warning "  Unable to add 'root' user to 'openflixr' group"
-    # Make /mnt group be openflixr
-    chown openflixr:openflixr -R /mnt || warning "  Unable to change ownership of /mnt"
-    # Add group write permissions to /mnt
-    chmod g+w -R /mnt >> ${LOG_FILE} || warning "  Unable to change permissions of /mnt"
+    run_script 'fixes_permissions'
 }
