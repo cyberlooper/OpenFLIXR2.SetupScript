@@ -4,32 +4,52 @@ IFS=$'\n\t'
 
 menu_config_select_fixes() {
     local FIXOPTS=()
-    FIXOPTS+=("Re-run setup " "Run Setup again after first completion")
-    FIXOPTS+=("Configuration " "Run configuration for a specific part of the setup")
+    for filename in ${SCRIPTPATH}/.scripts/fixes_*.sh; do
+        filename=${filename##*_}
+        filename=${filename/.sh/}
+        FIXOPTS+=("Run ${filename} fix " "")
+    done
 
-    local MAINCHOICE
+    local FIXCHOICE
     if [[ ${CI:-} == true ]] && [[ ${TRAVIS:-} == true ]]; then
-        MAINCHOICE="Cancel"
+        FIXCHOICE="Cancel"
     else
-        MAINCHOICE=$(whiptail --fb --clear --backtitle \""${OF_BACKTITLE}"\" --title \""Setup Fixes Menu"\" --cancel-button "Exit" --menu "What would you like to do?" 0 0 0 "${MAINOPTS[@]}" 3>&1 1>&2 2>&3 || echo "Cancel")
+        FIXCHOICE=$(whiptail --fb --clear --backtitle \""${OF_BACKTITLE}"\" --title \""OpenFLIXR - Fixes"\" --menu "What would you like to do?" 0 0 0 "${FIXOPTS[@]}" 3>&1 1>&2 2>&3 || echo "Cancel")
     fi
 
-    case "${MAINCHOICE}" in
-        "Re-run setup ")
-            run_script 'run_steps'
-            ;;
-        "Configuration ")
-            run_script 'menu_config' || run_script 'menu_main'
-            ;;
-        "Submit Logs ")
-            run_script 'submit_logs'
-            ;;
+    case "${FIXCHOICE}" in
         "Cancel")
-            info "Exiting OpenFLIXR Setup."
-            return
+            info "Returning to Fixes Menu."
+            return 1
             ;;
         *)
-            error "Invalid Option"
+            FIXNAME=${FIXCHOICE#* }
+            FIXNAME=${FIXNAME%% *}
+            if [[ -f "${SCRIPTPATH}/.scripts/fixes_${FIXNAME}.sh" ]]; then
+                run_script "fixes_${FIXNAME}" && FIXES_COMPLETED="Y"
+            else
+                error "Invalid Option"
+            fi
             ;;
     esac
+
+    if [[ "${FIXES_COMPLETED:-}" == "Y" ]]; then
+        info "Fixes - ${FIXCHOICE}completed"
+        whiptail \
+            --backtitle ${OF_BACKTITLE} \
+            --title "OpenFLIXR - Fixes" \
+            --clear \
+            --ok-button "Great!" \
+            --msgbox "${FIXCHOICE}completed. Returning to menu." 0 0
+        return 1
+    else
+        info "Fixes - ${FIXCHOICE}failed"
+        whiptail \
+            --backtitle ${OF_BACKTITLE} \
+            --title "OpenFLIXR - Fixes" \
+            --clear \
+            --ok-button "Fine..." \
+            --msgbox "${FIXCHOICE}failed... Returning to menu." 0 0
+        return 0
+    fi
 }
