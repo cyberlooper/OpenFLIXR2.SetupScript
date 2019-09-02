@@ -57,7 +57,9 @@ firstrun_process_check()
                 log "  Elapsed: ${duration}"
                 break
             elif [[ ${APT_COUNT_LAST_ELAPSED_MINUTES#0} -ge ${WAIT_TIME} && ${UPDATE_COUNT} -eq 0 && ${UPGRADE_COUNT} -eq 0 ]]; then
-                echo "> It has been more than ${WAIT_TIME} minutes since APT has changed and no updates or upgrades are running."
+                local WAIT_MULTIPLIER=$((${APT_COUNT_LAST_ELAPSED_MINUTES#0}/${WAIT_TIME}))
+                local CURRENT_WAIT_TIME=$((${WAIT_TIME}*${WAIT_MULTIPLIER}))
+                echo "> It has been more than ${CURRENT_WAIT_TIME} minutes since APT has changed and no updates or upgrades are running."
                 echo "> This is okay. Just. Keep. Waiting."
             else
                 echo "> Keep waiting..."
