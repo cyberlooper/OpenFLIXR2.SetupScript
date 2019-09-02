@@ -2,6 +2,10 @@
 
 # Pulled from https://github.com/happy-hacking-linux/timezone-selector
 
+command_exists () {
+    type "$1" &> /dev/null ;
+}
+
 detectTimezone() {
     if command_exists tzupdate ; then
         whiptail --infobox "Please wait, detecting your timezone... " 5 50; detected=$(tzupdate -p | sed "s/Detected timezone is //" | sed "s/\.//")
@@ -78,8 +82,4 @@ tzSelectionMenu() {
         selected_short="$region/$tz"
         TZ_CORRECT="N"
     fi
-}
-
-command_exists () {
-    type "$1" &> /dev/null ;
 }

@@ -18,12 +18,16 @@ step_timezone() {
         # Add domains that tzupdate uses for timezone lookup to pi-hole
         info "Adding some domains to pi-hole for timezone detection"
         pihole -w ip-api.com 2>&1 >> $LOG_FILE
+        echo "--------------------------------------------" >> $LOG_FILE
         pihole -w freegeoip.app 2>&1 >> $LOG_FILE
+        echo "--------------------------------------------" >> $LOG_FILE
         pihole -w geoip.nekudo.com 2>&1 >> $LOG_FILE
+        echo "--------------------------------------------" >> $LOG_FILE
         pihole -w timezoneapi.io 2>&1 >> $LOG_FILE
+        echo "--------------------------------------------" >> $LOG_FILE
 
-        # Run timezone selector
-        run_script 'tzSelectionMenu' ${OF_BACKTITLE}
+        log "Running timezone selector"
+        run_script 'tzSelectionMenu' ${OF_BACKTITLE} 2>&1 >> $LOG_FILE
 
         if [ "$TZ_CORRECT" = "Y" ]; then
             set_config "OPENFLIXR_TIMEZONE" $detected
@@ -38,9 +42,13 @@ step_timezone() {
         # Remove domains that tzupdate uses for timezone lookup to pihole
         info "Removing some domains to pi-hole for timezone detection"
         pihole -w -d ip-api.com 2>&1 >> $LOG_FILE
+        echo "--------------------------------------------" >> $LOG_FILE
         pihole -w -d freegeoip.app 2>&1 >> $LOG_FILE
+        echo "--------------------------------------------" >> $LOG_FILE
         pihole -w -d geoip.nekudo.com 2>&1 >> $LOG_FILE
+        echo "--------------------------------------------" >> $LOG_FILE
         pihole -w -d timezoneapi.io 2>&1 >> $LOG_FILE
+        echo "--------------------------------------------" >> $LOG_FILE
     else
         log "Keeping current timezone setting."
     fi
