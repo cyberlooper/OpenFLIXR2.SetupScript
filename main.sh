@@ -254,8 +254,6 @@ main() {
     fi
     cd "${SCRIPTPATH}" || fatal "Failed to change to ${SCRIPTPATH} directory."
     readonly GIT_REPO=$(git config --get remote.origin.url)
-    readonly LOCAL_COMMIT=$(git rev-parse --short master)
-    readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
     readonly PROMPT="GUI"
 
     run_script 'symlink_setupopenflixr'
@@ -267,22 +265,18 @@ main() {
 
     # Ubuntu Version Check
     if [[ ${UBU_VER} != "18.04" ]]; then
-        error "Unsupported Ubuntu Version. This setup can only be run for OpenFLIXR running Ubuntu 18.04"
+        error "Unsupported Ubuntu Version - ${UBU_VER}. This setup can only be run for OpenFLIXR running Ubuntu 18.04"
         error "Make sure you have completed the steps found here: https://github.com/openflixr/Docs/wiki/Setup#getting-set-up"
         error "If you have, check the 'Issues & Troubleshooting' section on that same page."
         exit 0
     fi
 
+    run_script 'load_config'
+    readonly LOCAL_COMMIT=$(git rev-parse --short ${config[BRANCH]})
+    readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
     info "${OF_BACKTITLE}"
-    debug "DETECTED_HOMEDIR=$DETECTED_HOMEDIR"
-    debug "SCRIPTPATH=$SCRIPTPATH"
-    debug "SCRIPTNAME=${SCRIPTNAME}"
-    debug "PROMPT='${PROMPT:-}'"
-
     run_script 'check_version'
     run_script 'check_dependencies'
-
-    run_script 'load_config'
     run_script 'save_config'
 
     if [[ ${config[SETUP_COMPLETED]} == "Y" ]]; then
