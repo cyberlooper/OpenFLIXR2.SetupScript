@@ -82,7 +82,9 @@ cmdline() {
                 exit
                 ;;
             u)
+                run_script 'load_config'
                 run_script 'update_self' "${OPTARG}"
+                run_script 'set_config' "BRANCH" "${OPTARG}"
                 exit
                 ;;
             v)

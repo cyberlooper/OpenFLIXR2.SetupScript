@@ -26,6 +26,10 @@ setup_configure_ombi_password()
                                 }" || echo 'error')
                 log "  result=${result}"
                 local result_successful
+                if [[ ${result} == "Invalid API Key" ]]; then
+                    error "  Something went wrong and the Ombi API Key is not correct..."
+                    warning "  You will need to update the password manually after the setup completes."
+                fi
                 result_successful=$(jq '.successful?' <<< $result)
                 log "  result_successful=${result_successful}"
                 if [[ "${result_successful}" == "true" ]]; then

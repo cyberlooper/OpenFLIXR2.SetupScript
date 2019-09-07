@@ -5,17 +5,22 @@ IFS=$'\n\t'
 setup_configure_ombi()
 {
     info "Configuring Ombi"
+    info "- Stopping Ombi"
+    service ombi stop
+    info "- Setting API Key"
+    local ombi_settings
+    ombi_settings=$(sqlite3 /opt/Ombi/OmbiSettings.db "SELECT Content FROM GlobalSettings WHERE SettingsName='OmbiSettings'")
+    # Set Ombi API Key
+    debug "  Setting API Key to: ${API_KEYS[ombi]}"
+    ombi_settings=$(sed 's/"ApiKey":".*","IgnoreCertificateErrors"/"ApiKey":"'${API_KEYS[ombi]}'","IgnoreCertificateErrors"/' <<< $ombi_settings)
+    info "- Updating DB with the API Key"
+    sqlite3 /opt/Ombi/OmbiSettings.db "UPDATE GlobalSettings SET Content='$ombi_settings' WHERE SettingsName='OmbiSettings'"
+    sleep 2s
+    info "- Starting Ombi"
+    service ombi start
     info "- Making sure Ombi is ready..."
     if [[ $(run_script 'check_application_ready' "http://localhost:3579/request" "  -") == "200" ]]; then
         info "  Ombi is ready!"
-        info "- Setting API Key"
-        local ombi_settings
-        ombi_settings=$(sqlite3 /opt/Ombi/OmbiSettings.db "SELECT Content FROM GlobalSettings WHERE SettingsName='OmbiSettings'")
-        # Set Ombi API Key
-        debug "  Setting API Key to: ${API_KEYS[ombi]}"
-        ombi_settings=$(sed 's/"ApiKey":".*","IgnoreCertificateErrors"/"ApiKey":"'${API_KEYS[ombi]}'","IgnoreCertificateErrors"/' <<< $ombi_settings)
-        info "- Updating DB with the API Key"
-        sqlite3 /opt/Ombi/OmbiSettings.db "UPDATE GlobalSettings SET Content='$ombi_settings' WHERE SettingsName='OmbiSettings'"
         info "- Checking for the openflixr user"
         ombi_openflixr=$(sqlite3 /opt/Ombi/Ombi.db "SELECT COUNT(Id) FROM AspNetUsers WHERE NormalizedUserName='OPENFLIXR';")
         if [[ $ombi_openflixr = 1 ]]; then
