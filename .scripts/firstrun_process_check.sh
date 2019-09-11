@@ -18,8 +18,8 @@ firstrun_process_check()
     local WAIT_TIME=5
     if [[ ${config[FIRSTRUN_PROCESSCHECK]:-} != "COMPLETED" ]]; then
         info "Waiting for the system to finish some processes..."
-        warning "This will take a while. Just wait..."
         if [[ -f "${DETECTED_HOMEDIR}/.FirstRun/.run_openflixr_vm" ]]; then
+            warning "This will take a while. Just wait..."
             info "Started: ${start_display}"
 
             while true; do
