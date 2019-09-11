@@ -24,6 +24,8 @@ firstrun_process_check()
 
             while true; do
                 APT_COUNT=$(ps -ef | grep apt | grep -v tail | grep -v grep | wc -l || true)
+                UPDATE_COUNT=$(ps -ef | grep update | grep -v "no-update" | grep -v tail | grep -v shellinabox | grep -v grep | wc -l || true)
+                UPGRADE_COUNT=$(ps -ef | grep upgrade | grep -v tail | grep -v shellinabox | grep -v unattended-upgrade | grep -v FirstRun | grep -v grep | wc -l || true)
                 echo -n "\rNow:     $(date) | Processes running - Apt: ${APT_COUNT} - Update: ${UPDATE_COUNT} - Upgrade: ${UPGRADE_COUNT}"
                 if [[ ${APT_COUNT} = 0 && ${UPDATE_COUNT} = 0 && ${UPGRADE_COUNT} = 0 ]]; then
                     run_script 'set_config' "FIRSTRUN_PROCESSCHECK" "COMPLETED"
