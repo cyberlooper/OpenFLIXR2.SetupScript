@@ -7,8 +7,12 @@ fixes_pihole()
     info "Pi-hole fixes"
     if [[ -n "$(command -v dnsmasq)" ]]; then
         info "- dnsmasq found. Removing..."
+        service dnsmasq stop
         apt-get -y remove dnsmasq > /dev/null 2>&1 || error "Failed to remove dnsmasq. This will need to be removed for pihole to work correctly."
+        apt-get -y purge dnsmasq > /dev/null 2>&1 || error "Failed to purge dnsmasq. This will need to be removed for pihole to work correctly."
+        rm "/usr/sbin/dnsmasq"
         info "  Done"
+        service pihole-FTL restart
     fi
     info "- Checking files"
     local FILE="/etc/pihole/dns-servers.conf"
