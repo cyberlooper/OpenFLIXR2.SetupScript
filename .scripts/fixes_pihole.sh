@@ -5,6 +5,8 @@ IFS=$'\n\t'
 fixes_pihole()
 {
     info "Pi-hole fixes"
+    info "- Temporary bypass of pi-hole"
+    sed -i "s#nameserver .*#nameserver 8.8.8.8#g" "/etc/resolv.conf"
     if [[ -n "$(command -v dnsmasq)" ]]; then
         info "- dnsmasq found. Removing..."
         service dnsmasq stop
@@ -36,30 +38,33 @@ fixes_pihole()
     fi
 
     info "- Checking Pi-Hole versions"
-    local PIHOLE_CURRENT=$(pihole -v | grep "Pi-hole" | cut -d ' ' -f 8)
-    local PIHOLE_LATEST=$(pihole -v | grep "Pi-hole" | cut -d ' ' -f 8 | cut -d ')' -f 1)
-    local ADMINLTE_CURRENT=$(pihole -v | grep "AdminLTE" | cut -d ' ' -f 8)
-    local ADMINLTE_LATEST=$(pihole -v | grep "AdminLTE" | cut -d ' ' -f 8 | cut -d ')' -f 1)
-    local FTL_CURRENT=$(pihole -v | grep "FTL" | cut -d ' ' -f 8)
-    local FTL_LATEST=$(pihole -v | grep "FTL" | cut -d ' ' -f 8 | cut -d ')' -f 1)
+    PIHOLE_CURRENT=$(pihole -v | grep "Pi-hole" | cut -d ' ' -f 6 | cut -d ')' -f 1)
+    PIHOLE_LATEST=$(pihole -v | grep "Pi-hole" | cut -d ' ' -f 8 | cut -d ')' -f 1)
+    ADMINLTE_CURRENT=$(pihole -v | grep "AdminLTE" | cut -d ' ' -f 6 | cut -d ')' -f 1)
+    ADMINLTE_LATEST=$(pihole -v | grep "AdminLTE" | cut -d ' ' -f 8 | cut -d ')' -f 1)
+    FTL_CURRENT=$(pihole -v | grep "FTL" | cut -d ' ' -f 6 | cut -d ')' -f 1)
+    FTL_LATEST=$(pihole -v | grep "FTL" | cut -d ' ' -f 8 | cut -d ')' -f 1)
+    if [[ ${PIHOLE_LATEST} == "ERROR" || ${ADMINLTE_LATEST} == "ERROR" || ${FTL_LATEST} == "ERROR" ]]; then
+        if [[ $(pihole -up | grep -c "Everything is up to date!") -eq 1 ]]; then
+            PIHOLE_LATEST=${PIHOLE_CURRENT}
+            ADMINLTE_LATEST=${ADMINLTE_CURRENT}
+            FTL_LATEST=${FTL_CURRENT}
+        fi
+    fi
     if [[ ${PIHOLE_CURRENT} != ${PIHOLE_LATEST} || ${ADMINLTE_CURRENT} != ${ADMINLTE_LATEST} || ${FTL_CURRENT} != ${FTL_LATEST} ]]; then
         info "- Pi-Hole needs to be updated..."
-        info "  - Temporary bypass of pi-hole"
-        sed -i "s#nameserver .*#nameserver 8.8.8.8#g" "/etc/resolv.conf"
         info "  - Changing default binary value"
         sed -i 's/binary="tbd"/binary="pihole-FTL-linux-x86_64"/' "/etc/.pihole/automated install/basic-install.sh"
         info "  - Updating Pi-hole"
         pihole -up
         info "  - Putting the pi-hole install script back to how it should be"
         wget -O "/etc/.pihole/automated install/basic-install.sh" "https://install.pi-hole.net"
-        info "  - Undo of the pihole bypass"
-        sed -i "s#nameserver .*#nameserver 127.0.0.1#g" "/etc/resolv.conf"
         info "  - Verifying versions"
-        PIHOLE_CURRENT=$(pihole -v | grep "Pi-hole" | cut -d ' ' -f 8)
+        PIHOLE_CURRENT=$(pihole -v | grep "Pi-hole" | cut -d ' ' -f 6 | cut -d ')' -f 1)
         PIHOLE_LATEST=$(pihole -v | grep "Pi-hole" | cut -d ' ' -f 8 | cut -d ')' -f 1)
-        ADMINLTE_CURRENT=$(pihole -v | grep "AdminLTE" | cut -d ' ' -f 8)
+        ADMINLTE_CURRENT=$(pihole -v | grep "AdminLTE" | cut -d ' ' -f 6 | cut -d ')' -f 1)
         ADMINLTE_LATEST=$(pihole -v | grep "AdminLTE" | cut -d ' ' -f 8 | cut -d ')' -f 1)
-        FTL_CURRENT=$(pihole -v | grep "FTL" | cut -d ' ' -f 8)
+        FTL_CURRENT=$(pihole -v | grep "FTL" | cut -d ' ' -f 6 | cut -d ')' -f 1)
         FTL_LATEST=$(pihole -v | grep "FTL" | cut -d ' ' -f 8 | cut -d ')' -f 1)
         if [[ ${PIHOLE_LATEST} == "ERROR" || ${ADMINLTE_LATEST} == "ERROR" || ${FTL_LATEST} == "ERROR" ]]; then
             if [[ $(pihole -up | grep -c "Everything is up to date!") -eq 1 ]]; then
@@ -77,5 +82,7 @@ fixes_pihole()
     else
         info "- Pi-Hole is up-to-date!"
     fi
+    info "- Undo of the pihole bypass"
+    sed -i "s#nameserver .*#nameserver 127.0.0.1#g" "/etc/resolv.conf"
     info "- Done"
 }
