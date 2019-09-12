@@ -5,6 +5,11 @@ IFS=$'\n\t'
 fixes_pihole()
 {
     info "Pi-hole fixes"
+    if [[ -n "$(command -v dnsmasq)" ]]; then
+        info "- dnsmasq found. Removing..."
+        apt-get -y remove dnsmasq > /dev/null 2>&1 || error "Failed to remove dnsmasq. This will need to be removed for pihole to work correctly."
+        info "  Done"
+    fi
     info "- Checking files"
     local FILE="/etc/pihole/dns-servers.conf"
     info "  - ${FILE}"
