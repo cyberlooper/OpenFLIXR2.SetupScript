@@ -20,7 +20,7 @@ firstrun_process_check()
         info "Waiting for the system to finish some processes..."
         if [[ -f "${DETECTED_HOMEDIR}/.FirstRun/.run_openflixr_vm" ]]; then
             warning "This will take a while. Just wait..."
-            info "Started: ${start_display}"
+            echo "Started: ${start_display}"
 
             while true; do
                 APT_COUNT=$(ps -ef | grep apt | grep -v tail | grep -v grep | wc -l || true)
