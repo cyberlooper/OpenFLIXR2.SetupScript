@@ -7,13 +7,18 @@ fixes_pihole()
     info "Pi-hole fixes"
     info "- Temporary bypass of pi-hole"
     sed -i "s#nameserver .*#nameserver 8.8.8.8#g" "/etc/resolv.conf"
+
     if [[ -n "$(command -v dnsmasq)" ]]; then
         info "- dnsmasq found. Removing..."
         service dnsmasq stop
         apt-get -y remove dnsmasq > /dev/null 2>&1 || error "Failed to remove dnsmasq. This will need to be removed for pihole to work correctly."
-        apt-get -y purge dnsmasq > /dev/null 2>&1 || error "Failed to purge dnsmasq. This will need to be removed for pihole to work correctly."
         rm "/usr/sbin/dnsmasq"
+        info "  Removing unused packages."
+        apt-get -y autoremove > /dev/null 2>&1 || fatal "Failed to remove unused packages from apt."
+        info "  Cleaning up package cache."
+        apt-get -y autoclean > /dev/null 2>&1 || fatal "Failed to cleanup cache from apt."
         info "  Done"
+        info "- Restarting Pi-hole..."
         service pihole-FTL restart
     fi
     info "- Checking files"
@@ -82,6 +87,8 @@ fixes_pihole()
     else
         info "- Pi-Hole is up-to-date!"
     fi
+    info "- Restarting Pi-hole..."
+    service pihole-FTL restart || error "Restart..."
     info "- Undo of the pihole bypass"
     sed -i "s#nameserver .*#nameserver 127.0.0.1#g" "/etc/resolv.conf"
     info "- Done"
