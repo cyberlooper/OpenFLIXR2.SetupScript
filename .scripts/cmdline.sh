@@ -39,7 +39,7 @@ cmdline() {
                 ;;
             f)
                 case ${OPTARG} in
-                    kernel | mono | mopidy | nginx | permissions | php | redis | sonarr | sources | pihole | updater)
+                    kernel | mono | mopidy | nginx | permissions | php | redis | sonarr | sources | pihole | ubooquity | updater)
                         run_script "fixes_${OPTARG}"
                         ;;
                     *)
