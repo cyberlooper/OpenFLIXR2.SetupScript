@@ -18,7 +18,9 @@ firstrun_upgrade()
         run_script 'fixes_mono'
         run_script 'fixes_sonarr'
         run_script 'fixes_pihole'
+        run_script 'fixes_ubooquity'
         run_script 'fixes_kernel'
+        run_script 'fixes_updater'
         run_script 'set_config' "FIRSTRUN_FIXES" "COMPLETED"
         reboot
     elif [[ ${config[FIRSTRUN_UPGRADE]:-} == "COMPLETED" && ${config[FIRSTRUN_FIXES]:-} == "COMPLETED" && ${config[FIRSTRUN_CLEANUP]:-} != "COMPLETED" ]]; then

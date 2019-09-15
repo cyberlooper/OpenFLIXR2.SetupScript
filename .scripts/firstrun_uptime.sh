@@ -15,6 +15,7 @@ firstrun_uptime()
             UPTIME_SECONDS=$(awk '{print int($1%60)}' /proc/uptime)
             if [[ ${UPTIME_HOURS} -gt 0 || ${UPTIME_MINUTES} -ge ${WAIT_UPTIME} ]]; then
                 run_script 'set_config' "FIRSTRUN_UPTIME" "COMPLETED"
+                echo ""
                 info "- Wait complete!"
                 break
             else
