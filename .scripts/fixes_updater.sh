@@ -62,8 +62,9 @@ fixes_updater()
     if [[ ! -f "${USERSCRIPT_NGINX}" ]]; then
         info "- Creating custom nginx file"
         echo "" > "${USERSCRIPT_NGINX}"
-        echo 'if [[ $(ls .openflixr/.nginx/*.block 2>/dev/null || true | wc -l) != 0 ]]; then' >> "${USERSCRIPT_NGINX}"
-        echo "    cp .openflixr/.nginx/*.block /opt/openflixr/nginx/" >> "${USERSCRIPT_NGINX}"
+        echo 'if [[ $(ls '${DETECTED_HOMEDIR}'/.openflixr/.nginx/*.block 2>/dev/null || true | wc -l) != 0 ]]; then' >> "${USERSCRIPT_NGINX}"
+        echo '    echo "Running 20_nginx.sh"' >> "${USERSCRIPT_NGINX}"
+        echo "    cp ${DETECTED_HOMEDIR}/.openflixr/.nginx/*.block /opt/openflixr/nginx/" >> "${USERSCRIPT_NGINX}"
         echo "    bash /opt/openflixr/createnginxconfig.sh" >> "${USERSCRIPT_NGINX}"
         echo "fi" >> "${USERSCRIPT_NGINX}"
     fi
