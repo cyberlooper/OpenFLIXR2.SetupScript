@@ -20,7 +20,8 @@ fixes_permissions()
     fi
 
     FIX_UG_PATHS=(
-        "/home/openflixr/.nano/search_history"
+        "${DETECTED_HOMEDIR}/.nano/search_history"
+        "${DETECTED_HOMEDIR}/.openflixr"
         "/mnt"
     )
     for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
@@ -44,6 +45,7 @@ fixes_permissions()
     done
 
     FIX_PERMS_PATHS=(
+        "${DETECTED_HOMEDIR}/.openflixr"
         "/mnt"
     )
     for FOLDER in ${OPENFLIXR_FOLDERS[@]}; do
