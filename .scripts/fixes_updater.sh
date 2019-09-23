@@ -33,4 +33,36 @@ fixes_updater()
     else
         info "- Done"
     fi
+
+    info "Updating Custom Userscripts"
+    # Setup custom userscript structure
+    if [[ ! -d "/home/openflixr/.openflixr/.nginx" ]]; then
+        mkdir -p "/home/openflixr/.openflixr/.nginx"
+    fi
+
+    if [[ ! -d "/home/openflixr/.openflixr/userscripts" ]]; then
+        mkdir -p "/home/openflixr/.openflixr/userscripts"
+    fi
+
+    # Custom nginx blocks
+    echo "" > "/home/openflixr/.openflixr/userscripts/nginx.sh"
+    echo 'if [[ $(ls .openflixr/.nginx/*.block 2>/dev/null || true | wc -l) != 0 ]]; then' >> "/home/openflixr/.openflixr/userscripts/nginx.sh"
+    echo "    cp .openflixr/.nginx/*.block /opt/openflixr/nginx/" >> "/home/openflixr/.openflixr/userscripts/nginx.sh"
+    echo "fi" >> "/home/openflixr/.openflixr/userscripts/nginx.sh"
+    echo "bash /opt/openflixr/createnginxconfig.sh" >> "/home/openflixr/.openflixr/userscripts/nginx.sh"
+
+    # Custom userscript
+    echo "" > ".openflixr/userscript.sh"
+    while IFS= read -r line; do
+        echo "bash /home/openflixr/${line}" >> "/home/openflixr/.openflixr/userscript.sh"
+    done < <(ls -la .openflixr/userscripts/*.sh | awk '{print $9}')
+
+    if [[ $(grep -c "bash /home/openflixr/.openflixr/userscript.sh" "/opt/openflixr/userscript.sh") == 0 ]]; then
+        echo "" >> "/opt/openflixr/userscript.sh"
+        echo "### Custom userscript # custom userscripts" >> "/opt/openflixr/userscript.sh"
+        echo "bash /home/openflixr/.openflixr/userscript.sh # custom userscripts" >> "/opt/openflixr/userscript.sh"
+        echo "### End Custom userscript # custom userscripts" >> "/opt/openflixr/userscript.sh"
+    fi
+
+    info "- Done"
 }
