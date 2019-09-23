@@ -30,7 +30,7 @@ fixes_mono()
             rm ${SOURCE}
         fi
         info "  - Adding Mono repo to sources"
-        gpg --list-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF > /dev/null 2>&1 || apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF > /dev/null 2>&1
+        gpg --list-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF > /dev/null 2>&1 || apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF > /dev/null 2>"${LOG_FILE}" || error "Failed to add mono key..."
         echo "${REPO}" | sudo tee "${SOURCE}" > /dev/null
         info "  - Updating apt"
         apt-get -y update > /dev/null 2>&1 || error "  Failed to update apt"
