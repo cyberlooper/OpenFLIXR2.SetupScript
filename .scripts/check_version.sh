@@ -3,6 +3,9 @@ set -euo pipefail
 IFS=$'\n\t'
 
 check_version() {
+    if [[ ${LOCAL_COMMIT:-} == "" ]]; then
+        readonly LOCAL_COMMIT=$(git rev-parse --short ${config[BRANCH]})
+    fi
     git fetch > /dev/null 2>&1
     if [[ ! -v DEVMODE ]]; then
         readonly GH_COMMIT=$(git rev-parse --short ${config[BRANCH]})

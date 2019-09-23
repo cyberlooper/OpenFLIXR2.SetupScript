@@ -13,7 +13,7 @@ fixes_sonarr()
             rm /etc/apt/sources.list.d/sonarr.list
         fi
         info "- Adding Sonarr repo to sources"
-        gpg --list-keys 0xA236C58F409091A18ACA53CBEBFF6B99D9B78493 > /dev/null 2>&1 || apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0xA236C58F409091A18ACA53CBEBFF6B99D9B78493 > /dev/null 2>&1 || fatal "Failed to add sonarr key..."
+        gpg --list-keys 0xA236C58F409091A18ACA53CBEBFF6B99D9B78493 > /dev/null 2>&1 || apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 0xA236C58F409091A18ACA53CBEBFF6B99D9B78493 > /dev/null 2>"${LOG_FILE}" || error "Failed to add sonarr key..."
         echo "deb http://apt.sonarr.tv/ master main" | tee /etc/apt/sources.list.d/sonarr.list > /dev/null || fatal "Failed to add sonarr repo..."
         info "- Updating apt"
         apt-get -y update > /dev/null 2>&1 || error "  Failed to update apt"
