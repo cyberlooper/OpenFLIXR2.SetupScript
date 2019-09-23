@@ -59,9 +59,9 @@ fixes_updater()
 
     if [[ $(grep -c "bash /home/openflixr/.openflixr/userscript.sh" "/opt/openflixr/userscript.sh") == 0 ]]; then
         echo "" >> "/opt/openflixr/userscript.sh"
-        echo "### Custom userscript # custom userscripts" >> "/opt/openflixr/userscript.sh"
-        echo "bash /home/openflixr/.openflixr/userscript.sh # custom userscripts" >> "/opt/openflixr/userscript.sh"
-        echo "### End Custom userscript # custom userscripts" >> "/opt/openflixr/userscript.sh"
+        echo "### Custom userscript" >> "/opt/openflixr/userscript.sh"
+        echo "bash /home/openflixr/.openflixr/userscript.sh # Custom userscripts" >> "/opt/openflixr/userscript.sh"
+        echo "### End Custom userscript" >> "/opt/openflixr/userscript.sh"
     fi
 
     info "- Done"
