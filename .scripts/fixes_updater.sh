@@ -44,6 +44,8 @@ fixes_updater()
         mkdir -p "/home/openflixr/.openflixr/userscripts"
     fi
 
+    chown -R openflixr:openflixr "/home/openflixr/.openflixr"
+
     # Custom nginx blocks
     echo "" > "/home/openflixr/.openflixr/userscripts/nginx.sh"
     echo 'if [[ $(ls .openflixr/.nginx/*.block 2>/dev/null || true | wc -l) != 0 ]]; then' >> "/home/openflixr/.openflixr/userscripts/nginx.sh"
@@ -52,7 +54,7 @@ fixes_updater()
     echo "bash /opt/openflixr/createnginxconfig.sh" >> "/home/openflixr/.openflixr/userscripts/nginx.sh"
 
     # Custom userscript
-    echo "" > ".openflixr/userscript.sh"
+    echo "" > "/home/openflixr/.openflixr/userscript.sh"
     while IFS= read -r line; do
         echo "bash /home/openflixr/${line}" >> "/home/openflixr/.openflixr/userscript.sh"
     done < <(ls -la .openflixr/userscripts/*.sh | awk '{print $9}')
