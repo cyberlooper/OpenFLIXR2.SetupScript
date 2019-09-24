@@ -31,7 +31,14 @@ fixes_permissions()
         if [[ -d "${FIX_PATH}" || -f "${FIX_PATH}" ]]; then
             USER=$(stat -c '%U' "${FIX_PATH}")
             GROUP=$(stat -c '%G' "${FIX_PATH}")
-            if [[ ${USER} == "openflixr" && ${GROUP} == "openflixr" ]]; then
+            if [[ ${FIX_PATH} == "/mnt" ]]; then
+                USER_BAD_COUNT=0
+                GROUP_BAD_COUNT=0
+            else
+                USER_BAD_COUNT=$(find "${FIX_PATH}" | xargs stat -c '%U' | grep -v "openflixr" || true | wc -l)
+                GROUP_BAD_COUNT=$(find "${FIX_PATH}" | xargs stat -c '%G' | grep -v "openflixr" || true | wc -l)
+            fi
+            if [[ ${USER} == "openflixr" && ${USER_BAD_COUNT} == 0 && ${GROUP} == "openflixr" && ${GROUP_BAD_COUNT} == 0 ]]; then
                 info "- '${FIX_PATH}' permissions are already 'openflixr:openflixr'!"
             else
                 info "- Changing '${FIX_PATH}' permissions to 'openflixr:openflixr'"
@@ -54,7 +61,13 @@ fixes_permissions()
     for FIX_PATH in ${FIX_PERMS_PATHS[@]}; do
         if [[ -d "${FIX_PATH}" || -f "${FIX_PATH}"  ]]; then
             perms=$(stat "${FIX_PATH}" | sed -n '/^Access: (/{s/Access: (\([0-9]\+\).*$/\1/;p}')
-            if [[ $perms =~ 775 ]]; then
+            if [[ ${FIX_PATH} == "/mnt" ]]; then
+                perms_bad_count=0
+            else
+                perms_bad_count=$(find "${FIX_PATH}" | xargs stat | sed -n '/^Access: (/{s/Access: (\([0-9]\+\).*$/\1/;p}' | grep -v ".*775" || true | wc -l)
+            fi
+
+            if [[ $perms =~ 775 && $perms_bad_count == 0 ]]; then
                 info "- '${FIX_PATH}' already set to 775!"
             else
                 info "- Setting '${FIX_PATH}' to 775"
