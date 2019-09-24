@@ -102,6 +102,7 @@ cmdline() {
                         ;;
                     f)
                         run_script 'setup_fixes'
+                        exit
                         ;;
                     u)
                         run_script 'update_self'
