@@ -3,6 +3,14 @@
 ## Information
 A script to help with OpenFLIXR setup.
 
+****
+**IMPORTANT!**
+This script is no longer maintained and looking for a maintainer.
+If you are interested in maintaining this script, please post a message on the OpenFLIXR Discord server.
+
+You may continue using OpenFLIXR as is but support will be limited until a maintainer is found to update the code, etc.
+****
+
 NOTE: While this will help you get started, it doesn't get you to a fully functioning box, you will still need to do some configuring of the various applications once complete.
 
 ## Usage
