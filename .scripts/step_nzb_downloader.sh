@@ -25,12 +25,12 @@ step_nzb_downloader() {
 
         case "${CONFIGCHOICE}" in
             "SabNZB ")
-                set_config "SERIES_MANAGER" "sabnzbd"
+                set_config "NZB_DOWNLOADER" "sabnzbd"
                 info "Configuring Series Manager to be ${CONFIGCHOICE}"
                 done=1
                 ;;
             "NZBget ")
-                set_config "SERIES_MANAGER" "nzbget"
+                set_config "NZB_DOWNLOADER" "nzbget"
                 info "Configuring Series Manager to be ${CONFIGCHOICE}"
                 done=1
                 ;;

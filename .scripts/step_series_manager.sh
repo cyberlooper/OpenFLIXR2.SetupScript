@@ -5,7 +5,7 @@ IFS=$'\n\t'
 step_series_manager() {
     local STEP_TITLE=${1:-"Step ${step_number}: ${step_name}"}
     local SERIESOPTS=()
-    SERIESOPTS+=("Sickchill " "")
+    #SERIESOPTS+=("Sickchill " "")
     SERIESOPTS+=("Sonarr " "")
 
     done=0
@@ -24,11 +24,11 @@ step_series_manager() {
         run_script 'check_response' $?
 
         case "${CONFIGCHOICE}" in
-            "Sickchill ")
-                set_config "SERIES_MANAGER" "sickrage"
-                info "Configuring Series Manager to be ${CONFIGCHOICE}"
-                done=1
-                ;;
+            # "Sickchill ")
+            #     set_config "SERIES_MANAGER" "sickrage"
+            #     info "Configuring Series Manager to be ${CONFIGCHOICE}"
+            #     done=1
+            #     ;;
             "Sonarr ")
                 set_config "SERIES_MANAGER" "sickrage"
                 info "Configuring Series Manager to be ${CONFIGCHOICE}"
