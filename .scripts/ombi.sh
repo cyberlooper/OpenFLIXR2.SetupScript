@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-readonly ombidir="/opt/ombi"
+readonly ombidir="/opt/Ombi"
 
 if [[ ! -d "${ombidir}" ]]; then
     mkdir ${ombidir}
@@ -22,7 +22,7 @@ chmod +x "${ombidir}/Ombi"
 cd ${ombidir}
 
 apt install -y libicu-dev libunwind8 libcurl4-openssl-dev
-exec bash "${ombidir}/Ombi" &
+./Ombi
 sleep 60
 pkill Ombi
 cd ${STORE_PATH}
