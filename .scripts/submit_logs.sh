@@ -69,14 +69,14 @@ submit_logs() {
             #     warning "Well this is embarassing... Automatic submission failed =("
             #     warning "You will need to manually submit your logs."
             #     warning "For more information, visit the troubleshooting section of the OpenFLIXR Setup Script:"
-            #     warning "https://github.com/openflixr/OpenFLIXR2.SetupScript#troubleshooting"
+            #     warning "https://github.com/cyberlooper/OpenFLIXR2.SetupScript#troubleshooting"
             #     run_script 'set_config' "SUBMITTED_LOGS" "N"
             # fi
         else
             warning "Not packaging the logs automatically."
             warning "You will need to do this yourself, run the setup again or run 'sudo setupopenflixr -l' to return to this prompt."
             warning "For more information, visit the troubleshooting section of the OpenFLIXR Setup Script:"
-            warning "https://github.com/openflixr/OpenFLIXR2.SetupScript#troubleshooting"
+            warning "https://github.com/cyberlooper/OpenFLIXR2.SetupScript#troubleshooting"
         fi
     else
         warning "You have already packaged logs for this version of the OpenFLIXR Setup Script."

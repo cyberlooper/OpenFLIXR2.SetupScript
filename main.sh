@@ -266,7 +266,7 @@ main() {
     # Ubuntu Version Check
     if [[ ${UBU_VER} != "18.04" ]]; then
         error "Unsupported Ubuntu Version - ${UBU_VER}. This setup can only be run for OpenFLIXR running Ubuntu 18.04"
-        error "Make sure you have completed the steps found here: https://github.com/openflixr/Docs/wiki/Setup#getting-set-up"
+        error "Make sure you have completed the steps found here: https://github.com/cyberlooper/Docs/wiki/Setup#getting-set-up"
         error "If you have, check the 'Issues & Troubleshooting' section on that same page."
         exit 0
     fi

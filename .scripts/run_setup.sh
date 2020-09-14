@@ -33,6 +33,6 @@ run_setup()
     info "#      Setup complete!      #"
     info "#############################"
     info "Be sure to head over to the Post-setup steps found here for what to do next:"
-    info "https://github.com/openflixr/Docs/wiki/Setup#post-setup-steps"
+    info "https://github.com/cyberlooper/Docs/wiki/Setup#post-setup-steps"
     run_script 'set_config' "SETUP_COMPLETED" "Y"
 }

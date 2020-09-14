@@ -15,10 +15,10 @@ NOTE: While this will help you get started, it doesn't get you to a fully functi
 
 ## Usage
 As of OpenFLIXR 2.9, the setup script is included!  
-[Visit the wiki for setup information](https://github.com/openflixr/Docs/wiki/Setup#general)
+[Visit the wiki for setup information](https://github.com/cyberlooper/Docs/wiki/Setup#general)
 
 ## Troubleshooting
-[Visit the wiki for information on troubleshooting issues with Setup](https://github.com/openflixr/Docs/wiki/Setup#issues--troubleshooting)
+[Visit the wiki for information on troubleshooting issues with Setup](https://github.com/cyberlooper/Docs/wiki/Setup#issues--troubleshooting)
 
 ## Testing
 Want to help with testing new development work and features of the setup? We'd really appreciate it!
