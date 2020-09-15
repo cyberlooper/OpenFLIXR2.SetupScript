@@ -280,7 +280,7 @@ main() {
     run_script 'check_dependencies'
     run_script 'save_config'
 
-    run_script 'unmaintained'
+    #run_script 'unmaintained'
 
     if [[ ${config[SETUP_COMPLETED]} == "Y" ]]; then
         run_script 'menu_main'
