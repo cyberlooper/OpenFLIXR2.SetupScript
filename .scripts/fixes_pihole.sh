@@ -90,6 +90,6 @@ fixes_pihole()
     info "- Restarting Pi-hole..."
     service pihole-FTL restart || error "Restart..."
     info "- Undo of the pihole bypass"
-    sed -i "s#nameserver .*#nameserver 127.0.0.1#g" "/etc/resolv.conf"
+    #sed -i "s#nameserver .*#nameserver 127.0.0.1#g" "/etc/resolv.conf"
     info "- Done"
 }

@@ -16,5 +16,5 @@ setup_fixes()
     run_script 'fixes_sources'
     run_script 'fixes_pihole'
     run_script 'fixes_kernel'
-    run_script 'pihole_unbypass'
+    #run_script 'pihole_unbypass'
 }

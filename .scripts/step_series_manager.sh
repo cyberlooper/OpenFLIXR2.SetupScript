@@ -30,7 +30,7 @@ step_series_manager() {
             #     done=1
             #     ;;
             "Sonarr ")
-                set_config "SERIES_MANAGER" "sickrage"
+                set_config "SERIES_MANAGER" "sonarr"
                 info "Configuring Series Manager to be ${CONFIGCHOICE}"
                 done=1
                 ;;
