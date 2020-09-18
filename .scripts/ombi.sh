@@ -36,7 +36,7 @@ ombi() {
 
         apt install -y libicu-dev libunwind8 libcurl4-openssl-dev
         echo "Things installed. Running ombi..."
-        /opt/Ombi/Ombi &
+        /opt/Ombi/Ombi --storage /opt/Ombi &
         echo "Ssshhhh... sleeping"
         sleep 60
         echo "Murder..."
@@ -47,6 +47,6 @@ ombi() {
     else
         error "Failed to retrieve or extra Ombi"
     fi
-echo "ombi done"
-touch /opt/Ombi/complete
+    echo "ombi done"
+    touch /opt/Ombi/complete
 }
