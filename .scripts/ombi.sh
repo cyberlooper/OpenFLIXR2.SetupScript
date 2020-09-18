@@ -33,6 +33,7 @@ ombi() {
 
         cd "${ombidir}"
         echo "Should now be in ${ombidir}"
+        sleep 5
 
         apt install -y libicu-dev libunwind8 libcurl4-openssl-dev
         echo "Things installed. Running ombi..."
