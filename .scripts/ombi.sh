@@ -2,10 +2,6 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-ombi_check() {
-    [[ -f /opt/Ombi/complete ]] && info "Ombi Installed." || run_script 'ombi'
-}
-
 ombi() {
     echo "ombi start"
     readonly ombidir="/opt/Ombi"
@@ -31,7 +27,7 @@ ombi() {
         chmod +x "${ombidir}/Ombi"
         echo "ombi executable!"
 
-        cd "${ombidir}"
+        cd "${ombidir}" || fatal "Could not change directory"
         echo "Should now be in ${ombidir}"
         sleep 5
 
@@ -43,7 +39,8 @@ ombi() {
         echo "Murder..."
         pkill Ombi
         echo "Dead"
-        cd "${STORE_PATH}"
+        cd "${STORE_PATH}" || fatal "Could not change directory"
+        sleep 5
         echo "Should now be in ${STORE_PATH}"
     else
         error "Failed to retrieve or extra Ombi"
