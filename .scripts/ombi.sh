@@ -47,4 +47,5 @@ ombi() {
     fi
     echo "ombi done"
     touch /opt/Ombi/complete
+    info "Final fixes completed, please run sudo setupopenflixr again to run main script"
 }
