@@ -276,6 +276,7 @@ main() {
     readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
     info "${OF_BACKTITLE}"
     run_script 'ombi'
+    echo "Ombi Setup completed"
     run_script 'check_version'
     run_script 'check_dependencies'
     run_script 'save_config'
