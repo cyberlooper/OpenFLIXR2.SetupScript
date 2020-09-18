@@ -275,7 +275,7 @@ main() {
     readonly LOCAL_COMMIT=$(git rev-parse --short ${config[BRANCH]})
     readonly OF_BACKTITLE="OpenFLIXR Setup - $LOCAL_COMMIT"
     info "${OF_BACKTITLE}"
-    run_script 'ombi'
+    run_script 'ombi_check'
     echo "Ombi Setup completed"
     run_script 'check_version'
     run_script 'check_dependencies'
