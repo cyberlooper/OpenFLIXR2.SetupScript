@@ -33,7 +33,7 @@ ombi() {
 
         apt install -y libicu-dev libunwind8 libcurl4-openssl-dev
         echo "Things installed. Running ombi..."
-        '/opt/Ombi/Ombi --storage /opt/Ombi' &
+        /opt/Ombi/Ombi --storage /opt/Ombi &
         echo "Ssshhhh... sleeping"
         sleep 60
         echo "Murder..."
