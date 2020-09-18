@@ -27,19 +27,19 @@ ombi() {
         chmod +x "${ombidir}/Ombi"
         echo "ombi executable!"
 
-        cd "${ombidir}"
-        echo "Should now be in ${ombidir}"
+        # cd "${ombidir}"
+        # echo "Should now be in ${ombidir}"
 
         apt install -y libicu-dev libunwind8 libcurl4-openssl-dev
         echo "Things installed. Running ombi..."
-        ./Ombi &
+        /opt/Ombi/Ombi &
         echo "Ssshhhh... sleeping"
         sleep 60
         echo "Murder..."
         pkill Ombi
         echo "Dead"
-        cd "${STORE_PATH}"
-        echo "Should now be in ${STORE_PATH}"
+        # cd "${STORE_PATH}"
+        # echo "Should now be in ${STORE_PATH}"
     else
         error "Failed to retrieve or extra Ombi"
     fi
