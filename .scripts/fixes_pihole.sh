@@ -90,7 +90,9 @@ fixes_pihole()
     info "- Restarting Pi-hole..."
     service pihole-FTL restart || error "Restart..."
     info "- Permenantly bypassing pi-hole"
-    sed -i "s#nameserver .*#nameserver 8.8.8.8#g" "/etc/resolv.conf.d/head"
+    #sed -i "s#nameserver .*#nameserver 8.8.8.8#g" "/etc/resolvconf/resolv.conf.d/head"
+    echo "8.8.8.8" >> "/etc/resolvconf/resolv.conf.d/head"
+    echo "4.4.4.4" >> "/etc/resolvconf/resolv.conf.d/head"
     service resolvconf restart
     info "- Done"
 }
